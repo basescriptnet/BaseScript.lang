@@ -1,0 +1,182 @@
+[
+    {
+        "type": "var_assign",
+        "identifier": {
+            "type": "identifier",
+            "value": "z",
+            "text": "z",
+            "offset": 4,
+            "lineBreaks": 0,
+            "line": 1,
+            "col": 5
+        },
+        "line": 1,
+        "col": 1,
+        "value": {
+            "type": "number",
+            "value": "1",
+            "text": "1",
+            "offset": 8,
+            "lineBreaks": 0,
+            "line": 1,
+            "col": 9
+        },
+        "offset": 0
+    },
+    {
+        "type": "var_assign",
+        "identifier": {
+            "type": "identifier",
+            "value": "arr",
+            "text": "arr",
+            "offset": 16,
+            "lineBreaks": 0,
+            "line": 2,
+            "col": 5
+        },
+        "line": 2,
+        "col": 1,
+        "value": {
+            "type": "array",
+            "value": [
+                {
+                    "type": "number",
+                    "value": 0
+                },
+                {
+                    "type": "number",
+                    "value": 1
+                },
+                {
+                    "type": "number",
+                    "value": 2
+                },
+                {
+                    "type": "number",
+                    "value": 3
+                },
+                {
+                    "type": "number",
+                    "value": 4
+                }
+            ],
+            "text": "[",
+            "offset": 22,
+            "lineBreaks": 0,
+            "line": 2,
+            "col": 11
+        },
+        "offset": 12
+    },
+    {
+        "type": "while",
+        "value": [
+            {
+                "type": "if_else",
+                "if": {
+                    "type": "if",
+                    "value": [
+                        {
+                            "type": "var_assign",
+                            "identifier": {
+                                "type": "identifier",
+                                "value": "g",
+                                "text": "g",
+                                "offset": 73,
+                                "lineBreaks": 0,
+                                "line": 5,
+                                "col": 13
+                            },
+                            "line": 5,
+                            "col": 9,
+                            "value": {
+                                "type": "number",
+                                "value": "1",
+                                "text": "1",
+                                "offset": 77,
+                                "lineBreaks": 0,
+                                "line": 5,
+                                "col": 17
+                            },
+                            "offset": 69
+                        },
+                        {
+                            "type": "var_reassign",
+                            "identifier": {
+                                "type": "identifier",
+                                "value": "z",
+                                "text": "z",
+                                "offset": 89,
+                                "lineBreaks": 0,
+                                "line": 6,
+                                "col": 9
+                            },
+                            "line": 6,
+                            "col": 9,
+                            "value": {
+                                "type": "number",
+                                "value": "10",
+                                "text": "10",
+                                "offset": 93,
+                                "lineBreaks": 0,
+                                "line": 6,
+                                "col": 13
+                            },
+                            "offset": 89
+                        }
+                    ],
+                    "text": "if",
+                    "offset": 49,
+                    "lineBreaks": 0,
+                    "line": 4,
+                    "col": 5,
+                    "condition": false
+                },
+                "else": {
+                    "type": "else",
+                    "value": [
+                        {
+                            "type": "var_reassign",
+                            "identifier": {
+                                "type": "identifier",
+                                "value": "z",
+                                "text": "z",
+                                "offset": 109,
+                                "lineBreaks": 0,
+                                "line": 7,
+                                "col": 12
+                            },
+                            "line": 7,
+                            "col": 12,
+                            "value": {
+                                "type": "number",
+                                "value": "30",
+                                "text": "30",
+                                "offset": 113,
+                                "lineBreaks": 0,
+                                "line": 7,
+                                "col": 16
+                            },
+                            "offset": 109
+                        }
+                    ],
+                    "text": "else",
+                    "offset": 104,
+                    "lineBreaks": 0,
+                    "line": 7,
+                    "col": 7
+                },
+                "offset": 49,
+                "lineBreaks": 0,
+                "line": 4,
+                "col": 5
+            }
+        ],
+        "text": "while",
+        "offset": 31,
+        "lineBreaks": 0,
+        "line": 3,
+        "col": 1,
+        "condition": true
+    }
+]

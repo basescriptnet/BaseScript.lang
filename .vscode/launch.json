@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch Program",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}\\watch.js"
+        },
+        {
+            "type": "node-terminal",
+            "name": "Run Script: watch",
+            "request": "launch",
+            "command": "npm run watch",
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
