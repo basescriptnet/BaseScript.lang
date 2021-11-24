@@ -1,8 +1,10 @@
-let z = 1;
-let arr = [0..4];
-while true {
-    if false {
-        let g = 1;
-        z = 10;
-    } else z = 30;
-}
+let password = 'admin';
+let message = switch* length of password {
+    | 0: 'cannot send empty string';
+    & 1:
+    & 2:
+    & 3:
+    | 4: 'password is too short';
+    | 5: 'password saved';
+    default: 'password is too long';
+};

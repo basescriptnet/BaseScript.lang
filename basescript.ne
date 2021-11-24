@@ -2,7 +2,7 @@
 	console.clear();
 	const moo = require('moo');
 	const lexer = moo.compile({
-		keyword: ['while', 'if', 'else', 'import', 'from', 'let', 'const', 'true', 'false', 'null'],
+		keyword: ['while', 'if', 'else', 'import', 'from', 'let', 'const', 'true', 'false', 'null', 'of', 'default', 'switch', 'switch*'],
 		number: /(?:\+|-)?[0-9]+(?:\.[0-9]+)?/,
 		'true': 'true',
 		'false': 'false',
@@ -46,6 +46,9 @@
 		':': ':',
 		'..': '..',
 		'.': '.',
+		'|': '|',
+		'&': '&',
+		'*': '*',
 		function_name: /[A-Za-z]+/,
 	})
 %}
@@ -63,6 +66,7 @@ statement -> value {% id %}
 	| if_block {% id %}
 	| while_block {% id %}
 	| sleep {% id %}
+	# | switch {% id %}
 
 sleep -> "sleep" _ "(" _ number _ ")" {% v => ({
 	type: 'sleep',
@@ -146,12 +150,30 @@ var_assign -> is_const type __ identifier _ "=" _ additive {% v => {
 		//if (v[7] !== parseInt(v[7])) throw new Error(`${v[7]} is not assignable to type int on line ${v[3].line}, column ${v[3].col}`);
 		return {type: 'var_assign', vartype: v[1], identifier: v[3], constant: v[0], line: v[1].line, col: v[0][0] ? v[0][0].col : v[1].col, value: v[7]}// value: global[v[2].value] = v[7]|0}
 	} %}
-	| "float" __ identifier _ "=" _ additive {% v => 
-		({type: 'var_assign', vartype: 'float', identifier: v[3], value: global[v[2].value] = v[6]}) %}
-	| is_const type __ identifier _ "=" _ expression  {% v => {
-		//if (v[7] !== parseInt(v[7])) throw new Error(`${v[7]} is not assignable to type int on line ${v[3].line}, column ${v[3].col}`);
-		return {type: 'var_assign', vartype: v[1], identifier: v[3], constant: v[0][0] ? true : false, line: v[1].line, col: v[0][0] ? v[0][0].col : v[1].col, value: v[7]}// value: global[v[2].value] = v[7]|0}
-	} %}
+	# | "float" __ identifier _ "=" _ additive {% v => 
+	# 	({type: 'var_assign', vartype: 'float', identifier: v[3], value: global[v[2].value] = v[6]}) %}
+	# | is_const type __ identifier _ "=" _ expression  {% v => {
+	# 	//if (v[7] !== parseInt(v[7])) throw new Error(`${v[7]} is not assignable to type int on line ${v[3].line}, column ${v[3].col}`);
+	# 	return {type: 'var_assign', vartype: v[1], identifier: v[3], constant: v[0][0] ? true : false, line: v[1].line, col: v[0][0] ? v[0][0].col : v[1].col, value: v[7]}// value: global[v[2].value] = v[7]|0}
+	# } %}
+	| "let" __ identifier _ "=" _ switch {% v => {
+		console.log({
+		type: 'var_assign',
+		identifier: v[2],
+		line: v[0].line,
+		col: v[0].col,
+		value: v[6],
+		offset: v[0].offset
+	})
+	return {
+		type: 'var_assign',
+		identifier: v[2],
+		line: v[0].line,
+		col: v[0].col,
+		value: v[6],
+		offset: v[0].offset
+	}
+} %}
 	| "let" __ identifier _ "=" _ value {% v => {
 	return {
 		type: 'var_assign',
@@ -162,6 +184,16 @@ var_assign -> is_const type __ identifier _ "=" _ additive {% v => {
 		offset: v[0].offset
 	}
 } %}
+	| var_assign (_ "," _ var_reassign):+ {% v => {
+		v[1] = v[1].map(i => Object.assign(i[3], {type: 'var_assign'}));
+		return {
+			type: 'var_assign_group',
+			line: v[0].line,
+			col: v[0].col,
+			value: [v[0], ...v[1]],
+			offset: v[0].offset
+		}
+	} %}
 
 is_const -> ("const" __ | null) {% v => v[0][0] ? true : false %}
 
@@ -187,12 +219,57 @@ expression -> identifier _ [+-/*] _ identifier {% v => ({
 
 identifier -> %identifier {% v => v[0] %}
 
-value -> number {% id %}
+value -> value _ "." _ (function_call | identifier) {% v => {
+		return {
+			type: 'dot_retraction',
+			value: v[4][0],
+			from: v[0],
+			line: v[0].line,
+			col: v[0].col,
+			lineBreaks: v[0].lineBreaks,
+			offset: v[0].offset,
+		}
+	} %}
+	| (function_call | identifier) _ "of" _ value {% v => {
+		return {
+			type: 'dot_retraction',
+			value: v[0][0],
+			from: v[4],
+			line: v[0][0].line,
+			col: v[0][0].col,
+			lineBreaks: v[0][0].lineBreaks,
+			offset: v[0][0].offset,
+		}
+	} %}
+	| "(" _ value _ ")" {% id %}
+	# | "(" _ switch _ ")" {% v => v[2] %}
+	| number {% id %}
 	| string {% id %}
 	| boolean {% id %}
 	| myNull {% id %}
-# 	| hex {% id %}
 	| array {% id %}
+	| identifier {% id %}
+
+switch -> "switch*" _ value _ "{" (_ case_single_valued):* _ "}" {% v => Object.assign(v[0], {
+	type: 'switch*',
+	value: v[2],
+	cases: v[5] ? v[5].map(i => i[1]) : []
+}) %}
+
+case_single_valued -> "|" _ value _ ":" _ (value _ ";"):? {% v => Object.assign(v[0], {
+		type: 'case_with_break',
+		value: v[2],
+		statements: v[6] ? v[6][0] : []
+	}) %}
+	| "&" _ value _ ":" _ {% v => Object.assign(v[0], {
+		type: 'case',
+		value: v[2],
+		statements: v[6] ? v[6][0] : []
+	}) %}
+	| "default" _ ":" _ (value _ ";"):? {% v => Object.assign(v[0], {
+		type: 'case_default',
+		value: v[4] ? v[4][0] : [null],
+	}) %}
 
 array -> "[" _ "]" {% v => {
 	v[0].value = []
@@ -223,7 +300,6 @@ array -> "[" _ "]" {% v => {
 		}
 		if (v[2] != min) 
 			output = output.reverse()
-		debugger
 		return Object.assign(v[0], {
 			type: 'array',
 			value: output
@@ -242,15 +318,22 @@ array -> "[" _ "]" {% v => {
 	# 	});
 	# } %}
 
-function_call -> %function_name _ arguments {% v => {
-		if (v[0] in functions) {
+function_call -> identifier _ arguments {% v => {
+	return Object.assign(v[0], {
+		type: 'function_call',
+		arguments: v[2]
+	})
+		/*if (v[0] in functions) {
 			return functions[v[0]](...v[2])
 		} else {
 			throw new Error('Function does not exist')
-		}
+		}*/
 	} %}
 
-arguments -> "(" _ ")" {% v => [] %}
+arguments -> "(" _ ")" {% v => Object.assign(v[0], {
+	type: 'arguments',
+	value: []
+}) %}
 	| "(" _ value (_ "," _ value):* (_ ","):? _ ")" {% v => {
 		let output = [v[2]];
 		for (let i in v[3]) {
@@ -262,7 +345,7 @@ arguments -> "(" _ ")" {% v => [] %}
 			value: output
 		});
 	} %}
-	| value {% v => [v[0]] %}
+	# | value {% v => [v[0]] %}
 
 additive -> multiplicative _ [+-] _ additive {% v => {
 	switch (v[2].value) {
@@ -313,7 +396,10 @@ string -> %string {% id %}
 boolean -> "true" {% v => true %}
 	| "false" {% v => false %}
 	
-myNull -> "null" {% v => null %}
+myNull -> "null" {% v => Object.assign(v[0], {
+	type: 'null',
+	value: null
+}) %}
 
 _ -> (%space %comment):* %space {% v => '' %}
 	| null {% v => '' %}

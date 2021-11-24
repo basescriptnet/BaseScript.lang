@@ -6,7 +6,7 @@ function id(x) { return x[0]; }
 	console.clear();
 	const moo = require('moo');
 	const lexer = moo.compile({
-		keyword: ['while', 'if', 'else', 'import', 'from', 'let', 'const', 'true', 'false', 'null'],
+		keyword: ['while', 'if', 'else', 'import', 'from', 'let', 'const', 'true', 'false', 'null', 'of', 'default', 'switch', 'switch*'],
 		number: /(?:\+|-)?[0-9]+(?:\.[0-9]+)?/,
 		'true': 'true',
 		'false': 'false',
@@ -50,6 +50,9 @@ function id(x) { return x[0]; }
 		':': ':',
 		'..': '..',
 		'.': '.',
+		'|': '|',
+		'&': '&',
+		'*': '*',
 		function_name: /[A-Za-z]+/,
 	})
 
@@ -123,11 +126,23 @@ var grammar = {
         	//if (v[7] !== parseInt(v[7])) throw new Error(`${v[7]} is not assignable to type int on line ${v[3].line}, column ${v[3].col}`);
         	return {type: 'var_assign', vartype: v[1], identifier: v[3], constant: v[0], line: v[1].line, col: v[0][0] ? v[0][0].col : v[1].col, value: v[7]}// value: global[v[2].value] = v[7]|0}
         } },
-    {"name": "var_assign", "symbols": [{"literal":"float"}, "__", "identifier", "_", {"literal":"="}, "_", "additive"], "postprocess":  v => 
-        ({type: 'var_assign', vartype: 'float', identifier: v[3], value: global[v[2].value] = v[6]}) },
-    {"name": "var_assign", "symbols": ["is_const", "type", "__", "identifier", "_", {"literal":"="}, "_", "expression"], "postprocess":  v => {
-        	//if (v[7] !== parseInt(v[7])) throw new Error(`${v[7]} is not assignable to type int on line ${v[3].line}, column ${v[3].col}`);
-        	return {type: 'var_assign', vartype: v[1], identifier: v[3], constant: v[0][0] ? true : false, line: v[1].line, col: v[0][0] ? v[0][0].col : v[1].col, value: v[7]}// value: global[v[2].value] = v[7]|0}
+    {"name": "var_assign", "symbols": [{"literal":"let"}, "__", "identifier", "_", {"literal":"="}, "_", "switch"], "postprocess":  v => {
+        		console.log({
+        		type: 'var_assign',
+        		identifier: v[2],
+        		line: v[0].line,
+        		col: v[0].col,
+        		value: v[6],
+        		offset: v[0].offset
+        	})
+        	return {
+        		type: 'var_assign',
+        		identifier: v[2],
+        		line: v[0].line,
+        		col: v[0].col,
+        		value: v[6],
+        		offset: v[0].offset
+        	}
         } },
     {"name": "var_assign", "symbols": [{"literal":"let"}, "__", "identifier", "_", {"literal":"="}, "_", "value"], "postprocess":  v => {
         	return {
@@ -136,6 +151,20 @@ var grammar = {
         		line: v[0].line,
         		col: v[0].col,
         		value: v[6],
+        		offset: v[0].offset
+        	}
+        } },
+    {"name": "var_assign$ebnf$1$subexpression$1", "symbols": ["_", {"literal":","}, "_", "var_reassign"]},
+    {"name": "var_assign$ebnf$1", "symbols": ["var_assign$ebnf$1$subexpression$1"]},
+    {"name": "var_assign$ebnf$1$subexpression$2", "symbols": ["_", {"literal":","}, "_", "var_reassign"]},
+    {"name": "var_assign$ebnf$1", "symbols": ["var_assign$ebnf$1", "var_assign$ebnf$1$subexpression$2"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "var_assign", "symbols": ["var_assign", "var_assign$ebnf$1"], "postprocess":  v => {
+        	v[1] = v[1].map(i => Object.assign(i[3], {type: 'var_assign'}));
+        	return {
+        		type: 'var_assign_group',
+        		line: v[0].line,
+        		col: v[0].col,
+        		value: [v[0], ...v[1]],
         		offset: v[0].offset
         	}
         } },
@@ -164,11 +193,67 @@ var grammar = {
     {"name": "expression", "symbols": ["string"], "postprocess": id},
     {"name": "expression", "symbols": ["array"], "postprocess": id},
     {"name": "identifier", "symbols": [(lexer.has("identifier") ? {type: "identifier"} : identifier)], "postprocess": v => v[0]},
+    {"name": "value$subexpression$1", "symbols": ["function_call"]},
+    {"name": "value$subexpression$1", "symbols": ["identifier"]},
+    {"name": "value", "symbols": ["value", "_", {"literal":"."}, "_", "value$subexpression$1"], "postprocess":  v => {
+        	return {
+        		type: 'dot_retraction',
+        		value: v[4][0],
+        		from: v[0],
+        		line: v[0].line,
+        		col: v[0].col,
+        		lineBreaks: v[0].lineBreaks,
+        		offset: v[0].offset,
+        	}
+        } },
+    {"name": "value$subexpression$2", "symbols": ["function_call"]},
+    {"name": "value$subexpression$2", "symbols": ["identifier"]},
+    {"name": "value", "symbols": ["value$subexpression$2", "_", {"literal":"of"}, "_", "value"], "postprocess":  v => {
+        	return {
+        		type: 'dot_retraction',
+        		value: v[0][0],
+        		from: v[4],
+        		line: v[0][0].line,
+        		col: v[0][0].col,
+        		lineBreaks: v[0][0].lineBreaks,
+        		offset: v[0][0].offset,
+        	}
+        } },
+    {"name": "value", "symbols": [{"literal":"("}, "_", "value", "_", {"literal":")"}], "postprocess": id},
     {"name": "value", "symbols": ["number"], "postprocess": id},
     {"name": "value", "symbols": ["string"], "postprocess": id},
     {"name": "value", "symbols": ["boolean"], "postprocess": id},
     {"name": "value", "symbols": ["myNull"], "postprocess": id},
     {"name": "value", "symbols": ["array"], "postprocess": id},
+    {"name": "value", "symbols": ["identifier"], "postprocess": id},
+    {"name": "switch$ebnf$1", "symbols": []},
+    {"name": "switch$ebnf$1$subexpression$1", "symbols": ["_", "case_single_valued"]},
+    {"name": "switch$ebnf$1", "symbols": ["switch$ebnf$1", "switch$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "switch", "symbols": [{"literal":"switch*"}, "_", "value", "_", {"literal":"{"}, "switch$ebnf$1", "_", {"literal":"}"}], "postprocess":  v => Object.assign(v[0], {
+        	type: 'switch*',
+        	value: v[2],
+        	cases: v[5] ? v[5].map(i => i[1]) : []
+        }) },
+    {"name": "case_single_valued$ebnf$1$subexpression$1", "symbols": ["value", "_", {"literal":";"}]},
+    {"name": "case_single_valued$ebnf$1", "symbols": ["case_single_valued$ebnf$1$subexpression$1"], "postprocess": id},
+    {"name": "case_single_valued$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "case_single_valued", "symbols": [{"literal":"|"}, "_", "value", "_", {"literal":":"}, "_", "case_single_valued$ebnf$1"], "postprocess":  v => Object.assign(v[0], {
+        	type: 'case_with_break',
+        	value: v[2],
+        	statements: v[6] ? v[6][0] : []
+        }) },
+    {"name": "case_single_valued", "symbols": [{"literal":"&"}, "_", "value", "_", {"literal":":"}, "_"], "postprocess":  v => Object.assign(v[0], {
+        	type: 'case',
+        	value: v[2],
+        	statements: v[6] ? v[6][0] : []
+        }) },
+    {"name": "case_single_valued$ebnf$2$subexpression$1", "symbols": ["value", "_", {"literal":";"}]},
+    {"name": "case_single_valued$ebnf$2", "symbols": ["case_single_valued$ebnf$2$subexpression$1"], "postprocess": id},
+    {"name": "case_single_valued$ebnf$2", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "case_single_valued", "symbols": [{"literal":"default"}, "_", {"literal":":"}, "_", "case_single_valued$ebnf$2"], "postprocess":  v => Object.assign(v[0], {
+        	type: 'case_default',
+        	value: v[4] ? v[4][0] : [null],
+        }) },
     {"name": "array", "symbols": [{"literal":"["}, "_", {"literal":"]"}], "postprocess":  v => {
         	v[0].value = []
         	v[0].type = 'array'
@@ -209,14 +294,21 @@ var grammar = {
         		value: output
         	});
         } },
-    {"name": "function_call", "symbols": [(lexer.has("function_name") ? {type: "function_name"} : function_name), "_", "arguments"], "postprocess":  v => {
-        	if (v[0] in functions) {
+    {"name": "function_call", "symbols": ["identifier", "_", "arguments"], "postprocess":  v => {
+        return Object.assign(v[0], {
+        	type: 'function_call',
+        	arguments: v[2]
+        })
+        	/*if (v[0] in functions) {
         		return functions[v[0]](...v[2])
         	} else {
         		throw new Error('Function does not exist')
-        	}
+        	}*/
         } },
-    {"name": "arguments", "symbols": [{"literal":"("}, "_", {"literal":")"}], "postprocess": v => []},
+    {"name": "arguments", "symbols": [{"literal":"("}, "_", {"literal":")"}], "postprocess":  v => Object.assign(v[0], {
+        	type: 'arguments',
+        	value: []
+        }) },
     {"name": "arguments$ebnf$1", "symbols": []},
     {"name": "arguments$ebnf$1$subexpression$1", "symbols": ["_", {"literal":","}, "_", "value"]},
     {"name": "arguments$ebnf$1", "symbols": ["arguments$ebnf$1", "arguments$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
@@ -234,7 +326,6 @@ var grammar = {
         		value: output
         	});
         } },
-    {"name": "arguments", "symbols": ["value"], "postprocess": v => [v[0]]},
     {"name": "additive", "symbols": ["multiplicative", "_", /[+-]/, "_", "additive"], "postprocess":  v => {
         	switch (v[2].value) {
         		case '+':
@@ -264,7 +355,10 @@ var grammar = {
     {"name": "string", "symbols": [(lexer.has("string") ? {type: "string"} : string)], "postprocess": id},
     {"name": "boolean", "symbols": [{"literal":"true"}], "postprocess": v => true},
     {"name": "boolean", "symbols": [{"literal":"false"}], "postprocess": v => false},
-    {"name": "myNull", "symbols": [{"literal":"null"}], "postprocess": v => null},
+    {"name": "myNull", "symbols": [{"literal":"null"}], "postprocess":  v => Object.assign(v[0], {
+        	type: 'null',
+        	value: null
+        }) },
     {"name": "_$ebnf$1", "symbols": []},
     {"name": "_$ebnf$1$subexpression$1", "symbols": [(lexer.has("space") ? {type: "space"} : space), (lexer.has("comment") ? {type: "comment"} : comment)]},
     {"name": "_$ebnf$1", "symbols": ["_$ebnf$1", "_$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},

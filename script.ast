@@ -3,8 +3,8 @@
         "type": "var_assign",
         "identifier": {
             "type": "identifier",
-            "value": "z",
-            "text": "z",
+            "value": "password",
+            "text": "password",
             "offset": 4,
             "lineBreaks": 0,
             "line": 1,
@@ -13,13 +13,13 @@
         "line": 1,
         "col": 1,
         "value": {
-            "type": "number",
-            "value": "1",
-            "text": "1",
-            "offset": 8,
+            "type": "string",
+            "value": "admin",
+            "text": "'admin'",
+            "offset": 15,
             "lineBreaks": 0,
             "line": 1,
-            "col": 9
+            "col": 16
         },
         "offset": 0
     },
@@ -27,9 +27,9 @@
         "type": "var_assign",
         "identifier": {
             "type": "identifier",
-            "value": "arr",
-            "text": "arr",
-            "offset": 16,
+            "value": "message",
+            "text": "message",
+            "offset": 29,
             "lineBreaks": 0,
             "line": 2,
             "col": 5
@@ -37,146 +37,189 @@
         "line": 2,
         "col": 1,
         "value": {
-            "type": "array",
-            "value": [
-                {
-                    "type": "number",
-                    "value": 0
+            "type": "switch*",
+            "value": {
+                "type": "dot_retraction",
+                "value": {
+                    "type": "identifier",
+                    "value": "length",
+                    "text": "length",
+                    "offset": 47,
+                    "lineBreaks": 0,
+                    "line": 2,
+                    "col": 23
                 },
-                {
-                    "type": "number",
-                    "value": 1
+                "from": {
+                    "type": "identifier",
+                    "value": "password",
+                    "text": "password",
+                    "offset": 57,
+                    "lineBreaks": 0,
+                    "line": 2,
+                    "col": 33
                 },
-                {
-                    "type": "number",
-                    "value": 2
-                },
-                {
-                    "type": "number",
-                    "value": 3
-                },
-                {
-                    "type": "number",
-                    "value": 4
-                }
-            ],
-            "text": "[",
-            "offset": 22,
+                "line": 2,
+                "col": 23,
+                "lineBreaks": 0,
+                "offset": 47
+            },
+            "text": "switch*",
+            "offset": 39,
             "lineBreaks": 0,
             "line": 2,
-            "col": 11
-        },
-        "offset": 12
-    },
-    {
-        "type": "while",
-        "value": [
-            {
-                "type": "if_else",
-                "if": {
-                    "type": "if",
-                    "value": [
-                        {
-                            "type": "var_assign",
-                            "identifier": {
-                                "type": "identifier",
-                                "value": "g",
-                                "text": "g",
-                                "offset": 73,
-                                "lineBreaks": 0,
-                                "line": 5,
-                                "col": 13
-                            },
-                            "line": 5,
-                            "col": 9,
-                            "value": {
-                                "type": "number",
-                                "value": "1",
-                                "text": "1",
-                                "offset": 77,
-                                "lineBreaks": 0,
-                                "line": 5,
-                                "col": 17
-                            },
-                            "offset": 69
-                        },
-                        {
-                            "type": "var_reassign",
-                            "identifier": {
-                                "type": "identifier",
-                                "value": "z",
-                                "text": "z",
-                                "offset": 89,
-                                "lineBreaks": 0,
-                                "line": 6,
-                                "col": 9
-                            },
-                            "line": 6,
-                            "col": 9,
-                            "value": {
-                                "type": "number",
-                                "value": "10",
-                                "text": "10",
-                                "offset": 93,
-                                "lineBreaks": 0,
-                                "line": 6,
-                                "col": 13
-                            },
-                            "offset": 89
-                        }
-                    ],
-                    "text": "if",
-                    "offset": 49,
+            "col": 15,
+            "cases": [
+                {
+                    "type": "case_with_break",
+                    "value": {
+                        "type": "number",
+                        "value": "0",
+                        "text": "0",
+                        "offset": 75,
+                        "lineBreaks": 0,
+                        "line": 3,
+                        "col": 7
+                    },
+                    "text": "|",
+                    "offset": 73,
+                    "lineBreaks": 0,
+                    "line": 3,
+                    "col": 5,
+                    "statements": {
+                        "type": "string",
+                        "value": "cannot send empty string",
+                        "text": "'cannot send empty string'",
+                        "offset": 78,
+                        "lineBreaks": 0,
+                        "line": 3,
+                        "col": 10
+                    }
+                },
+                {
+                    "type": "case",
+                    "value": {
+                        "type": "number",
+                        "value": "1",
+                        "text": "1",
+                        "offset": 113,
+                        "lineBreaks": 0,
+                        "line": 4,
+                        "col": 7
+                    },
+                    "text": "&",
+                    "offset": 111,
                     "lineBreaks": 0,
                     "line": 4,
                     "col": 5,
-                    "condition": false
+                    "statements": []
                 },
-                "else": {
-                    "type": "else",
-                    "value": [
-                        {
-                            "type": "var_reassign",
-                            "identifier": {
-                                "type": "identifier",
-                                "value": "z",
-                                "text": "z",
-                                "offset": 109,
-                                "lineBreaks": 0,
-                                "line": 7,
-                                "col": 12
-                            },
-                            "line": 7,
-                            "col": 12,
-                            "value": {
-                                "type": "number",
-                                "value": "30",
-                                "text": "30",
-                                "offset": 113,
-                                "lineBreaks": 0,
-                                "line": 7,
-                                "col": 16
-                            },
-                            "offset": 109
-                        }
-                    ],
-                    "text": "else",
-                    "offset": 104,
+                {
+                    "type": "case",
+                    "value": {
+                        "type": "number",
+                        "value": "2",
+                        "text": "2",
+                        "offset": 123,
+                        "lineBreaks": 0,
+                        "line": 5,
+                        "col": 7
+                    },
+                    "text": "&",
+                    "offset": 121,
+                    "lineBreaks": 0,
+                    "line": 5,
+                    "col": 5,
+                    "statements": []
+                },
+                {
+                    "type": "case",
+                    "value": {
+                        "type": "number",
+                        "value": "3",
+                        "text": "3",
+                        "offset": 133,
+                        "lineBreaks": 0,
+                        "line": 6,
+                        "col": 7
+                    },
+                    "text": "&",
+                    "offset": 131,
+                    "lineBreaks": 0,
+                    "line": 6,
+                    "col": 5,
+                    "statements": []
+                },
+                {
+                    "type": "case_with_break",
+                    "value": {
+                        "type": "number",
+                        "value": "4",
+                        "text": "4",
+                        "offset": 143,
+                        "lineBreaks": 0,
+                        "line": 7,
+                        "col": 7
+                    },
+                    "text": "|",
+                    "offset": 141,
                     "lineBreaks": 0,
                     "line": 7,
-                    "col": 7
+                    "col": 5,
+                    "statements": {
+                        "type": "string",
+                        "value": "password is too short",
+                        "text": "'password is too short'",
+                        "offset": 146,
+                        "lineBreaks": 0,
+                        "line": 7,
+                        "col": 10
+                    }
                 },
-                "offset": 49,
-                "lineBreaks": 0,
-                "line": 4,
-                "col": 5
-            }
-        ],
-        "text": "while",
-        "offset": 31,
-        "lineBreaks": 0,
-        "line": 3,
-        "col": 1,
-        "condition": true
+                {
+                    "type": "case_with_break",
+                    "value": {
+                        "type": "number",
+                        "value": "5",
+                        "text": "5",
+                        "offset": 178,
+                        "lineBreaks": 0,
+                        "line": 8,
+                        "col": 7
+                    },
+                    "text": "|",
+                    "offset": 176,
+                    "lineBreaks": 0,
+                    "line": 8,
+                    "col": 5,
+                    "statements": {
+                        "type": "string",
+                        "value": "password saved",
+                        "text": "'password saved'",
+                        "offset": 181,
+                        "lineBreaks": 0,
+                        "line": 8,
+                        "col": 10
+                    }
+                },
+                {
+                    "type": "case_default",
+                    "value": {
+                        "type": "string",
+                        "value": "password is too long",
+                        "text": "'password is too long'",
+                        "offset": 213,
+                        "lineBreaks": 0,
+                        "line": 9,
+                        "col": 14
+                    },
+                    "text": "default",
+                    "offset": 204,
+                    "lineBreaks": 0,
+                    "line": 9,
+                    "col": 5
+                }
+            ]
+        },
+        "offset": 25
     }
 ]

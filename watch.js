@@ -24,7 +24,7 @@ function watch (space = 4) {
         console.log('Watching '+__dirname)
         watcher.on('change', (path) => {
             if (!/\.bs$/i.test(path)) return;
-            // console.clear()
+            console.clear()
             let fileName = path.substr(0, path.length-('.bs'.length));
             
             console.log(path+': [')
@@ -55,6 +55,8 @@ function watch (space = 4) {
                 );
                 // ----- new
                     function parse (statements) {
+                        if (!Array.isArray(statements)) 
+                            statements = [statements];
                         let result = '';
                         // debugger
                         for (let i = 0; i < statements.length; i++) {
@@ -63,6 +65,11 @@ function watch (space = 4) {
                             switch (statement.type) {
                                 case 'var_assign':
                                     result += `let ${statement.identifier.value} = ${parse([value])};`;
+                                    break;
+                                case 'var_assign_group':
+                                    for (let i = 0; i < value.length; i++) {
+                                        result += `${parse([value[i]])}`;
+                                    }
                                     break;
                                 case 'var_reassign':
                                     result += `${statement.identifier.value} = ${parse([value])};`;
@@ -78,6 +85,36 @@ function watch (space = 4) {
                                     break;
                                 case 'number':
                                     result += value;
+                                    break;
+                                case 'string':
+                                    result += `"${value}"`;
+                                    break;
+                                case 'null':
+                                    result += null;
+                                    break;
+                                case 'dot_retraction':
+                                    result += `${parse([statement.from])}.${parse([value])}`;
+                                    break;
+                                case 'identifier':
+                                    result += value;
+                                    break;
+                                case 'function_call':
+                                    result += value;
+                                    if (!statement.arguments.value.length) {
+                                        result += '()';
+                                        break;
+                                    }
+                                    result += parse([statement.arguments]);
+                                    break;
+                                case 'arguments':
+                                        result += '(';
+                                        let args = [];
+                                        for (let i = 0; i < value.length; i++) {
+                                            args.push(parse([value[i]]));
+                                        }
+                                        result += args.join(',');
+                                        // result += `(${value.map(i => parse(i)).join(',')})`;
+                                        result += ')';
                                     break;
                                 case 'if_else':
                                     result += `if (${statement.if.condition}) {${parse(statement.if.value)}}`;
@@ -95,6 +132,28 @@ function watch (space = 4) {
                                 case 'sleep':
                                     result += `sleep(${value});`;
                                     break;
+                                case 'switch*':
+                                    result += '(function () { let ___switch_result___ = null;';
+                                    result += `switch (${parse([statement.value])}) {`;
+                                    for (let i = 0; i < statement.cases.length; i++) {
+                                        result += parse(statement.cases[i]);
+                                    }
+                                    result += '} return ___switch_result___; })()';
+                                    break;
+                                case 'case_with_break':
+                                    result += `case ${parse([statement.value])}:`;
+                                    result += `___switch_result___ = ${parse(statement.statements)};`;
+                                    result += `break;`;
+                                    break;
+                                case 'case':
+                                    result += `case ${parse([statement.value])}:`;
+                                    // result += `___switch_result___ = ${parse(statement.statements)};`;
+                                    break;
+                                
+                                case 'case_default':
+                                    result += `default: ___switch_result___ = ${parse([statement.value])};`;
+                                    // result += `___switch_result___ = ${parse(statement.statements)};`;
+                                    break;
                             }
                         }
                         return result.trim();
@@ -102,7 +161,7 @@ function watch (space = 4) {
                     let built_in = require('./built_in.js');
                     fs.writeFileSync(
                         `${fileName}.js`,
-                        beautify(`(async function () {${built_in.toString()};${parse(JSON.parse(ast))}})()`)
+                        beautify(`(async function () {${parse(JSON.parse(ast))}})()`)
                     );
                 // ----- new end
                 return ast;

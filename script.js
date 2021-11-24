@@ -1,17 +1,23 @@
 (async function() {
-    function sleep(ms) {
-        var now = new Date().getTime();
-        while (new Date().getTime() < now + ms) {
-            /* Do nothing */ }
-    };
-    let z = 1;
-    let arr = [0, 1, 2, 3, 4];
-    while (true) {
-        if (false) {
-            let g = 1;
-            z = 10;
-        } else {
-            z = 30;
+    let password = "admin";
+    let message = (function() {
+        let ___switch_result___ = null;
+        switch (password.length) {
+            case 0:
+                ___switch_result___ = "cannot send empty string";
+                break;
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                ___switch_result___ = "password is too short";
+                break;
+            case 5:
+                ___switch_result___ = "password saved";
+                break;
+            default:
+                ___switch_result___ = "password is too long";
         }
-    }
+        return ___switch_result___;
+    })();
 })()
