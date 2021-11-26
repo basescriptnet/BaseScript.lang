@@ -6,11 +6,21 @@ module.exports = function (str) {
     try {
         let result = (parser.feed(str)).results[0]
         if (!result) {
-            return '';
+            console.log('[Log]: Grammar doesn\'t match.')
+            return [];
         };
         return result
     } catch (err) {
-        console.error(err)
+        let message = err.message.split(/\nA /);
+        try {
+            let filtered = new Set(message
+                .slice(1)
+                .map(i => i.split(/based on:\n/)[0].trim()));
+                console.error([message[0], [...filtered].join(', ')].join(''))
+        } catch (error) {
+            console.error(err.message);
+        }
+        // debugger
     }
-    return '';
+    return [];
 }

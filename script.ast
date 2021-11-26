@@ -1,225 +1,682 @@
 [
     {
         "type": "var_assign",
-        "identifier": {
-            "type": "identifier",
-            "value": "password",
-            "text": "password",
-            "offset": 4,
-            "lineBreaks": 0,
-            "line": 1,
-            "col": 5
-        },
+        "use_let": true,
         "line": 1,
         "col": 1,
         "value": {
-            "type": "string",
-            "value": "admin",
-            "text": "'admin'",
-            "offset": 15,
-            "lineBreaks": 0,
+            "type": "var_assign_group",
             "line": 1,
-            "col": 16
+            "col": 5,
+            "value": [
+                {
+                    "type": "var_reassign",
+                    "identifier": {
+                        "type": "identifier",
+                        "value": "isRegistered",
+                        "text": "isRegistered",
+                        "offset": 4,
+                        "lineBreaks": 0,
+                        "line": 1,
+                        "col": 5
+                    },
+                    "line": 1,
+                    "col": 5,
+                    "value": {
+                        "type": "function_call",
+                        "value": "require",
+                        "text": "require",
+                        "offset": 19,
+                        "lineBreaks": 0,
+                        "line": 1,
+                        "col": 20,
+                        "arguments": {
+                            "type": "arguments",
+                            "value": [
+                                {
+                                    "type": "string",
+                                    "value": "red.js",
+                                    "text": "'red.js'",
+                                    "offset": 27,
+                                    "lineBreaks": 0,
+                                    "line": 1,
+                                    "col": 28
+                                }
+                            ],
+                            "offset": 26,
+                            "lineBreaks": 0,
+                            "line": 1,
+                            "col": 27
+                        }
+                    },
+                    "offset": 4
+                },
+                {
+                    "type": "var_reassign",
+                    "identifier": {
+                        "type": "identifier",
+                        "value": "hasAccess",
+                        "text": "hasAccess",
+                        "offset": 43,
+                        "lineBreaks": 0,
+                        "line": 2,
+                        "col": 5
+                    },
+                    "line": 2,
+                    "col": 5,
+                    "value": {
+                        "type": "function_call",
+                        "value": "require",
+                        "text": "require",
+                        "offset": 55,
+                        "lineBreaks": 0,
+                        "line": 2,
+                        "col": 17,
+                        "arguments": {
+                            "type": "arguments",
+                            "value": [
+                                {
+                                    "type": "string",
+                                    "value": "hasAcess.js",
+                                    "text": "'hasAcess.js'",
+                                    "offset": 63,
+                                    "lineBreaks": 0,
+                                    "line": 2,
+                                    "col": 25
+                                }
+                            ],
+                            "offset": 62,
+                            "lineBreaks": 0,
+                            "line": 2,
+                            "col": 24
+                        }
+                    },
+                    "offset": 43
+                }
+            ],
+            "offset": 4
         },
         "offset": 0
     },
     {
-        "type": "var_assign",
-        "identifier": {
-            "type": "identifier",
-            "value": "message",
-            "text": "message",
-            "offset": 29,
-            "lineBreaks": 0,
-            "line": 2,
-            "col": 5
-        },
-        "line": 2,
-        "col": 1,
-        "value": {
-            "type": "switch*",
-            "value": {
-                "type": "dot_retraction",
+        "type": "if",
+        "value": [
+            {
+                "type": "statement_value",
                 "value": {
-                    "type": "identifier",
-                    "value": "length",
-                    "text": "length",
-                    "offset": 47,
-                    "lineBreaks": 0,
-                    "line": 2,
-                    "col": 23
-                },
-                "from": {
-                    "type": "identifier",
-                    "value": "password",
-                    "text": "password",
-                    "offset": 57,
-                    "lineBreaks": 0,
-                    "line": 2,
-                    "col": 33
-                },
-                "line": 2,
-                "col": 23,
-                "lineBreaks": 0,
-                "offset": 47
-            },
-            "text": "switch*",
-            "offset": 39,
-            "lineBreaks": 0,
-            "line": 2,
-            "col": 15,
-            "cases": [
-                {
-                    "type": "case_with_break",
-                    "value": {
-                        "type": "number",
-                        "value": "0",
-                        "text": "0",
-                        "offset": 75,
-                        "lineBreaks": 0,
-                        "line": 3,
-                        "col": 7
-                    },
-                    "text": "|",
-                    "offset": 73,
-                    "lineBreaks": 0,
-                    "line": 3,
-                    "col": 5,
-                    "statements": {
-                        "type": "string",
-                        "value": "cannot send empty string",
-                        "text": "'cannot send empty string'",
-                        "offset": 78,
-                        "lineBreaks": 0,
-                        "line": 3,
-                        "col": 10
-                    }
-                },
-                {
-                    "type": "case",
-                    "value": {
-                        "type": "number",
-                        "value": "1",
-                        "text": "1",
-                        "offset": 113,
-                        "lineBreaks": 0,
-                        "line": 4,
-                        "col": 7
-                    },
-                    "text": "&",
-                    "offset": 111,
-                    "lineBreaks": 0,
-                    "line": 4,
-                    "col": 5,
-                    "statements": []
-                },
-                {
-                    "type": "case",
-                    "value": {
-                        "type": "number",
-                        "value": "2",
-                        "text": "2",
-                        "offset": 123,
+                    "type": "dot_retraction",
+                    "from": {
+                        "type": "identifier",
+                        "value": "console",
+                        "text": "console",
+                        "offset": 155,
                         "lineBreaks": 0,
                         "line": 5,
-                        "col": 7
+                        "col": 24
                     },
-                    "text": "&",
-                    "offset": 121,
-                    "lineBreaks": 0,
+                    "value": {
+                        "type": "function_call",
+                        "value": "log",
+                        "text": "log",
+                        "offset": 136,
+                        "lineBreaks": 0,
+                        "line": 5,
+                        "col": 5,
+                        "arguments": {
+                            "type": "arguments",
+                            "value": [
+                                {
+                                    "type": "string",
+                                    "value": "welcome!",
+                                    "text": "'welcome!'",
+                                    "offset": 140,
+                                    "lineBreaks": 0,
+                                    "line": 5,
+                                    "col": 9
+                                }
+                            ],
+                            "offset": 139,
+                            "lineBreaks": 0,
+                            "line": 5,
+                            "col": 8
+                        }
+                    },
                     "line": 5,
                     "col": 5,
-                    "statements": []
+                    "lineBreaks": 0,
+                    "offset": 136
                 },
-                {
-                    "type": "case",
-                    "value": {
-                        "type": "number",
-                        "value": "3",
-                        "text": "3",
-                        "offset": 133,
+                "line": 5,
+                "col": 5,
+                "offset": 136
+            },
+            {
+                "type": "statement_value",
+                "value": {
+                    "type": "dot_retraction",
+                    "from": {
+                        "type": "identifier",
+                        "value": "document",
+                        "text": "document",
+                        "offset": 169,
                         "lineBreaks": 0,
                         "line": 6,
-                        "col": 7
+                        "col": 5
                     },
-                    "text": "&",
-                    "offset": 131,
-                    "lineBreaks": 0,
-                    "line": 6,
-                    "col": 5,
-                    "statements": []
-                },
-                {
-                    "type": "case_with_break",
                     "value": {
-                        "type": "number",
-                        "value": "4",
-                        "text": "4",
-                        "offset": 143,
-                        "lineBreaks": 0,
-                        "line": 7,
-                        "col": 7
-                    },
-                    "text": "|",
-                    "offset": 141,
-                    "lineBreaks": 0,
-                    "line": 7,
-                    "col": 5,
-                    "statements": {
-                        "type": "string",
-                        "value": "password is too short",
-                        "text": "'password is too short'",
-                        "offset": 146,
-                        "lineBreaks": 0,
-                        "line": 7,
-                        "col": 10
-                    }
-                },
-                {
-                    "type": "case_with_break",
-                    "value": {
-                        "type": "number",
-                        "value": "5",
-                        "text": "5",
+                        "type": "function_call",
+                        "value": "write",
+                        "text": "write",
                         "offset": 178,
                         "lineBreaks": 0,
-                        "line": 8,
-                        "col": 7
+                        "line": 6,
+                        "col": 14,
+                        "arguments": {
+                            "type": "arguments",
+                            "value": [
+                                {
+                                    "type": "string",
+                                    "value": "You have full access!",
+                                    "text": "'You have full access!'",
+                                    "offset": 184,
+                                    "lineBreaks": 0,
+                                    "line": 6,
+                                    "col": 20
+                                }
+                            ],
+                            "offset": 183,
+                            "lineBreaks": 0,
+                            "line": 6,
+                            "col": 19
+                        }
                     },
-                    "text": "|",
-                    "offset": 176,
+                    "line": 6,
+                    "col": 5,
+                    "lineBreaks": 0,
+                    "offset": 169
+                },
+                "line": 6,
+                "col": 5,
+                "offset": 169
+            },
+            {
+                "type": "debugger",
+                "value": "debugger",
+                "text": "debugger",
+                "offset": 215,
+                "lineBreaks": 0,
+                "line": 7,
+                "col": 5
+            },
+            {
+                "type": "function_declaration",
+                "value": [
+                    {
+                        "type": "statement_value",
+                        "value": {
+                            "type": "dot_retraction",
+                            "from": {
+                                "type": "identifier",
+                                "value": "console",
+                                "text": "console",
+                                "offset": 270,
+                                "lineBreaks": 0,
+                                "line": 9,
+                                "col": 9
+                            },
+                            "value": {
+                                "type": "function_call",
+                                "value": "log",
+                                "text": "log",
+                                "offset": 278,
+                                "lineBreaks": 0,
+                                "line": 9,
+                                "col": 17,
+                                "arguments": {
+                                    "type": "arguments",
+                                    "value": [
+                                        {
+                                            "type": "string",
+                                            "value": "Result of ${num1}+${num2} is ${num1 + num2}",
+                                            "text": "`Result of ${num1}+${num2} is ${num1 + num2}`",
+                                            "offset": 282,
+                                            "lineBreaks": 0,
+                                            "line": 9,
+                                            "col": 21
+                                        }
+                                    ],
+                                    "offset": 281,
+                                    "lineBreaks": 0,
+                                    "line": 9,
+                                    "col": 20
+                                }
+                            },
+                            "line": 9,
+                            "col": 9,
+                            "lineBreaks": 0,
+                            "offset": 270
+                        },
+                        "line": 9,
+                        "col": 9,
+                        "offset": 270
+                    },
+                    {
+                        "type": "return",
+                        "value": {
+                            "type": "expression",
+                            "value": [
+                                {
+                                    "type": "identifier",
+                                    "value": "num1",
+                                    "text": "num1",
+                                    "offset": 386,
+                                    "lineBreaks": 0,
+                                    "line": 11,
+                                    "col": 16
+                                },
+                                {
+                                    "type": "operator",
+                                    "value": "*",
+                                    "text": "*",
+                                    "offset": 391,
+                                    "lineBreaks": 0,
+                                    "line": 11,
+                                    "col": 21
+                                },
+                                {
+                                    "type": "expression_with_parenthesis",
+                                    "value": [
+                                        {
+                                            "type": "identifier",
+                                            "value": "num2",
+                                            "text": "num2",
+                                            "offset": 394,
+                                            "lineBreaks": 0,
+                                            "line": 11,
+                                            "col": 24
+                                        },
+                                        {
+                                            "type": "operator",
+                                            "value": "+",
+                                            "text": "+",
+                                            "offset": 399,
+                                            "lineBreaks": 0,
+                                            "line": 11,
+                                            "col": 29
+                                        },
+                                        {
+                                            "type": "identifier",
+                                            "value": "num2",
+                                            "text": "num2",
+                                            "offset": 401,
+                                            "lineBreaks": 0,
+                                            "line": 11,
+                                            "col": 31
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "text": "return",
+                        "offset": 379,
+                        "lineBreaks": 0,
+                        "line": 11,
+                        "col": 9
+                    }
+                ],
+                "text": "int",
+                "offset": 230,
+                "lineBreaks": 0,
+                "line": 8,
+                "col": 5,
+                "identifier": {
+                    "type": "identifier",
+                    "value": "sum",
+                    "text": "sum",
+                    "offset": 234,
                     "lineBreaks": 0,
                     "line": 8,
-                    "col": 5,
-                    "statements": {
-                        "type": "string",
-                        "value": "password saved",
-                        "text": "'password saved'",
-                        "offset": 181,
+                    "col": 9
+                },
+                "arguments": {
+                    "type": "arguments_with_types",
+                    "value": [
+                        {
+                            "type": "identifier",
+                            "value": "num1",
+                            "text": "num1",
+                            "offset": 243,
+                            "lineBreaks": 0,
+                            "line": 8,
+                            "col": 18
+                        },
+                        {
+                            "type": "identifier",
+                            "value": "num2",
+                            "text": "num2",
+                            "offset": 253,
+                            "lineBreaks": 0,
+                            "line": 8,
+                            "col": 28
+                        }
+                    ],
+                    "offset": 238,
+                    "lineBreaks": 0,
+                    "line": 8,
+                    "col": 13,
+                    "types": [
+                        "int",
+                        "int"
+                    ]
+                }
+            },
+            {
+                "type": "var_assign",
+                "use_let": true,
+                "line": 14,
+                "col": 5,
+                "value": {
+                    "type": "var_assign_group",
+                    "line": 14,
+                    "col": 9,
+                    "value": [
+                        {
+                            "type": "var_reassign",
+                            "identifier": {
+                                "type": "identifier",
+                                "value": "z",
+                                "text": "z",
+                                "offset": 487,
+                                "lineBreaks": 0,
+                                "line": 14,
+                                "col": 9
+                            },
+                            "line": 14,
+                            "col": 9,
+                            "value": {
+                                "type": "new",
+                                "value": {
+                                    "type": "function_call",
+                                    "value": "sayHello",
+                                    "text": "sayHello",
+                                    "offset": 495,
+                                    "lineBreaks": 0,
+                                    "line": 14,
+                                    "col": 17,
+                                    "arguments": {
+                                        "type": "arguments",
+                                        "value": [],
+                                        "text": "(",
+                                        "offset": 503,
+                                        "lineBreaks": 0,
+                                        "line": 14,
+                                        "col": 25
+                                    }
+                                },
+                                "text": "new",
+                                "offset": 491,
+                                "lineBreaks": 0,
+                                "line": 14,
+                                "col": 13
+                            },
+                            "offset": 487
+                        }
+                    ],
+                    "offset": 487
+                },
+                "offset": 483
+            },
+            {
+                "type": "statement_value",
+                "value": {
+                    "type": "var_reassign",
+                    "identifier": {
+                        "type": "identifier",
+                        "value": "z",
+                        "text": "z",
+                        "offset": 512,
                         "lineBreaks": 0,
-                        "line": 8,
-                        "col": 10
+                        "line": 15,
+                        "col": 5
+                    },
+                    "line": 15,
+                    "col": 5,
+                    "value": {
+                        "type": "number",
+                        "value": "10",
+                        "text": "10",
+                        "offset": 516,
+                        "lineBreaks": 0,
+                        "line": 15,
+                        "col": 9
+                    },
+                    "offset": 512
+                },
+                "line": 15,
+                "col": 5,
+                "offset": 512
+            },
+            {
+                "type": "statement_value",
+                "value": {
+                    "type": "dot_retraction",
+                    "from": {
+                        "type": "array_slice",
+                        "value": [
+                            {
+                                "type": "number",
+                                "value": 0
+                            },
+                            {
+                                "type": "number",
+                                "value": 1
+                            },
+                            {
+                                "type": "number",
+                                "value": 2
+                            },
+                            {
+                                "type": "number",
+                                "value": 3
+                            },
+                            {
+                                "type": "number",
+                                "value": 4
+                            },
+                            {
+                                "type": "number",
+                                "value": 5
+                            }
+                        ],
+                        "offset": 525,
+                        "lineBreaks": 0,
+                        "line": 16,
+                        "col": 5,
+                        "start": {
+                            "type": "number",
+                            "value": "1",
+                            "text": "1",
+                            "offset": 532,
+                            "lineBreaks": 0,
+                            "line": 16,
+                            "col": 12
+                        },
+                        "end": {
+                            "type": "number",
+                            "value": "5",
+                            "text": "5",
+                            "offset": 534,
+                            "lineBreaks": 0,
+                            "line": 16,
+                            "col": 14
+                        },
+                        "reversed": false
+                    },
+                    "value": {
+                        "type": "dot_retraction",
+                        "from": {
+                            "type": "function_call",
+                            "value": "hello",
+                            "text": "hello",
+                            "offset": 537,
+                            "lineBreaks": 0,
+                            "line": 16,
+                            "col": 17,
+                            "arguments": {
+                                "type": "arguments",
+                                "value": [],
+                                "text": "(",
+                                "offset": 542,
+                                "lineBreaks": 0,
+                                "line": 16,
+                                "col": 22
+                            }
+                        },
+                        "value": {
+                            "type": "identifier",
+                            "value": "world",
+                            "text": "world",
+                            "offset": 545,
+                            "lineBreaks": 0,
+                            "line": 16,
+                            "col": 25
+                        },
+                        "line": 16,
+                        "col": 17,
+                        "lineBreaks": 0,
+                        "offset": 537
+                    },
+                    "line": 16,
+                    "col": 5,
+                    "lineBreaks": 0,
+                    "offset": 525
+                },
+                "line": 16,
+                "col": 5,
+                "offset": 525
+            },
+            {
+                "type": "statement_value",
+                "value": {
+                    "type": "var_reassign",
+                    "identifier": {
+                        "type": "expression",
+                        "value": [
+                            {
+                                "type": "expression",
+                                "value": [
+                                    {
+                                        "type": "identifier",
+                                        "value": "document",
+                                        "text": "document",
+                                        "offset": 557,
+                                        "lineBreaks": 0,
+                                        "line": 17,
+                                        "col": 5
+                                    },
+                                    {
+                                        "type": "period",
+                                        "value": ".",
+                                        "text": ".",
+                                        "offset": 565,
+                                        "lineBreaks": 0,
+                                        "line": 17,
+                                        "col": 13
+                                    },
+                                    {
+                                        "type": "identifier",
+                                        "value": "body",
+                                        "text": "body",
+                                        "offset": 566,
+                                        "lineBreaks": 0,
+                                        "line": 17,
+                                        "col": 14
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "period",
+                                "value": ".",
+                                "text": ".",
+                                "offset": 570,
+                                "lineBreaks": 0,
+                                "line": 17,
+                                "col": 18
+                            },
+                            {
+                                "type": "identifier",
+                                "value": "innerHTML",
+                                "text": "innerHTML",
+                                "offset": 571,
+                                "lineBreaks": 0,
+                                "line": 17,
+                                "col": 19
+                            }
+                        ]
+                    },
+                    "value": {
+                        "type": "string_slice",
+                        "value": "hello world",
+                        "text": "'hello world'",
+                        "offset": 583,
+                        "lineBreaks": 0,
+                        "line": 17,
+                        "col": 31,
+                        "start": {
+                            "type": "number",
+                            "value": "0",
+                            "text": "0",
+                            "offset": 597,
+                            "lineBreaks": 0,
+                            "line": 17,
+                            "col": 45
+                        },
+                        "end": {
+                            "type": "number",
+                            "value": "5",
+                            "text": "5",
+                            "offset": 600,
+                            "lineBreaks": 0,
+                            "line": 17,
+                            "col": 48
+                        },
+                        "reversed": true
                     }
+                }
+            }
+        ],
+        "text": "if",
+        "offset": 100,
+        "lineBreaks": 0,
+        "line": 4,
+        "col": 1,
+        "condition": {
+            "type": "condition_group",
+            "value": [
+                {
+                    "type": "identifier",
+                    "value": "isRegistered",
+                    "text": "isRegistered",
+                    "offset": 103,
+                    "lineBreaks": 0,
+                    "line": 4,
+                    "col": 4
                 },
                 {
-                    "type": "case_default",
-                    "value": {
-                        "type": "string",
-                        "value": "password is too long",
-                        "text": "'password is too long'",
-                        "offset": 213,
-                        "lineBreaks": 0,
-                        "line": 9,
-                        "col": 14
-                    },
-                    "text": "default",
-                    "offset": 204,
+                    "type": "identifier",
+                    "value": "hasAccess",
+                    "text": "hasAccess",
+                    "offset": 119,
                     "lineBreaks": 0,
-                    "line": 9,
-                    "col": 5
+                    "line": 4,
+                    "col": 20
                 }
-            ]
-        },
-        "offset": 25
+            ],
+            "separator": " or ",
+            "line": 4,
+            "lineBreaks": 0,
+            "offset": 103,
+            "col": 4
+        }
     }
 ]

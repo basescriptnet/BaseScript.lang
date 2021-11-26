@@ -1,10 +1,18 @@
-let password = 'admin';
-let message = switch* length of password {
-    | 0: 'cannot send empty string';
-    & 1:
-    & 2:
-    & 3:
-    | 4: 'password is too short';
-    | 5: 'password saved';
-    default: 'password is too long';
-};
+let isRegistered = require('red.js'),
+    hasAccess = require('hasAcess.js');
+    // hello world
+if isRegistered or hasAccess {
+    log('welcome!') of console;
+    document.write('You have full access!');
+    debugger;
+    int sum (int num1, int num2) {
+        console.log(`Result of ${num1}+${num2} is ${num1 + num2}`);
+        // console.log('hello world');
+        return num1 * (num2 + num2); // add parenthesis support
+        // return 'num1'; // error
+    }
+    let z = new sayHello();
+    z = 10;
+    [0..5][1:5].hello().world;
+    document.body.innerHTML = 'hello world'[0::5];
+}

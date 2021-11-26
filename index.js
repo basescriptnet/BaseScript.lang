@@ -11,7 +11,7 @@ function readFile (fileName) {
 }
 module.exports = (string) => {
     // if string is provided
-    console.log(1)
+    // console.log(1)
     if (!/\.bs$/.test(string)) { 
         try {
             let result = parser(string);
