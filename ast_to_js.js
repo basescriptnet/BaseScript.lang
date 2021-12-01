@@ -1,12 +1,13 @@
 module.exports = function parse (statements, tmp) {
     // statememnts must be an array, if no, make it an array
+    if (statements === void 0) debugger;
     if (!Array.isArray(statements)) 
         statements = [statements];
     let result = '';
     for (let i = 0; i < statements.length; i++) {
         let statement = statements[i];
         let value = statement.value;
-        let r = [];
+        var r = [];
         switch (statement.type) {
             case 'statement_value':
                 result += `${parse(value)};`;
@@ -21,7 +22,7 @@ module.exports = function parse (statements, tmp) {
                 result += 'debugger;';
                 break;
             case 'var_assign':
-                result += `${statement.use_let ? 'let ' : ''}${parse([value])};`;
+                result += `${statement.use_let ? 'let ' : statement.use_const ? 'const ' : ''}${parse([value])};`;
                 break;
             case 'var_assign_group':
                 if (!!value.value) value = value.value;
@@ -46,17 +47,20 @@ module.exports = function parse (statements, tmp) {
                 result += value;
                 break;
             case 'string':
-                result += value.indexOf('$') > -1 ? `\`${value}\`` : `"${value}"`;
+                result += value.indexOf('$') > -1 ? `\`${value}\`` : `${JSON.stringify(value)}`;
                 break;
             case 'null':
                 result += null;
                 break;
             case 'dot_retraction':
                 let from = parse([statement.from]);
-                let v = parse([value]);
+                let v = [];
+                for (let i = 0; i < value.length; i++) {
+                    v.push(parse(value[i]))
+                }
                 // console.log(from, v);
                 // debugger;
-                result += `${parse([statement.from])}.${parse([value])}`;
+                result += `${parse([statement.from])}.${v.join('.')}`;
                 break;
             case 'array_slice':
                 result = result.slice(0, -1);
@@ -75,14 +79,45 @@ module.exports = function parse (statements, tmp) {
                 result += `"${reversed_string.slice(parse(statement.start), parse(statement.end)).join('')}"`//.slice(${parse(statement.start)}, ${parse(statement.end)})`
                 break;
             case 'new':
-                result += `new ${parse(value)}`;
+            case 'await':
+            case 'yield':
+                result += `${statement.type} ${parse(value)}`;
                 break;
             case 'function_declaration':
-                let types = [];
+                var types = [];
                 result += `function ${parse(statement.identifier)}`;
-                let sav = statement.arguments.value;
+                var sav = statement.arguments.value;
                 for (let i = 0; i < sav.length; i++) {
-                    r.push(parse(sav[i]));
+                    r.push(parse(sav[i], tmp));
+                    if (statement.arguments.types[i] !== 'none') {
+                        let type = statement.arguments.types[i];
+                        // types.push([statement.arguments.types[i], sav[i]]);
+                        switch (type) {
+                            case 'int':
+                                types.push(`if (parseInt(${parse(sav[i])}) !== ${parse(sav[i])}) {
+                                        throw new TypeError('"${parse(sav[i])}" should be type of int')
+                                    }`);
+                                break;
+                            case 'string':
+                                types.push(`if (typeof ${parse(sav[i])} !== 'string') {
+                                        throw new TypeError('"${parse(sav[i])}" should be type of string')
+                                    }`);
+                                break;
+                        }
+                    }
+                } 
+                // console.log(types)
+                result += `(${r.join(', ')}) {
+                    ${types.length ? types.join('') : ''}
+                    ${parse(statement.value, statement.text)}
+                }`;
+                break;
+            case 'annonymous_function':
+                var types = [];
+                result += `function ${statement.identifier ? parse(statement.identifier) : ''}`;
+                var sav = statement.arguments.value;
+                for (let i = 0; i < sav.length; i++) {
+                    r.push(parse(sav[i], tmp));
                     if (statement.arguments.types[i] !== 'none') {
                         let type = statement.arguments.types[i];
                         // types.push([statement.arguments.types[i], sav[i]]);
@@ -110,7 +145,7 @@ module.exports = function parse (statements, tmp) {
                 if (value === void 0) {
                     value = 'null';
                 } else {
-                    value = parse(value);
+                    value = parse(value, tmp);
                 }
                 switch (tmp) {
                     case 'int':
@@ -135,21 +170,45 @@ module.exports = function parse (statements, tmp) {
                 result += value;
                 break;
             case 'function_call':
-                result += '\n'+value;
+                if (statement.identifier) {
+                    result += statement.identifier;
+                }
+                if (typeof value === "object") {
+                    result += '\n'+parse(value);
+                } else {
+                    result += '\n'+value;
+                }
                 if (!statement.arguments.value.length) {
                     result += '()';
                     break;
                 }
                 // result += parse([statement.arguments]);
                     result += '(';
-                    let args = [];
+                    var args = [];
                     for (let i = 0; i < statement.arguments.value.length; i++) {
-                        args.push(parse([statement.arguments.value[i]]));
+                        args.push(parse(statement.arguments.value[i]));
                     }
                     result += args.join(',');
                     // result += `(${value.map(i => parse(i)).join(',')})`;
                 result += ')';
                 break;
+            case 'function_call_from_value':
+                result += '\n'+parse(value);
+                if (!statement.arguments.value.length) {
+                    result += '()';
+                    break;
+                }
+                // result += parse([statement.arguments]);
+                    result += '(';
+                    var args = [];
+                    for (let i = 0; i < statement.arguments.value.length; i++) {
+                        args.push(parse(statement.arguments.value[i]));
+                    }
+                    result += args.join(',');
+                    // result += `(${value.map(i => parse(i)).join(',')})`;
+                result += ')';
+                break;
+                
             // case 'arguments':
                     // result += '(';
                     // let args = [];
@@ -161,40 +220,49 @@ module.exports = function parse (statements, tmp) {
                     // result += ')';
                 // break;
             case 'if_else':
-                result += `if (${statement.if.condition}) {${parse(statement.if.value)}}`;
-                result += ` else {${parse(statement.else.value)}}`;
+                result += `if (${parse(statement.if.condition)}) {${parse(statement.if.value, tmp)}}`;
+                result += ` else {${parse(statement.else.value, tmp)}}`;
                 break;
             case 'if':
-            result += `if (${parse(statement.condition)}) {${parse(value)}}`;
+                result += `if (${parse(statement.condition)}) {${parse(value, tmp)}}`;
                 break;
             case 'else':
-                result += `else {${parse(value)}}`;
+                result += `else {${parse(value, tmp)}}`;
                 break;
             case 'while':
-                result += `while (${statement.condition}) {${parse(value)}}`;
+                result += `while (${statement.condition}) {${parse(value, tmp)}}`;
+                break;
+            case 'for_loop':
+                result += `for (${parse(statement.identifier).replace(';', '')}; ${parse(statement.condition)}; ${parse(statement.change)}) {${parse(value)}}`
+                break;
+            case 'for_in':
+                result += `for (const ${parse(statement.identifier)} in ${parse(statement.iterable)}) {${parse(value, tmp)}}`
+                break;
+            case 'for_of':
+                result += `for (const ${parse(statement.identifier)} of ${parse(statement.iterable)}) {${parse(value, tmp)}}`
                 break;
             case 'sleep':
                 result += `sleep(${value});`;
                 break;
             case 'switch*':
                 result += '(function () { let ___switch_result___ = null;';
-                result += `switch (${parse([statement.value])}) {`;
+                result += `switch (${parse(statement.value)}) {`;
                 for (let i = 0; i < statement.cases.length; i++) {
                     result += parse(statement.cases[i]);
                 }
                 result += '} return ___switch_result___; })()';
                 break;
             case 'case_with_break':
-                result += `case ${parse([statement.value])}:`;
+                result += `case ${parse(statement.value)}:`;
                 result += `___switch_result___ = ${parse(statement.statements)};`;
                 result += `break;`;
                 break;
             case 'case':
-                result += `case ${parse([statement.value])}:`;
+                result += `case ${parse(statement.value)}:`;
                 break;
             
             case 'case_default':
-                result += `default: ___switch_result___ = ${parse([statement.value])};`;
+                result += `default: ___switch_result___ = ${parse(statement.value)};`;
                 break;
             case 'expression':
                 result += `${parse(value[0])} ${value[1].value} ${parse(value[2])}`;
@@ -204,6 +272,148 @@ module.exports = function parse (statements, tmp) {
                 break;
             case 'operator':
                 result += value;
+                break;
+            case 'condition':
+                if (typeof value === 'string') {
+                    if (statement.left !== void 0) {
+                        result += `${parse(statement.left)}${value}${parse(statement.right)}`;
+                        break;
+                    }
+                    result += value;
+                } else {
+                    result += parse(value, tmp);
+                }
+                break;
+            case 'throw':
+                result += `throw ${parse(value)};`;
+                break;
+            case 'break_continue':
+                result += `${value};`;
+                break;
+            case 'echo':
+                let p = parse(value);
+                result += `if (typeof ${p} !== 'string') {
+                    throw 'echo must be type of string';
+                } else {
+                    try {
+                        eval(${p})
+                    } catch (err) {
+                        console.warn(\`[Echo error]: \${err}\`);
+                    }}`;
+                break;
+            case 'html_text':
+                result += `document.createTextNode(${parse(value)})`;
+                break;
+            case 'html_expression':
+                // doesn't work when putting value other than string
+                result += `globalThis.BS.Node("${statement.opening_tag}",`;
+                // result += `(() => {let el = document.createElement("${parse(value)}");`;
+                if (statement.id) {
+                    result += `"${statement.id.value}", `;
+                    // result += `el.id = "${statement.id.value}";`;
+                } else result += 'null,'
+                if (statement.classList) {
+                    result += '"'
+                    // result += 'el.className = "'
+                    for (let i in statement.classList) {
+                        result += statement.classList[i].value + ' ';
+                    }
+                    result = result.trimEnd();
+                    result += '",'
+                } else result += 'null,';
+                
+                if (statement.attributes && statement.attributes.length) {
+                    result += '{'
+                    for (let i in statement.attributes) {
+                        result += statement.attributes[i].identifier.value + ':';
+                        result += parse(statement.attributes[i].value) + ',';
+                    }
+                    result += `},`;
+                } else result += 'null,';
+            
+                if (value) {
+                    // var els = parse(value);
+                    for (let i = 0; i < value.length; i++) {
+                        r.push(parse(value[i]));
+                    }
+                    result += `[${r.join(',')}]`;
+                    // result += `let children = ${els};`
+                    // result += `for (let i = 0; i < children.length; i++) {
+                    //     el.append(children[i]);
+                    // }`;
+                } else result += 'null'
+                result += `)`;
+                break;
+            case 'html':
+                // if (!statement.id && ! statement.classList) {
+                //     result += `document.createElement("${parse(value)}")`;
+                // } else {
+                    result += `globalThis.BS.Node("${parse(value)}",`;
+                    // result += `(() => {let el = document.createElement("${parse(value)}");`;
+                    if (statement.id) {
+                        result += `"${statement.id.value}", `;
+                        // result += `el.id = "${statement.id.value}";`;
+                    } else result += 'null,'
+                    if (statement.classList) {
+                        result += '"'
+                        // result += 'el.className = "'
+                        for (let i in statement.classList) {
+                            result += statement.classList[i].value + ' ';
+                        }
+                        result = result.trimEnd();
+                        result += '",'
+                    } else result += 'null,'
+                    if (statement.elements) {
+                        var els = parse(statement.elements);
+                        result += els;
+                        // result += `let children = ${els};`
+                        // result += `for (let i = 0; i < children.length; i++) {
+                        //     el.append(children[i]);
+                        // }`;
+                    } else result += 'null'
+                    result += `)`;
+                    // result += `return el})()`;
+                // }
+                break;
+            case 'object':
+                var output = '{';
+                for (let i in value) {
+                    output += `${i}:${parse(value[i])},`;
+                }
+                output += '}';
+                result += output;
+                break;
+            case 'keyword':
+                if (value == 'this') {
+                    result += 'this';
+                    break;
+                }
+                break;
+            case 'try':
+                result += `try {${parse(statement.value)}}`
+                break;
+            case 'catch':
+                result += `catch (${statement.identifier}) {${parse(statement.value)}}`
+                break;
+            case 'finally':
+                result += `finally {${parse(value, tmp)}}`
+                break;
+            case 'try_catch':
+                result += `${parse(statement.value)}${statement.catch ? parse(statement.catch) : 'catch (err) {}'}`
+                break;
+            case 'try_catch_finally':
+            // debugger
+                result += `${parse(statement.value)}${statement.finally ? parse(statement.finally) : ''}`
+                break;
+            case 'with':
+            // debugger
+                result += `with (${parse(statement.obj)}) {${parse(statement.value, tmp)}}`
+                break;
+            case 'period':
+            // debugger
+                result += `.`
+                break;
+            case undefined: // whitespace
                 break;
             default:
                 result += '/* Unhandled expression: '+JSON.stringify(statement)+' */'

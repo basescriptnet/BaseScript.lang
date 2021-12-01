@@ -1,26 +1,106 @@
 (async function() {
-    let isRegistered = require("red.js"),
-        hasAccess = require("hasAcess.js");
-    if (isRegistered || hasAccess) {
-        console.log("welcome!");
-        document.write("You have full access!");
-        debugger;
-
-        function sum(num1, num2) {
-            if (parseInt(num1) !== num1) {
-                throw new TypeError('"num1" should be type of int')
-            }
-            if (parseInt(num2) !== num2) {
-                throw new TypeError('"num2" should be type of int')
-            }
-            console.log(`Result of ${num1}+${num2} is ${num1 + num2}`);
-            if (parseInt(num1 * (num2 + num2)) !== num1 * (num2 + num2)) {
-                throw new TypeError('Returned value should be type of int')
-            } else return num1 * (num2 + num2);
-        }
-        let z = new sayHello();
-        z = 10;
-        [1, 2, 3, 4].hello().world;
-        document.body.innerHTML = "dlrow";
+    if (!globalThis) {
+        globalThis = window || global || this || {};
     }
-})()
+    globalThis.BS = {
+        Node(tagName, id, className, attributes, children) {
+            let el = document.createElement(tagName);
+            id && (el.id = id);
+            className && (el.className = className);
+            // attributes
+            if (children) {
+                el.append(children);
+            }
+            if (typeof attributes == 'object') {
+                for (let i in attributes) {
+                    el.setAttribute(i, attributes[i]);
+                }
+            }
+            return el;
+        }
+    };
+    Element.prototype._append = Element.prototype.append;
+    Element.prototype.append = function(children) {
+        if (Array.isArray(children)) {
+            for (let i = 0, l = children.length; i < l; i++) {
+                this._append(children[i]);
+            }
+        } else {
+            this._append(children);
+        }
+        return this;
+    }
+    Element.prototype.text = function(content) {
+        if (content === void 0) {
+            return this.textContent;
+        }
+        this.textContent = content;
+        return this;
+    }
+    Element.prototype.css = function(obj) {
+        for (let i in obj) {
+            this.style[i] = obj[i];
+        }
+        return this;
+    }
+    Element.prototype.events = function(obj) {
+        for (let i in obj) {
+            this.addEventListener(i, obj[i]);
+        }
+        return this;
+    }
+
+    function list(amount, callback) {
+        let array = [];
+        for (let i = 0; i < amount; i++) {
+            if (typeof callback === 'function') {
+                console.log(i);
+                array.push(callback(i));
+            } else {
+                array.push(callback);
+            }
+        }
+        return array;
+    }
+
+    function range(n) {
+        let i = 0 // start
+        return { // iterator protocol
+            [Symbol.iterator]: () => { // @@iterator
+                return { // object with the next function
+                    next() {
+                        while (i !== n) {
+                            let temp = i
+                            i++
+                            return {
+                                value: temp,
+                                done: false
+                            }
+                        }
+                        return {
+                            done: true
+                        }
+                    }
+                }
+            }
+        }
+    }
+    const PI = 3.141592653589793,
+        E = 2.718281828459045;
+
+    // your code below this line!
+
+    let id = 100;
+    let ul = globalThis.BS.Node("ul", null, null, {
+        id: "hello",
+        class: "f",
+    }, [globalThis.BS.Node("li", null, null, null, ["Home"]), globalThis.BS.Node("li", null, null, {
+        style: "color: red;",
+    }, ["About us"]), globalThis.BS.Node("li", null, null, null, ["Our \"Agency\""]), globalThis.BS.Node("li", null, null, null)]);
+    try {
+        fdfdf + fdfd;
+    } catch (err) {}
+    with(document) {
+        body.append(ul);
+    }
+})();

@@ -1,18 +1,19 @@
-let isRegistered = require('red.js'),
-    hasAccess = require('hasAcess.js');
-    // hello world
-if isRegistered or hasAccess {
-    log('welcome!') of console;
-    document.write('You have full access!');
-    debugger;
-    int sum (int num1, int num2) {
-        console.log(`Result of ${num1}+${num2} is ${num1 + num2}`);
-        // console.log('hello world');
-        return num1 * (num2 + num2); // add parenthesis support
-        // return 'num1'; // error
-    }
-    let z = new sayHello();
-    z = 10;
-    [0..5][1:5].hello().world;
-    document.body.innerHTML = 'hello world'[0::5];
+let id = 100;
+// let r = /hello/;
+let ul =
+<ul id="hello" class="f">
+    <li>"Home"</li>
+    <li style="color: red;">"About us"</li>
+    <li>'Our "Agency"'</li>
+    <li/>
+</ul>;
+// try {
+//     addEventListener;
+// } catch {
+//     "false";
+// }
+try: fdfdf+fdfd;
+
+with document {
+    body.append(ul);
 }

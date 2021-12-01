@@ -55,10 +55,57 @@ function watch (space = 4) {
                 );
                 // ----- new
                 let parse = require('./ast_to_js.js')
-                let built_in = require('./built_in.js');
+                // let built_in = `
+                // Element.prototype._append = Element.prototype.append;
+                // Element.prototype.append = function (children) {
+                //     if (Array.isArray(children)) {
+                //         for (let i = 0, l = children.length; i < l; i++) {
+                //             this._append(children[i]);
+                //         }
+                //     } else {
+                //         this._append(children);
+                //     }
+                //     return this;
+                // }
+                // Element.prototype.text = function (content) {
+                //     if (content === void 0) {
+                //         return this.textContent;
+                //     }
+                //     this.textContent = content;
+                //     return this;
+                // }
+                // Element.prototype.css = function (obj) {
+                //     for (let i in obj) {
+                //         this.style[i] = obj[i];
+                //     }
+                //     return this;
+                // }
+                // Element.prototype.events = function (obj) {
+                //     for (let i in obj) {
+                //         this.addEventListener(i, obj[i]);
+                //     }
+                //     return this;
+                // }
+                // function list (amount, callback) {
+                //     let array = [];
+                //     for (let i = 0; i < amount; i++) {
+                //         if (typeof callback === 'function') {
+                //             console.log(i);
+                //             array.push(callback(i));
+                //         } else {
+                //             array.push(callback);
+                //         }
+                //     }
+                //     return array;
+                // }
+                // `; //require('./built_in.js');
+                let date = Date.now();
+                var content = parse(JSON.parse(ast));
+                console.log(Date.now() - date);
+                let built_in = fs.readFileSync('./built_in.js');
                 fs.writeFileSync(
                     `${fileName}.js`,
-                    beautify(`(async function () {${parse(JSON.parse(ast))}})()`)
+                    beautify(`(async function () {${built_in}\n${content}})();\n`)
                 );
                 // ----- new end
                 return ast;
