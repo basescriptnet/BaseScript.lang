@@ -105,7 +105,19 @@ function watch (space = 4) {
                 let built_in = fs.readFileSync('./built_in.js');
                 fs.writeFileSync(
                     `${fileName}.js`,
-                    beautify(`(async function () {${built_in}\n${content}})();\n`)
+                    beautify(`
+                    if (!globalThis) {
+                        globalThis = window || global || this || {};
+                    }
+                    try {
+                        globalThis.require = require;
+                    } catch (err) {
+                        globalThis.require = () => undefined;
+                    }
+                    // finally {
+                    //     globalThis.require = () => undefined;
+                    // }
+                    (async function () {${built_in}\n${content}})();\n`)
                 );
                 // ----- new end
                 return ast;

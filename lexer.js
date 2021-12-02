@@ -2,8 +2,8 @@
 const moo = require('moo');
 const lexer = moo.compile({
     comment: /\/\/.*/,
-    // regexp: /\/(?:\\[.+*^$[\]{}|?:]|[^\/\\])*\//,
     keyword: ['typeof', 'instanceof', 'constructor', 'super', 'extends', 'function', 'this', 'echo', 'export', 'yield', 'async', 'try', 'catch', 'finally', 'static', 'while', 'if', 'else', 'import', 'from', 'let', 'const', 'true', 'false', 'null', 'of', 'default', 'switch', 'switch*', 'with', 'for', 'case', 'default', 'elif', 'debugger', 'or', 'and', 'return', 'new', 'is', 'is not', 'is greater than', 'is greater or equal to', 'is smaller than', 'is smaller or equal to', 'equal', 'throw', 'break', 'continue'],
+    regexp: /\/(?:\\[ bfnrtswSWdD.+*^$[\]{}|?:]|[^\n\/\\])*?\//,
     operator: ['+', '-', '/', '**', '*', '%'],
     number: /(?:\+|-)?[0-9]+(?:\.[0-9]+)?/,
     'true': 'true',
@@ -14,7 +14,7 @@ const lexer = moo.compile({
     },
     string: [
         {
-            match: /"(?:\\["nrt]|[^"\\])*"/, value: x => x.slice(1, -1)
+            match: /"(?:\\["nrt]|[^"])*"/, value: x => x.slice(1, -1)
         },
         {
             match: /'(?:\\['nrt]|[^'\\])*'/, value: x => x.slice(1, -1)
@@ -29,6 +29,7 @@ const lexer = moo.compile({
     'closing parentesis': ')',
     int: 'int',
     float: 'float',
+    double_equal: '==',
     equal: '=',
     semicolon: ';',
     constant: 'const',
@@ -41,6 +42,7 @@ const lexer = moo.compile({
     // ')': ')',
     '{': '{',
     '}': '}',
+    escape: '\\',
     comma: ',',
     semicolon: ';',
     colon: ':',
@@ -52,6 +54,7 @@ const lexer = moo.compile({
     '<=': '<=',
     or: '||',
     and: '&&',
+    eval: '@eval',
     '|': '|',
     '&': '&',
     id: '#',

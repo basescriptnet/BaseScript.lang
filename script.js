@@ -1,7 +1,15 @@
-(async function() {
-    if (!globalThis) {
-        globalThis = window || global || this || {};
-    }
+if (!globalThis) {
+    globalThis = window || global || this || {};
+}
+try {
+    globalThis.require = require;
+} catch (err) {
+    globalThis.require = () => undefined;
+}
+// finally {
+//     globalThis.require = () => undefined;
+// }
+(async function() { // console.log(requirejs);
     globalThis.BS = {
         Node(tagName, id, className, attributes, children) {
             let el = document.createElement(tagName);
@@ -17,8 +25,30 @@
                 }
             }
             return el;
-        }
+        },
+        ast: (function() {
+            let r = globalThis.require('./index.js');
+            if (r) return r;
+            return function() {
+                console.warn('Ast is not supported yet in browsers.')
+            }
+        })(),
+        parse: (function() {
+            let r = globalThis.require('./ast_to_js.js');
+            if (r) return r;
+            return function() {
+                console.warn('@eval is not supported yet in browsers.')
+            }
+        })(),
+        // require('./ast_to_js.js')// || function () {console.warn('@eval is not supported yet in browsers.')}
     };
+    try {
+        Element;
+    } catch {
+        globalThis.Element = {
+            prototype: {}
+        };
+    }
     Element.prototype._append = Element.prototype.append;
     Element.prototype.append = function(children) {
         if (Array.isArray(children)) {
@@ -90,9 +120,7 @@
 
     // your code below this line!
 
-    let id = 100;
-    let j = (function() {
-
-        console.log("hello world");
-    })(10, 20);
+    let v = "\\a = 10;console.log(a);";
+    eval(globalThis.BS.parse(globalThis.BS.ast(v)));
+    console.log("success");
 })();

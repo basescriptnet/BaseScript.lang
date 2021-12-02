@@ -1,6 +1,4 @@
-if (!globalThis) {
-    globalThis = window || global || this || {};
-}
+// console.log(requirejs);
 globalThis.BS = {
     Node (tagName, id, className, attributes, children) {
         let el = document.createElement(tagName);
@@ -16,8 +14,24 @@ globalThis.BS = {
             }
         }
         return el;
-    }
+    },
+    ast: (function () {
+        let r = globalThis.require('./index.js');
+        if (r) return r;
+        return function () {console.warn('Ast is not supported yet in browsers.')}
+    })(),
+    parse: (function () {
+        let r = globalThis.require('./ast_to_js.js');
+        if (r) return r;
+        return function () {console.warn('@eval is not supported yet in browsers.')}
+    })(),
+    // require('./ast_to_js.js')// || function () {console.warn('@eval is not supported yet in browsers.')}
 };
+try {
+    Element;
+} catch {
+    globalThis.Element = {prototype: {}};
+}
 Element.prototype._append = Element.prototype.append;
 Element.prototype.append = function (children) {
     if (Array.isArray(children)) {

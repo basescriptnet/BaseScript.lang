@@ -69,6 +69,10 @@ var grammar = {
         	type: 'echo',
         	value: v[2]
         }) },
+    {"name": "statement", "symbols": [(lexer.has("eval") ? {type: "eval"} : eval), "__", "value", "_", {"literal":";"}], "postprocess":  v => assign(v[0], {
+        	type: 'eval',
+        	value: v[2]
+        }) },
     {"name": "statement", "symbols": ["value", "_", {"literal":";"}], "postprocess":  v => ({
         	type: 'statement_value',
         	value: v[0],
@@ -276,13 +280,14 @@ var grammar = {
         } },
     {"name": "var_assign$ebnf$1$subexpression$1", "symbols": [{"literal":"let"}, "__"]},
     {"name": "var_assign$ebnf$1$subexpression$1", "symbols": [{"literal":"const"}, "__"]},
+    {"name": "var_assign$ebnf$1$subexpression$1", "symbols": [{"literal":"\\"}]},
     {"name": "var_assign$ebnf$1", "symbols": ["var_assign$ebnf$1$subexpression$1"], "postprocess": id},
     {"name": "var_assign$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "var_assign", "symbols": ["var_assign$ebnf$1", "var_assign_list"], "postprocess":  v => {
         	let f = v[0] ? v[0][0] : v[1];
         	return {
         		type: 'var_assign',
-        		use_let: v[0] && v[0][0].value == 'let' ? true : false,
+        		use_let: v[0] && (v[0][0].value == 'let' || v[0][0].value == '\\') ? true : false,
         		use_const: v[0] && v[0][0].value == 'const' ? true : false,
         		line: f.line,
         		col: f.col,
@@ -327,6 +332,7 @@ var grammar = {
         	type: 'expression',
         	value: [v[0], v[2][0], v[4]]
         }) },
+    {"name": "expression", "symbols": ["regexp"], "postprocess": id},
     {"name": "expression", "symbols": ["annonymous_function"], "postprocess": id},
     {"name": "expression", "symbols": ["function_call"], "postprocess": id},
     {"name": "expression", "symbols": ["identifier"], "postprocess": id},
@@ -335,7 +341,13 @@ var grammar = {
     {"name": "expression", "symbols": ["number"], "postprocess": id},
     {"name": "expression", "symbols": [{"literal":"this"}], "postprocess": id},
     {"name": "identifier", "symbols": [(lexer.has("identifier") ? {type: "identifier"} : identifier)], "postprocess": v => v[0]},
-    {"name": "regexp", "symbols": [(lexer.has("regexp") ? {type: "regexp"} : regexp)], "postprocess": id},
+    {"name": "regexp$ebnf$1", "symbols": []},
+    {"name": "regexp$ebnf$1$subexpression$1", "symbols": ["regexp_flags"]},
+    {"name": "regexp$ebnf$1", "symbols": ["regexp$ebnf$1", "regexp$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "regexp", "symbols": [(lexer.has("regexp") ? {type: "regexp"} : regexp), "regexp$ebnf$1"], "postprocess":  v => assign(v[0], {
+        	value: v[0] + (v[1] ? v[1].join('') : '')
+        }) },
+    {"name": "regexp_flags", "symbols": [/[gmi]/], "postprocess": v => v[0].value},
     {"name": "dot_retraction$subexpression$1", "symbols": ["function_call"]},
     {"name": "dot_retraction$subexpression$1", "symbols": ["identifier"]},
     {"name": "dot_retraction$subexpression$1", "symbols": ["value"]},
@@ -378,12 +390,18 @@ var grammar = {
     {"name": "value$subexpression$1", "symbols": [{"literal":"new"}]},
     {"name": "value$subexpression$1", "symbols": [{"literal":"await"}]},
     {"name": "value$subexpression$1", "symbols": [{"literal":"yield"}]},
+    {"name": "value$subexpression$1", "symbols": [{"literal":"typeof"}]},
     {"name": "value", "symbols": ["value$subexpression$1", "__", "value"], "postprocess":  v => {
         	return assign(v[0][0], {
         		type: v[0][0].text,
         		value: v[2]
         	})
         } },
+    {"name": "value", "symbols": ["value", "__", {"literal":"instanceof"}, "__", "value"], "postprocess":  v => ({
+        	type: 'instanceof',
+        	left: v[0],
+        	value: v[4]
+        }) },
     {"name": "value", "symbols": [{"literal":"("}, "_", "value", "_", {"literal":")"}], "postprocess":  v => assign(v[2], {
         	type: 'expression_with_parenthesis'
         }) },
@@ -394,7 +412,6 @@ var grammar = {
     {"name": "value", "symbols": ["html"], "postprocess": id},
     {"name": "value", "symbols": ["array"], "postprocess": id},
     {"name": "value", "symbols": ["object"], "postprocess": id},
-    {"name": "value", "symbols": ["regexp"], "postprocess": id},
     {"name": "prefixExp", "symbols": ["identifier"], "postprocess": id},
     {"name": "prefixExp", "symbols": ["function_call"], "postprocess": id},
     {"name": "prefixExp", "symbols": [{"literal":"this"}], "postprocess": id},

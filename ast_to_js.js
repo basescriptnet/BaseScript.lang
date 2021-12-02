@@ -1,6 +1,9 @@
 module.exports = function parse (statements, tmp) {
     // statememnts must be an array, if no, make it an array
-    if (statements === void 0) debugger;
+    if (statements === void 0) {
+        debugger
+        return;
+    };
     if (!Array.isArray(statements)) 
         statements = [statements];
     let result = '';
@@ -81,7 +84,11 @@ module.exports = function parse (statements, tmp) {
             case 'new':
             case 'await':
             case 'yield':
+            case 'typeof':
                 result += `${statement.type} ${parse(value)}`;
+                break;
+            case 'instanceof':
+                result += `${parse(statement.left)} instanceof ${parse(value)}`;
                 break;
             case 'function_declaration':
                 var types = [];
@@ -276,16 +283,19 @@ module.exports = function parse (statements, tmp) {
                     break;
                 }
                 if (statement.result) {
-                        statement.type = 'annonymous_function';
-                        result += `(${parse(statement)})`;
-                        if (statement.call_arguments) {
-                            var r = [];
-                            for (let i = 0; i < statement.call_arguments.value.length; i++) {
-                                r.push(parse(statement.call_arguments.value[i]));
-                            }
-                            result += `(${r.join(',')})`;
+                    statement.type = 'annonymous_function';
+                    result += `(${parse(statement)})`;
+                    if (statement.call_arguments) {
+                        var r = [];
+                        for (let i = 0; i < statement.call_arguments.value.length; i++) {
+                            r.push(parse(statement.call_arguments.value[i]));
+                        }
+                        result += `(${r.join(',')})`;
                         }
                 }
+                break;
+            case 'regexp':
+                result += value;
                 break;
             case 'operator':
                 result += value;
@@ -303,6 +313,10 @@ module.exports = function parse (statements, tmp) {
                 break;
             case 'throw':
                 result += `throw ${parse(value)};`;
+                break;
+            case 'eval':
+                // var BS = require('./index');
+                result += `eval(globalThis.BS.parse(globalThis.BS.ast(${parse(value)})));`;
                 break;
             case 'break_continue':
                 result += `${value};`;

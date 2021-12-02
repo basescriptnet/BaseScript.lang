@@ -39,6 +39,10 @@ statement -> var_assign _ ";" {% id %}
 		type: 'echo',
 		value: v[2]
 	}) %}
+	| %eval __ value _ ";" {% v => assign(v[0], {
+		type: 'eval',
+		value: v[2]
+	}) %}
 	| value _ ";" {% v => ({
 		type: 'statement_value',
 		value: v[0],
@@ -266,11 +270,11 @@ value_reassign -> value _ "=" _ (switch | value) {% v => {
 	}
 } %} 
 
-var_assign -> ("let" __ | "const" __):? var_assign_list {% v => {
+var_assign -> ("let" __ | "const" __ | "\\"):? var_assign_list {% v => {
 	let f = v[0] ? v[0][0] : v[1];
 	return {
 		type: 'var_assign',
-		use_let: v[0] && v[0][0].value == 'let' ? true : false,
+		use_let: v[0] && (v[0][0].value == 'let' || v[0][0].value == '\\') ? true : false,
 		use_const: v[0] && v[0][0].value == 'const' ? true : false,
 		line: f.line,
 		col: f.col,
@@ -311,6 +315,7 @@ expression ->  "(" _ expression _ ")" {% v => assign(v[2], {
 		type: 'expression',
 		value: [v[0], v[2][0], v[4]]
 	}) %}
+	| regexp {% id %}
 	| annonymous_function {% id %}
 	| function_call {% id %}
 	| identifier {% id %}
@@ -320,9 +325,16 @@ expression ->  "(" _ expression _ ")" {% v => assign(v[2], {
 	| "this" {% id %}
 # base line
 identifier -> %identifier {% v => v[0] %}
+# /\/(?:\\[bfnrt.+*^$[\]{}|?:]|[^\/\\])*?\//
+# regexp -> "/" ( ("\\" [bfnrt.+*^$[] | "\\" "]") [A-Za-z_]) "/" {% v => assign(v[0], {
+# 	type: 'regexp',
+# 	value: v.slice(1, -1) 
+# }) %}
+regexp -> %regexp (regexp_flags):* {% v => assign(v[0], {
+	value: v[0] + (v[1] ? v[1].join('') : '')
+}) %}
 
-regexp -> %regexp {% id %}
-
+regexp_flags -> [gmi] {% v => v[0].value %}
 dot_retraction -> dot_retraction _ "." _ (function_call | identifier | value) {% v => {
 	return {
 		type: 'dot_retraction',
@@ -430,12 +442,17 @@ object_retraction_ -> (object_retraction | function_call | identifier | value | 
 	# | ("this" | identifier | html | object | number | function_call) {% id %}
 	# | value
 
-value -> ("new" | "await" | "yield") __ value {% v => {
+value -> ("new" | "await" | "yield" | "typeof") __ value {% v => {
 		return assign(v[0][0], {
 			type: v[0][0].text,
 			value: v[2]
 		})
 	} %}
+	| value __ "instanceof" __ value {% v => ({
+		type: 'instanceof',
+		left: v[0],
+		value: v[4]
+	}) %}
 	| "(" _ value _ ")" {% v => assign(v[2], {
 		type: 'expression_with_parenthesis'
 	}) %}
@@ -453,7 +470,6 @@ value -> ("new" | "await" | "yield") __ value {% v => {
 	| html {% id %}
 	| array {% id %}
 	| object {% id %}
-	| regexp {% id %}
 
 prefixExp -> identifier {% id %}
 	| function_call {% id %}
@@ -573,17 +589,17 @@ array -> array _ "[" _ number _ ":" ":":? _ number _ "]" {% v => {
 			value: output
 		});
 	} %}
-	# | value (__ value):*
-	#  {% v => {
+	# | value (_ "," _ value):* {% v => {
+	# 	//debugger
 	# 	let output = [v[0]];
 	# 	for (let i in v[1]) {
-	# 		output.push(v[1][i][1])
+	# 		output.push(v[1][i][3])
 	# 	}
-	# 	delete v[0].text
-	# 	return Object.assign(v[0], {
+	# 	// delete v[0].text
+	# 	return {
 	# 		type: 'array',
 	# 		value: output
-	# 	});
+	# 	};
 	# } %}
 
 object -> "{" _ "}" {% v => {
