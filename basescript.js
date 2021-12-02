@@ -340,6 +340,8 @@ var grammar = {
     {"name": "expression", "symbols": ["string"], "postprocess": id},
     {"name": "expression", "symbols": ["number"], "postprocess": id},
     {"name": "expression", "symbols": [{"literal":"this"}], "postprocess": id},
+    {"name": "expression", "symbols": ["html"], "postprocess": id},
+    {"name": "expression", "symbols": ["object"], "postprocess": id},
     {"name": "identifier", "symbols": [(lexer.has("identifier") ? {type: "identifier"} : identifier)], "postprocess": v => v[0]},
     {"name": "regexp$ebnf$1", "symbols": []},
     {"name": "regexp$ebnf$1$subexpression$1", "symbols": ["regexp_flags"]},
@@ -387,6 +389,11 @@ var grammar = {
         		offset: v[0][0].offset,
         	}
         } },
+    {"name": "value", "symbols": ["value", "_", {"literal":"["}, "value", {"literal":"]"}], "postprocess":  v => ({
+        	type: 'item_retraction',
+        	from: v[0],
+        	value: v[3]
+        }) },
     {"name": "value$subexpression$1", "symbols": [{"literal":"new"}]},
     {"name": "value$subexpression$1", "symbols": [{"literal":"await"}]},
     {"name": "value$subexpression$1", "symbols": [{"literal":"yield"}]},
@@ -402,16 +409,13 @@ var grammar = {
         	left: v[0],
         	value: v[4]
         }) },
+    {"name": "value", "symbols": ["boolean"], "postprocess": id},
     {"name": "value", "symbols": [{"literal":"("}, "_", "value", "_", {"literal":")"}], "postprocess":  v => assign(v[2], {
         	type: 'expression_with_parenthesis'
         }) },
     {"name": "value", "symbols": ["expression"], "postprocess": id},
-    {"name": "value", "symbols": ["boolean"], "postprocess": id},
     {"name": "value", "symbols": ["myNull"], "postprocess": id},
     {"name": "value", "symbols": ["annonymous_function"], "postprocess": id},
-    {"name": "value", "symbols": ["html"], "postprocess": id},
-    {"name": "value", "symbols": ["array"], "postprocess": id},
-    {"name": "value", "symbols": ["object"], "postprocess": id},
     {"name": "prefixExp", "symbols": ["identifier"], "postprocess": id},
     {"name": "prefixExp", "symbols": ["function_call"], "postprocess": id},
     {"name": "prefixExp", "symbols": [{"literal":"this"}], "postprocess": id},
@@ -754,8 +758,12 @@ var grammar = {
         	value: v[0].value + v[2].value
         })} },
     {"name": "string_concat", "symbols": [(lexer.has("string") ? {type: "string"} : string)], "postprocess": id},
-    {"name": "boolean", "symbols": [{"literal":"true"}], "postprocess": v => true},
-    {"name": "boolean", "symbols": [{"literal":"false"}], "postprocess": v => false},
+    {"name": "boolean", "symbols": [{"literal":"!"}, "_", "value"], "postprocess":  v => ({
+        	type: 'boolean_reversed',
+        	value: v[2]
+        })},
+    {"name": "boolean", "symbols": [{"literal":"true"}], "postprocess": v => ({type: 'boolean', value: true})},
+    {"name": "boolean", "symbols": [{"literal":"false"}], "postprocess": v => ({type: 'boolean', value: false})},
     {"name": "myNull", "symbols": [{"literal":"null"}], "postprocess":  v => Object.assign(v[0], {
         	type: 'null',
         	value: null

@@ -323,6 +323,9 @@ expression ->  "(" _ expression _ ")" {% v => assign(v[2], {
 	| string {% id %}
 	| number {% id %}
 	| "this" {% id %}
+	| html {% id %}
+	# | array {% id %}
+	| object {% id %}
 # base line
 identifier -> %identifier {% v => v[0] %}
 # /\/(?:\\[bfnrt.+*^$[\]{}|?:]|[^\/\\])*?\//
@@ -442,7 +445,12 @@ object_retraction_ -> (object_retraction | function_call | identifier | value | 
 	# | ("this" | identifier | html | object | number | function_call) {% id %}
 	# | value
 
-value -> ("new" | "await" | "yield" | "typeof") __ value {% v => {
+value -> value _ "[" value "]" {% v => ({
+	type: 'item_retraction',
+	from: v[0],
+	value: v[3]
+}) %}
+	| ("new" | "await" | "yield" | "typeof") __ value {% v => {
 		return assign(v[0][0], {
 			type: v[0][0].text,
 			value: v[2]
@@ -453,6 +461,7 @@ value -> ("new" | "await" | "yield" | "typeof") __ value {% v => {
 		left: v[0],
 		value: v[4]
 	}) %}
+	| boolean {% id %}
 	| "(" _ value _ ")" {% v => assign(v[2], {
 		type: 'expression_with_parenthesis'
 	}) %}
@@ -462,14 +471,10 @@ value -> ("new" | "await" | "yield" | "typeof") __ value {% v => {
 	# | string {% id %}
 	# | obj_retract {% id %}
 	# | ("this" | identifier | html | object | number | function_call) _ "." _ ("this" | identifier | html | object | number | function_call) {% v => v %}
-	| boolean {% id %}
 	| myNull {% id %}
 	# | function_call {% id %}
 	| annonymous_function {% id %}
 	# | identifier {% id %}
-	| html {% id %}
-	| array {% id %}
-	| object {% id %}
 
 prefixExp -> identifier {% id %}
 	| function_call {% id %}
@@ -795,8 +800,12 @@ string_concat -> string_concat __ %string {% v => {
 })} %}
 	| %string {% id %}
 # booleans
-boolean -> "true" {% v => true %}
-	| "false" {% v => false %}
+boolean -> "!" _ value {% v => ({
+	type: 'boolean_reversed',
+	value: v[2]
+})%}
+	| "true" {% v => ({type: 'boolean', value: true}) %}
+	| "false" {% v => ({type: 'boolean', value: false}) %}
 	
 myNull -> "null" {% v => Object.assign(v[0], {
 	type: 'null',

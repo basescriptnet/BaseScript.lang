@@ -120,7 +120,26 @@ try {
 
     // your code below this line!
 
-    let v = "\\a = 10;console.log(a);";
-    eval(globalThis.BS.parse(globalThis.BS.ast(v)));
-    console.log("success");
+    let table = globalThis.BS.Node("table", null, null, null);
+    let possibles = ["X", "O"];
+    let turn = 0;
+    for (const i of range(3)) {
+        let tr = globalThis.BS.Node("tr", null, null, null);
+        for (const j of range(3)) {
+            tr.append(globalThis.BS.Node("td", null, null, null).css({
+                width: "100px",
+                height: "100px",
+                border: "10px solid black",
+                textAlign: "center",
+            }).events({
+                click: function() {
+
+                    this.text(possibles[turn]);
+                    turn = Number(!turn);
+                },
+            }));
+        }
+        table.append(tr);
+    }
+    document.body.append(table);
 })();

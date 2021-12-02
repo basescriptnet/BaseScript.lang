@@ -318,8 +318,17 @@ module.exports = function parse (statements, tmp) {
                 // var BS = require('./index');
                 result += `eval(globalThis.BS.parse(globalThis.BS.ast(${parse(value)})));`;
                 break;
+            case 'item_retraction':
+                result += `${parse(statement.from)}[${parse(value)}]`
+                break;
             case 'break_continue':
                 result += `${value};`;
+                break;
+            case 'boolean_reversed':
+                result += `!${parse(value)}`;
+                break;
+            case 'boolean':
+                result += `${value}`;
                 break;
             case 'echo':
                 let p = parse(value);

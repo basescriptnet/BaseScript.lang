@@ -57,6 +57,7 @@ const lexer = moo.compile({
     eval: '@eval',
     '|': '|',
     '&': '&',
+    '!': '!',
     id: '#',
     asterisk: '*',
     function_name: /[A-Za-z]+/,

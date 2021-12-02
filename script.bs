@@ -1,3 +1,21 @@
-let v = "\a = 10;console.log(a);";
-@eval v;
-console.log('success');
+\table = <table/>;
+\possibles = ['X', 'O'];
+\turn = 0;
+for i of range(3) {
+    \tr = <tr/>;
+    for j of range(3) {
+        tr.append(<td/>.css({
+            width: '100px',
+            height: '100px',
+            border: '10px solid black',
+            textAlign: 'center'
+        }).events({
+            click () {
+                this.text(possibles[turn]);
+                turn = Number(!turn);
+            }
+        }));
+    }
+    table.append(tr);
+}
+document.body.append(table);
