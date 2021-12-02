@@ -319,7 +319,14 @@ module.exports = function parse (statements, tmp) {
                 result += `eval(globalThis.BS.parse(globalThis.BS.ast(${parse(value)})));`;
                 break;
             case 'item_retraction':
-                result += `${parse(statement.from)}[${parse(value)}]`
+                result += `${parse(statement.from)}[${parse(value)}]`;
+                if (statement.arguments) {
+                    var r = [];
+                    for (let i = 0; i < statement.arguments.value.length; i++) {
+                        r.push(parse(statement.arguments.value[i]));
+                    }
+                    result += `(${r.join(',')})`;
+                }
                 break;
             case 'break_continue':
                 result += `${value};`;

@@ -445,11 +445,25 @@ object_retraction_ -> (object_retraction | function_call | identifier | value | 
 	# | ("this" | identifier | html | object | number | function_call) {% id %}
 	# | value
 
-value -> value _ "[" value "]" {% v => ({
-	type: 'item_retraction',
-	from: v[0],
-	value: v[3]
-}) %}
+value -> value _ "[" _ value _ "]" _ arguments {% v => {
+	//debugger
+		return {
+			type: 'item_retraction',
+			arguments: v[8],
+			from: v[0],
+			value: v[4]
+			//identifier: v[0].value
+		}
+	} %}
+	| value _ "[" _ value _ "]" {% v => ({
+		type: 'item_retraction',
+		from: v[0],
+		value: v[4]
+	}) %}
+	| "(" _ value _ ")" {% v => assign(v[2], {
+		type: 'expression_with_parenthesis'
+	}) %}
+	| expression {% id %}
 	| ("new" | "await" | "yield" | "typeof") __ value {% v => {
 		return assign(v[0][0], {
 			type: v[0][0].text,
@@ -462,10 +476,6 @@ value -> value _ "[" value "]" {% v => ({
 		value: v[4]
 	}) %}
 	| boolean {% id %}
-	| "(" _ value _ ")" {% v => assign(v[2], {
-		type: 'expression_with_parenthesis'
-	}) %}
-	| expression {% id %}
 	# | "(" _ switch _ ")" {% v => v[2] %}
 	# | number {% id %}
 	# | string {% id %}
@@ -693,6 +703,14 @@ function_call -> identifier _ arguments {% v => {
 		//identifier: v[0].value
 	})
 } %}
+# 	identifier _ arguments {% v => {
+# 	//debugger
+# 	return Object.assign(v[0], {
+# 		type: 'function_call',
+# 		arguments: v[2],
+# 		//identifier: v[0].value
+# 	})
+# } %}
 # 	| expression _ arguments {% v => {
 # 	//debugger
 # 	return Object.assign(v[0], {

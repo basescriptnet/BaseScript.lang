@@ -389,11 +389,25 @@ var grammar = {
         		offset: v[0][0].offset,
         	}
         } },
-    {"name": "value", "symbols": ["value", "_", {"literal":"["}, "value", {"literal":"]"}], "postprocess":  v => ({
+    {"name": "value", "symbols": ["value", "_", {"literal":"["}, "_", "value", "_", {"literal":"]"}, "_", "arguments"], "postprocess":  v => {
+        //debugger
+        	return {
+        		type: 'item_retraction',
+        		arguments: v[8],
+        		from: v[0],
+        		value: v[4]
+        		//identifier: v[0].value
+        	}
+        } },
+    {"name": "value", "symbols": ["value", "_", {"literal":"["}, "_", "value", "_", {"literal":"]"}], "postprocess":  v => ({
         	type: 'item_retraction',
         	from: v[0],
-        	value: v[3]
+        	value: v[4]
         }) },
+    {"name": "value", "symbols": [{"literal":"("}, "_", "value", "_", {"literal":")"}], "postprocess":  v => assign(v[2], {
+        	type: 'expression_with_parenthesis'
+        }) },
+    {"name": "value", "symbols": ["expression"], "postprocess": id},
     {"name": "value$subexpression$1", "symbols": [{"literal":"new"}]},
     {"name": "value$subexpression$1", "symbols": [{"literal":"await"}]},
     {"name": "value$subexpression$1", "symbols": [{"literal":"yield"}]},
@@ -410,10 +424,6 @@ var grammar = {
         	value: v[4]
         }) },
     {"name": "value", "symbols": ["boolean"], "postprocess": id},
-    {"name": "value", "symbols": [{"literal":"("}, "_", "value", "_", {"literal":")"}], "postprocess":  v => assign(v[2], {
-        	type: 'expression_with_parenthesis'
-        }) },
-    {"name": "value", "symbols": ["expression"], "postprocess": id},
     {"name": "value", "symbols": ["myNull"], "postprocess": id},
     {"name": "value", "symbols": ["annonymous_function"], "postprocess": id},
     {"name": "prefixExp", "symbols": ["identifier"], "postprocess": id},
