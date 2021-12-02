@@ -112,6 +112,9 @@ module.exports = function parse (statements, tmp) {
                     ${parse(statement.value, statement.text)}
                 }`;
                 break;
+            // case 'iife':
+                
+            //     break;
             case 'annonymous_function':
                 var types = [];
                 result += `function ${statement.identifier ? parse(statement.identifier) : ''}`;
@@ -268,7 +271,21 @@ module.exports = function parse (statements, tmp) {
                 result += `${parse(value[0])} ${value[1].value} ${parse(value[2])}`;
                 break;
             case 'expression_with_parenthesis':
-                result += `(${parse(value)})`;
+                if (!statement.arguments) {
+                    result += `(${parse(value)})`;
+                    break;
+                }
+                if (statement.result) {
+                        statement.type = 'annonymous_function';
+                        result += `(${parse(statement)})`;
+                        if (statement.call_arguments) {
+                            var r = [];
+                            for (let i = 0; i < statement.call_arguments.value.length; i++) {
+                                r.push(parse(statement.call_arguments.value[i]));
+                            }
+                            result += `(${r.join(',')})`;
+                        }
+                }
                 break;
             case 'operator':
                 result += value;

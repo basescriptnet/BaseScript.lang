@@ -302,12 +302,16 @@ var_reassign -> identifier _ "=" _ (switch | value) {% v => {
 } %}
 # expressions
 expression ->  "(" _ expression _ ")" {% v => assign(v[2], {
-		type: 'expression_with_parenthesis'
+		type: 'expression_with_parenthesis',
+	}) %}
+	| "(" _ expression _ ")" _ arguments_with_types {% v => assign(v[2], {
+		type: 'expression_with_parenthesis',
 	}) %}
 	| expression _ ("**" | [.+-/*%]) _ expression {% v => ({
 		type: 'expression',
 		value: [v[0], v[2][0], v[4]]
 	}) %}
+	| annonymous_function {% id %}
 	| function_call {% id %}
 	| identifier {% id %}
 	| array {% id %}
@@ -629,13 +633,20 @@ function_declaration -> ("string" | "int" | "float" | "array" | "object" | "func
 	})
 } %}
 
-annonymous_function -> ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
+annonymous_function -> "(" _ annonymous_function _ ")" _ arguments {% v => {
+	return assign(v[2], {
+		type: 'iife',
+		call_arguments: v[6]
+	})
+} %}
+	| ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
 	// console.log(v[0][0].value)
 	return assign(v[0][0], {
 		type: 'annonymous_function',
 		identifier: v[1] ? v[1][1] : '',
 		arguments: v[3],
 		value: v[6] ? v[6].map(i => i[1]) : [],
+		result: v[0][0].text
 		// text is one of the options above: string; int...
 	})
 } %}
@@ -661,6 +672,14 @@ function_call -> identifier _ arguments {% v => {
 		//identifier: v[0].value
 	})
 } %}
+# 	| expression _ arguments {% v => {
+# 	//debugger
+# 	return Object.assign(v[0], {
+# 		type: 'function_call',
+# 		arguments: v[2],
+# 		//identifier: v[0].value
+# 	})
+# } %}
 	# this has a bug. It repeats twice
 	# | identifier __ value {% v => assign(v[0], {
 	# 	type: 'function_call',
@@ -672,9 +691,10 @@ function_call -> identifier _ arguments {% v => {
 	# }) %}
 
 	# | value _ arguments {% v => {
-	# 	return assign(v[0], {
+	# 	return ({
 	# 	type: 'function_call_from_value',
 	# 	arguments: v[2],
+	# 	value: v[0],
 	# }) } %}
 
 arguments -> "(" _ ")" {% v => Object.assign(v[0], {

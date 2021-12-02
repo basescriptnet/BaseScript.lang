@@ -1,19 +1,22 @@
 let id = 100;
 // let r = /hello/;
-let ul =
-<ul id="hello" class="f">
-    <li>"Home"</li>
-    <li style="color: red;">"About us"</li>
-    <li>'Our "Agency"'</li>
-    <li/>
-</ul>;
+// let ul =
+// <ul id="hello" class="f">
+//     <li>"Home"</li>
+//     <li style="color: red;">"About us"</li>
+//     <li>'Our "Agency"'</li>
+//     <li/>
+// </ul>;
 // try {
 //     addEventListener;
 // } catch {
 //     "false";
 // }
-try: fdfdf+fdfd;
+let j = (function () {
+    console.log('hello world');
+})(10, 20);
+// try: fdfdf+fdfd;
 
-with document {
-    body.append(ul);
-}
+// with document {
+//     body.append(ul);
+// }

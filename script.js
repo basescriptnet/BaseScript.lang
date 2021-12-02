@@ -91,16 +91,8 @@
     // your code below this line!
 
     let id = 100;
-    let ul = globalThis.BS.Node("ul", null, null, {
-        id: "hello",
-        class: "f",
-    }, [globalThis.BS.Node("li", null, null, null, ["Home"]), globalThis.BS.Node("li", null, null, {
-        style: "color: red;",
-    }, ["About us"]), globalThis.BS.Node("li", null, null, null, ["Our \"Agency\""]), globalThis.BS.Node("li", null, null, null)]);
-    try {
-        fdfdf + fdfd;
-    } catch (err) {}
-    with(document) {
-        body.append(ul);
-    }
+    let j = (function() {
+
+        console.log("hello world");
+    })(10, 20);
 })();

@@ -316,7 +316,10 @@ var grammar = {
         	}
         } },
     {"name": "expression", "symbols": [{"literal":"("}, "_", "expression", "_", {"literal":")"}], "postprocess":  v => assign(v[2], {
-        	type: 'expression_with_parenthesis'
+        	type: 'expression_with_parenthesis',
+        }) },
+    {"name": "expression", "symbols": [{"literal":"("}, "_", "expression", "_", {"literal":")"}, "_", "arguments_with_types"], "postprocess":  v => assign(v[2], {
+        	type: 'expression_with_parenthesis',
         }) },
     {"name": "expression$subexpression$1", "symbols": [{"literal":"**"}]},
     {"name": "expression$subexpression$1", "symbols": [/[.+-/*%]/]},
@@ -324,6 +327,7 @@ var grammar = {
         	type: 'expression',
         	value: [v[0], v[2][0], v[4]]
         }) },
+    {"name": "expression", "symbols": ["annonymous_function"], "postprocess": id},
     {"name": "expression", "symbols": ["function_call"], "postprocess": id},
     {"name": "expression", "symbols": ["identifier"], "postprocess": id},
     {"name": "expression", "symbols": ["array"], "postprocess": id},
@@ -589,6 +593,12 @@ var grammar = {
         		// text is one of the options above: string; int...
         	})
         } },
+    {"name": "annonymous_function", "symbols": [{"literal":"("}, "_", "annonymous_function", "_", {"literal":")"}, "_", "arguments"], "postprocess":  v => {
+        	return assign(v[2], {
+        		type: 'iife',
+        		call_arguments: v[6]
+        	})
+        } },
     {"name": "annonymous_function$subexpression$1", "symbols": [{"literal":"string"}]},
     {"name": "annonymous_function$subexpression$1", "symbols": [{"literal":"int"}]},
     {"name": "annonymous_function$subexpression$1", "symbols": [{"literal":"float"}]},
@@ -612,6 +622,7 @@ var grammar = {
         		identifier: v[1] ? v[1][1] : '',
         		arguments: v[3],
         		value: v[6] ? v[6].map(i => i[1]) : [],
+        		result: v[0][0].text
         		// text is one of the options above: string; int...
         	})
         } },

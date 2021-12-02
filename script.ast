@@ -43,342 +43,136 @@
         "type": "var_assign",
         "use_let": true,
         "use_const": false,
-        "line": 2,
+        "line": 15,
         "col": 1,
         "value": {
             "type": "var_assign_group",
-            "line": 2,
+            "line": 15,
             "col": 5,
             "value": [
                 {
                     "type": "var_reassign",
                     "identifier": {
                         "type": "identifier",
-                        "value": "ul",
-                        "text": "ul",
-                        "offset": 19,
+                        "value": "j",
+                        "text": "j",
+                        "offset": 285,
                         "lineBreaks": 0,
-                        "line": 2,
+                        "line": 15,
                         "col": 5
                     },
-                    "line": 2,
+                    "line": 15,
                     "col": 5,
                     "value": {
-                        "type": "html_expression",
+                        "type": "expression_with_parenthesis",
                         "value": [
-                            [
-                                "",
-                                {
-                                    "type": "html_expression",
+                            {
+                                "type": "statement_value",
+                                "value": {
+                                    "type": "expression",
                                     "value": [
-                                        [
-                                            "",
-                                            {
-                                                "type": "string",
-                                                "value": "Home",
-                                                "text": "\"Home\"",
-                                                "offset": 60,
-                                                "lineBreaks": 0,
-                                                "line": 4,
-                                                "col": 9
-                                            }
-                                        ]
-                                    ],
-                                    "text": "li",
-                                    "offset": 57,
-                                    "lineBreaks": 0,
-                                    "line": 4,
-                                    "col": 6,
-                                    "opening_tag": "li",
-                                    "closing_tag": "li",
-                                    "attributes": []
-                                }
-                            ],
-                            [
-                                "",
-                                {
-                                    "type": "html_expression",
-                                    "value": [
-                                        [
-                                            "",
-                                            {
-                                                "type": "string",
-                                                "value": "About us",
-                                                "text": "\"About us\"",
-                                                "offset": 101,
-                                                "lineBreaks": 0,
-                                                "line": 5,
-                                                "col": 29
-                                            }
-                                        ]
-                                    ],
-                                    "text": "li",
-                                    "offset": 78,
-                                    "lineBreaks": 0,
-                                    "line": 5,
-                                    "col": 6,
-                                    "opening_tag": "li",
-                                    "closing_tag": "li",
-                                    "attributes": [
                                         {
-                                            "type": "var_reassign",
-                                            "identifier": {
-                                                "type": "identifier",
-                                                "value": "style",
-                                                "text": "style",
-                                                "offset": 81,
+                                            "type": "identifier",
+                                            "value": "console",
+                                            "text": "console",
+                                            "offset": 309,
+                                            "lineBreaks": 0,
+                                            "line": 16,
+                                            "col": 5
+                                        },
+                                        {
+                                            "type": "period",
+                                            "value": ".",
+                                            "text": ".",
+                                            "offset": 316,
+                                            "lineBreaks": 0,
+                                            "line": 16,
+                                            "col": 12
+                                        },
+                                        {
+                                            "type": "function_call",
+                                            "value": "log",
+                                            "text": "log",
+                                            "offset": 317,
+                                            "lineBreaks": 0,
+                                            "line": 16,
+                                            "col": 13,
+                                            "arguments": {
+                                                "type": "arguments",
+                                                "value": [
+                                                    {
+                                                        "type": "string",
+                                                        "value": "hello world",
+                                                        "text": "'hello world'",
+                                                        "offset": 321,
+                                                        "lineBreaks": 0,
+                                                        "line": 16,
+                                                        "col": 17
+                                                    }
+                                                ],
+                                                "offset": 320,
                                                 "lineBreaks": 0,
-                                                "line": 5,
-                                                "col": 9
-                                            },
-                                            "line": 5,
-                                            "col": 9,
-                                            "value": {
-                                                "type": "string",
-                                                "value": "color: red;",
-                                                "text": "\"color: red;\"",
-                                                "offset": 87,
-                                                "lineBreaks": 0,
-                                                "line": 5,
-                                                "col": 15
-                                            },
-                                            "offset": 81
+                                                "line": 16,
+                                                "col": 16
+                                            }
                                         }
                                     ]
                                 }
-                            ],
-                            [
-                                "",
-                                {
-                                    "type": "html_expression",
-                                    "value": [
-                                        [
-                                            "",
-                                            {
-                                                "type": "string",
-                                                "value": "Our \"Agency\"",
-                                                "text": "'Our \"Agency\"'",
-                                                "offset": 126,
-                                                "lineBreaks": 0,
-                                                "line": 6,
-                                                "col": 9
-                                            }
-                                        ]
-                                    ],
-                                    "text": "li",
-                                    "offset": 123,
-                                    "lineBreaks": 0,
-                                    "line": 6,
-                                    "col": 6,
-                                    "opening_tag": "li",
-                                    "closing_tag": "li",
-                                    "attributes": []
-                                }
-                            ],
-                            [
-                                "",
-                                {
-                                    "type": "html",
-                                    "value": {
-                                        "type": "identifier",
-                                        "value": "li",
-                                        "text": "li",
-                                        "offset": 152,
-                                        "lineBreaks": 0,
-                                        "line": 7,
-                                        "col": 6
-                                    },
-                                    "text": "<",
-                                    "offset": 151,
-                                    "lineBreaks": 0,
-                                    "line": 7,
-                                    "col": 5,
-                                    "id": null,
-                                    "classList": null
-                                }
-                            ]
-                        ],
-                        "text": "ul",
-                        "offset": 26,
-                        "lineBreaks": 0,
-                        "line": 3,
-                        "col": 2,
-                        "opening_tag": "ul",
-                        "closing_tag": "ul",
-                        "attributes": [
-                            {
-                                "type": "var_reassign",
-                                "identifier": {
-                                    "type": "identifier",
-                                    "value": "id",
-                                    "text": "id",
-                                    "offset": 29,
-                                    "lineBreaks": 0,
-                                    "line": 3,
-                                    "col": 5
-                                },
-                                "line": 3,
-                                "col": 5,
-                                "value": {
-                                    "type": "string",
-                                    "value": "hello",
-                                    "text": "\"hello\"",
-                                    "offset": 32,
-                                    "lineBreaks": 0,
-                                    "line": 3,
-                                    "col": 8
-                                },
-                                "offset": 29
-                            },
-                            {
-                                "type": "var_reassign",
-                                "identifier": {
-                                    "type": "identifier",
-                                    "value": "class",
-                                    "text": "class",
-                                    "offset": 40,
-                                    "lineBreaks": 0,
-                                    "line": 3,
-                                    "col": 16
-                                },
-                                "line": 3,
-                                "col": 16,
-                                "value": {
-                                    "type": "string",
-                                    "value": "f",
-                                    "text": "\"f\"",
-                                    "offset": 46,
-                                    "lineBreaks": 0,
-                                    "line": 3,
-                                    "col": 22
-                                },
-                                "offset": 40
                             }
-                        ]
+                        ],
+                        "text": "function",
+                        "offset": 290,
+                        "lineBreaks": 0,
+                        "line": 15,
+                        "col": 10,
+                        "identifier": "",
+                        "arguments": {
+                            "type": "arguments_with_types",
+                            "value": [],
+                            "text": "(",
+                            "offset": 299,
+                            "lineBreaks": 0,
+                            "line": 15,
+                            "col": 19
+                        },
+                        "result": "function",
+                        "call_arguments": {
+                            "type": "arguments_with_types",
+                            "value": [
+                                {
+                                    "type": "number",
+                                    "value": "10",
+                                    "text": "10",
+                                    "offset": 341,
+                                    "lineBreaks": 0,
+                                    "line": 17,
+                                    "col": 4
+                                },
+                                {
+                                    "type": "number",
+                                    "value": "20",
+                                    "text": "20",
+                                    "offset": 345,
+                                    "lineBreaks": 0,
+                                    "line": 17,
+                                    "col": 8
+                                }
+                            ],
+                            "offset": 340,
+                            "lineBreaks": 0,
+                            "line": 17,
+                            "col": 3,
+                            "types": [
+                                "none",
+                                "none"
+                            ]
+                        }
                     },
-                    "offset": 19
+                    "offset": 285
                 }
             ],
-            "offset": 19
+            "offset": 285
         },
-        "offset": 15
-    },
-    {
-        "type": "try_catch_finally",
-        "value": {
-            "type": "try_catch",
-            "value": {
-                "type": "try",
-                "value": {
-                    "type": "statement_value",
-                    "value": {
-                        "type": "expression",
-                        "value": [
-                            {
-                                "type": "identifier",
-                                "value": "fdfdf",
-                                "text": "fdfdf",
-                                "offset": 244,
-                                "lineBreaks": 0,
-                                "line": 14,
-                                "col": 6
-                            },
-                            {
-                                "type": "operator",
-                                "value": "+",
-                                "text": "+",
-                                "offset": 249,
-                                "lineBreaks": 0,
-                                "line": 14,
-                                "col": 11
-                            },
-                            {
-                                "type": "identifier",
-                                "value": "fdfd",
-                                "text": "fdfd",
-                                "offset": 250,
-                                "lineBreaks": 0,
-                                "line": 14,
-                                "col": 12
-                            }
-                        ]
-                    }
-                }
-            },
-            "catch": null
-        },
-        "finally": null
-    },
-    {
-        "type": "with",
-        "value": [
-            {
-                "type": "statement_value",
-                "value": {
-                    "type": "expression",
-                    "value": [
-                        {
-                            "type": "identifier",
-                            "value": "body",
-                            "text": "body",
-                            "offset": 280,
-                            "lineBreaks": 0,
-                            "line": 17,
-                            "col": 5
-                        },
-                        {
-                            "type": "period",
-                            "value": ".",
-                            "text": ".",
-                            "offset": 284,
-                            "lineBreaks": 0,
-                            "line": 17,
-                            "col": 9
-                        },
-                        {
-                            "type": "function_call",
-                            "value": "append",
-                            "text": "append",
-                            "offset": 285,
-                            "lineBreaks": 0,
-                            "line": 17,
-                            "col": 10,
-                            "arguments": {
-                                "type": "arguments",
-                                "value": [
-                                    {
-                                        "type": "identifier",
-                                        "value": "ul",
-                                        "text": "ul",
-                                        "offset": 292,
-                                        "lineBreaks": 0,
-                                        "line": 17,
-                                        "col": 17
-                                    }
-                                ],
-                                "offset": 291,
-                                "lineBreaks": 0,
-                                "line": 17,
-                                "col": 16
-                            }
-                        }
-                    ]
-                }
-            }
-        ],
-        "text": "with",
-        "offset": 259,
-        "lineBreaks": 0,
-        "line": 16,
-        "col": 1,
-        "obj": {
-            "type": "identifier",
-            "value": "document",
-            "text": "document",
-            "offset": 264,
-            "lineBreaks": 0,
-            "line": 16,
-            "col": 6
-        }
+        "offset": 281
     }
 ]
