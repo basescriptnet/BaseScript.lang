@@ -288,7 +288,7 @@
                                                                                 "width": {
                                                                                     "type": "string",
                                                                                     "value": "100px",
-                                                                                    "text": "'100px'",
+                                                                                    "text": "100",
                                                                                     "offset": 172,
                                                                                     "lineBreaks": 0,
                                                                                     "line": 8,
@@ -297,8 +297,8 @@
                                                                                 "height": {
                                                                                     "type": "string",
                                                                                     "value": "100px",
-                                                                                    "text": "'100px'",
-                                                                                    "offset": 202,
+                                                                                    "text": "100",
+                                                                                    "offset": 200,
                                                                                     "lineBreaks": 0,
                                                                                     "line": 9,
                                                                                     "col": 21
@@ -307,7 +307,7 @@
                                                                                     "type": "string",
                                                                                     "value": "10px solid black",
                                                                                     "text": "'10px solid black'",
-                                                                                    "offset": 232,
+                                                                                    "offset": 228,
                                                                                     "lineBreaks": 0,
                                                                                     "line": 10,
                                                                                     "col": 21
@@ -316,7 +316,7 @@
                                                                                     "type": "string",
                                                                                     "value": "center",
                                                                                     "text": "'center'",
-                                                                                    "offset": 276,
+                                                                                    "offset": 272,
                                                                                     "lineBreaks": 0,
                                                                                     "line": 11,
                                                                                     "col": 24
@@ -338,7 +338,7 @@
                                                                 "type": "period",
                                                                 "value": ".",
                                                                 "text": ".",
-                                                                "offset": 296,
+                                                                "offset": 292,
                                                                 "lineBreaks": 0,
                                                                 "line": 12,
                                                                 "col": 11
@@ -347,7 +347,7 @@
                                                                 "type": "function_call",
                                                                 "value": "events",
                                                                 "text": "events",
-                                                                "offset": 297,
+                                                                "offset": 293,
                                                                 "lineBreaks": 0,
                                                                 "line": 12,
                                                                 "col": 12,
@@ -369,7 +369,7 @@
                                                                                                         "type": "keyword",
                                                                                                         "value": "this",
                                                                                                         "text": "this",
-                                                                                                        "offset": 347,
+                                                                                                        "offset": 343,
                                                                                                         "lineBreaks": 0,
                                                                                                         "line": 14,
                                                                                                         "col": 17
@@ -378,7 +378,7 @@
                                                                                                         "type": "period",
                                                                                                         "value": ".",
                                                                                                         "text": ".",
-                                                                                                        "offset": 351,
+                                                                                                        "offset": 347,
                                                                                                         "lineBreaks": 0,
                                                                                                         "line": 14,
                                                                                                         "col": 21
@@ -387,7 +387,7 @@
                                                                                                         "type": "function_call",
                                                                                                         "value": "text",
                                                                                                         "text": "text",
-                                                                                                        "offset": 352,
+                                                                                                        "offset": 348,
                                                                                                         "lineBreaks": 0,
                                                                                                         "line": 14,
                                                                                                         "col": 22,
@@ -400,7 +400,7 @@
                                                                                                                         "type": "identifier",
                                                                                                                         "value": "possibles",
                                                                                                                         "text": "possibles",
-                                                                                                                        "offset": 357,
+                                                                                                                        "offset": 353,
                                                                                                                         "lineBreaks": 0,
                                                                                                                         "line": 14,
                                                                                                                         "col": 27
@@ -409,14 +409,14 @@
                                                                                                                         "type": "identifier",
                                                                                                                         "value": "turn",
                                                                                                                         "text": "turn",
-                                                                                                                        "offset": 367,
+                                                                                                                        "offset": 363,
                                                                                                                         "lineBreaks": 0,
                                                                                                                         "line": 14,
                                                                                                                         "col": 37
                                                                                                                     }
                                                                                                                 }
                                                                                                             ],
-                                                                                                            "offset": 356,
+                                                                                                            "offset": 352,
                                                                                                             "lineBreaks": 0,
                                                                                                             "line": 14,
                                                                                                             "col": 26
@@ -433,7 +433,7 @@
                                                                                                     "type": "identifier",
                                                                                                     "value": "turn",
                                                                                                     "text": "turn",
-                                                                                                    "offset": 392,
+                                                                                                    "offset": 388,
                                                                                                     "lineBreaks": 0,
                                                                                                     "line": 15,
                                                                                                     "col": 17
@@ -444,7 +444,7 @@
                                                                                                     "type": "function_call",
                                                                                                     "value": "Number",
                                                                                                     "text": "Number",
-                                                                                                    "offset": 399,
+                                                                                                    "offset": 395,
                                                                                                     "lineBreaks": 0,
                                                                                                     "line": 15,
                                                                                                     "col": 24,
@@ -457,28 +457,28 @@
                                                                                                                     "type": "identifier",
                                                                                                                     "value": "turn",
                                                                                                                     "text": "turn",
-                                                                                                                    "offset": 407,
+                                                                                                                    "offset": 403,
                                                                                                                     "lineBreaks": 0,
                                                                                                                     "line": 15,
                                                                                                                     "col": 32
                                                                                                                 }
                                                                                                             }
                                                                                                         ],
-                                                                                                        "offset": 405,
+                                                                                                        "offset": 401,
                                                                                                         "lineBreaks": 0,
                                                                                                         "line": 15,
                                                                                                         "col": 30
                                                                                                     }
                                                                                                 },
-                                                                                                "offset": 392
+                                                                                                "offset": 388
                                                                                             },
                                                                                             "line": 15,
                                                                                             "col": 17,
-                                                                                            "offset": 392
+                                                                                            "offset": 388
                                                                                         }
                                                                                     ],
                                                                                     "text": "click",
-                                                                                    "offset": 319,
+                                                                                    "offset": 315,
                                                                                     "lineBreaks": 0,
                                                                                     "line": 13,
                                                                                     "col": 13,
@@ -486,20 +486,20 @@
                                                                                         "type": "arguments",
                                                                                         "value": [],
                                                                                         "text": "(",
-                                                                                        "offset": 325,
+                                                                                        "offset": 321,
                                                                                         "lineBreaks": 0,
                                                                                         "line": 13,
                                                                                         "col": 19
                                                                                     }
                                                                                 }
                                                                             },
-                                                                            "offset": 304,
+                                                                            "offset": 300,
                                                                             "lineBreaks": 0,
                                                                             "line": 12,
                                                                             "col": 19
                                                                         }
                                                                     ],
-                                                                    "offset": 303,
+                                                                    "offset": 299,
                                                                     "lineBreaks": 0,
                                                                     "line": 12,
                                                                     "col": 18
@@ -572,7 +572,7 @@
                             "type": "identifier",
                             "value": "table",
                             "text": "table",
-                            "offset": 455,
+                            "offset": 451,
                             "lineBreaks": 0,
                             "line": 19,
                             "col": 5
@@ -581,7 +581,7 @@
                             "type": "period",
                             "value": ".",
                             "text": ".",
-                            "offset": 460,
+                            "offset": 456,
                             "lineBreaks": 0,
                             "line": 19,
                             "col": 10
@@ -590,7 +590,7 @@
                             "type": "function_call",
                             "value": "append",
                             "text": "append",
-                            "offset": 461,
+                            "offset": 457,
                             "lineBreaks": 0,
                             "line": 19,
                             "col": 11,
@@ -601,13 +601,13 @@
                                         "type": "identifier",
                                         "value": "tr",
                                         "text": "tr",
-                                        "offset": 468,
+                                        "offset": 464,
                                         "lineBreaks": 0,
                                         "line": 19,
                                         "col": 18
                                     }
                                 ],
-                                "offset": 467,
+                                "offset": 463,
                                 "lineBreaks": 0,
                                 "line": 19,
                                 "col": 17
@@ -672,7 +672,7 @@
                             "type": "identifier",
                             "value": "document",
                             "text": "document",
-                            "offset": 477,
+                            "offset": 473,
                             "lineBreaks": 0,
                             "line": 21,
                             "col": 1
@@ -681,7 +681,7 @@
                             "type": "period",
                             "value": ".",
                             "text": ".",
-                            "offset": 485,
+                            "offset": 481,
                             "lineBreaks": 0,
                             "line": 21,
                             "col": 9
@@ -690,7 +690,7 @@
                             "type": "identifier",
                             "value": "body",
                             "text": "body",
-                            "offset": 486,
+                            "offset": 482,
                             "lineBreaks": 0,
                             "line": 21,
                             "col": 10
@@ -701,7 +701,7 @@
                     "type": "period",
                     "value": ".",
                     "text": ".",
-                    "offset": 490,
+                    "offset": 486,
                     "lineBreaks": 0,
                     "line": 21,
                     "col": 14
@@ -710,7 +710,7 @@
                     "type": "function_call",
                     "value": "append",
                     "text": "append",
-                    "offset": 491,
+                    "offset": 487,
                     "lineBreaks": 0,
                     "line": 21,
                     "col": 15,
@@ -721,13 +721,13 @@
                                 "type": "identifier",
                                 "value": "table",
                                 "text": "table",
-                                "offset": 498,
+                                "offset": 494,
                                 "lineBreaks": 0,
                                 "line": 21,
                                 "col": 22
                             }
                         ],
-                        "offset": 497,
+                        "offset": 493,
                         "lineBreaks": 0,
                         "line": 21,
                         "col": 21

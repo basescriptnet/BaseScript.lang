@@ -5,8 +5,8 @@ for i of range(3) {
     \tr = <tr/>;
     for j of range(3) {
         tr.append(<td/>.css({
-            width: '100px',
-            height: '100px',
+            width: 100px,
+            height: 100px,
             border: '10px solid black',
             textAlign: 'center'
         }).events({

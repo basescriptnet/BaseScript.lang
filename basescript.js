@@ -763,6 +763,10 @@ var grammar = {
         	});
         } },
     {"name": "string", "symbols": ["string_concat"], "postprocess": id},
+    {"name": "string", "symbols": ["number", {"literal":"px"}], "postprocess":  v => assign(v[0], {
+        	type: 'string',
+        	value: v[0].value + 'px'
+        }) },
     {"name": "string_concat", "symbols": ["string_concat", "__", (lexer.has("string") ? {type: "string"} : string)], "postprocess":  v => {
         	return Object.assign(v[0], {
         	value: v[0].value + v[2].value

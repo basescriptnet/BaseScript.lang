@@ -811,6 +811,10 @@ string -> string _ "[" _ number _ ":" ":":? _ number _ "]" {% v => {
 		});
 	} %}
 	| string_concat {% id %}
+	| number "px" {% v => assign(v[0], {
+		type: 'string',
+		value: v[0].value + 'px'
+	}) %}
 	
 string_concat -> string_concat __ %string {% v => {
 	return Object.assign(v[0], {

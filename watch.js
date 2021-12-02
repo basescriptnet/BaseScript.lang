@@ -101,7 +101,7 @@ function watch (space = 4) {
                 // `; //require('./built_in.js');
                 let date = Date.now();
                 var content = parse(JSON.parse(ast));
-                console.log(Date.now() - date);
+                console.log('Compiled in ' + (Date.now() - date) + 'ms');
                 let built_in = fs.readFileSync('./built_in.js');
                 fs.writeFileSync(
                     `${fileName}.js`,
