@@ -216,6 +216,14 @@ condition -> condition __ ("and" | "or") __ condition {% v => {
 		col: v[0].col,
 	}
 } %}
+	# | "(" _ condition _ ")" {% v => ({
+	# 		type: 'condition',
+	# 		value: v[2].value,
+	# 		line: v[0].line,
+	# 		lineBreaks: v[0].lineBreaks,
+	# 		offset: v[0].offset,
+	# 		col: v[0].col,
+	# 	}) %}
 	| value _ comparision_operators _ value {% v => {
 		return {
 			type: 'condition',
@@ -305,11 +313,14 @@ var_reassign -> identifier _ "=" _ (switch | value) {% v => {
 	}
 } %}
 # expressions
-expression ->  "(" _ expression _ ")" {% v => assign(v[2], {
+expression ->  "(" _ expression _ ")" {% v => ({
 		type: 'expression_with_parenthesis',
+		value: v[2]
 	}) %}
-	| "(" _ expression _ ")" _ arguments_with_types {% v => assign(v[2], {
+	| "(" _ expression _ ")" _ arguments_with_types {% v => ({
 		type: 'expression_with_parenthesis',
+		value: v[2],
+		arguments: v[6]
 	}) %}
 	| expression _ ("**" | [.+-/*%]) _ expression {% v => ({
 		type: 'expression',
@@ -460,8 +471,9 @@ value -> value _ "[" _ value _ "]" _ arguments {% v => {
 		from: v[0],
 		value: v[4]
 	}) %}
-	| "(" _ value _ ")" {% v => assign(v[2], {
-		type: 'expression_with_parenthesis'
+	| "(" _ value _ ")" {% v => ({
+		type: 'expression_with_parenthesis',
+		value: v[2]
 	}) %}
 	| expression {% id %}
 	| ("new" | "await" | "yield" | "typeof") __ value {% v => {
@@ -513,12 +525,12 @@ html -> opening_tag (_ html_content):* _ closing_tag {% v => {
 		attributes: v[0][1]
 	})
 } %}
-	| html __ "with" __ "elements" __ value {% v => {
-		return assign(v[0], {
-			type: 'html',
-			elements: v[6]
-		})
-	} %}
+	# | html __ "with" __ "elements" __ value {% v => {
+	# 	return assign(v[0], {
+	# 		type: 'html',
+	# 		elements: v[6]
+	# 	})
+	# } %}
 | "<" identifier ("#" identifier):? ("." identifier):* "/" ">" {% v => {
 	return assign(v[0], {
 		type: 'html',
@@ -527,7 +539,7 @@ html -> opening_tag (_ html_content):* _ closing_tag {% v => {
 		classList: v[3].length ? v[3].map(i => i[1]) : null
 	})
 } %}
-	| "text" __ value {% v => assign(v[0], {
+	| "@text" __ value {% v => assign(v[0], {
 		type: 'html_text',
 		value: v[2]
 	}) %}
@@ -636,10 +648,11 @@ object -> "{" _ "}" {% v => {
 		});
 	} %}
 
-pair -> key _ arguments _ statements_block {% v => assign(v[0], {
+pair -> ("async" __):? key _ arguments _ statements_block {% v => assign(v[1], {
 		type: 'annonymous_function',
-		arguments: v[2],
-		value: v[4],
+		arguments: v[3],
+		value: v[5],
+		async: v[0] ? true : false
 		// .text is the key
 	}) %}
 	| key _ ":" _ value {% v => [v[0], v[4]] %}
@@ -653,31 +666,34 @@ key -> string {% id %}
 	| identifier {% id %}
 
 # functions
-function_declaration -> ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") __ identifier _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
+function_declaration -> ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") __ identifier _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
 	// console.log(v[0][0].value)
-	return assign(v[0][0], {
+	return assign(v[1][0], {
 		type: 'function_declaration',
-		identifier: v[2],
-		arguments: v[4],
-		value: v[7] ? v[7].map(i => i[1]) : [],
+		identifier: v[3],
+		arguments: v[5],
+		value: v[8] ? v[8].map(i => i[1]) : [],
+		async: v[0] ? true : false
 		// text is one of the options above: string; int...
 	})
 } %}
 
 annonymous_function -> "(" _ annonymous_function _ ")" _ arguments {% v => {
-	return assign(v[2], {
+	return ({
 		type: 'iife',
-		call_arguments: v[6]
+		value: v[2],
+		call_arguments: v[6],
 	})
 } %}
-	| ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
+	| ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
 	// console.log(v[0][0].value)
-	return assign(v[0][0], {
+	return assign(v[1][0], {
 		type: 'annonymous_function',
-		identifier: v[1] ? v[1][1] : '',
-		arguments: v[3],
-		value: v[6] ? v[6].map(i => i[1]) : [],
-		result: v[0][0].text
+		identifier: v[2] ? v[2][1] : '',
+		arguments: v[4],
+		value: v[7] ? v[7].map(i => i[1]) : [],
+		result: v[1][0].text,
+		async: v[0] ? true : false
 		// text is one of the options above: string; int...
 	})
 } %}

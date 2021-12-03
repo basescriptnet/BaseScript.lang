@@ -92,7 +92,7 @@ module.exports = function parse (statements, tmp) {
                 break;
             case 'function_declaration':
                 var types = [];
-                result += `function ${parse(statement.identifier)}`;
+                result += `${statement.async ? 'async ' : ''}function ${parse(statement.identifier)}`;
                 var sav = statement.arguments.value;
                 for (let i = 0; i < sav.length; i++) {
                     r.push(parse(sav[i], tmp));
@@ -119,12 +119,14 @@ module.exports = function parse (statements, tmp) {
                     ${parse(statement.value, statement.text)}
                 }`;
                 break;
-            // case 'iife':
-                
-            //     break;
+            case 'iife':
+                // debugger
+                // statement.type = 'annonymous_function'
+                result += `(${parse(value)})(${statement.call_arguments.value.map(i => parse(i)).join(',')})`;
+                break;
             case 'annonymous_function':
                 var types = [];
-                result += `function ${statement.identifier ? parse(statement.identifier) : ''}`;
+                result += `${statement.async ? 'async ' : ''}function ${statement.identifier ? parse(statement.identifier) : ''}`;
                 var sav = statement.arguments.value;
                 for (let i = 0; i < sav.length; i++) {
                     r.push(parse(sav[i], tmp));

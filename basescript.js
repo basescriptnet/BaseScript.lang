@@ -320,11 +320,14 @@ var grammar = {
         		offset: v[0].offset
         	}
         } },
-    {"name": "expression", "symbols": [{"literal":"("}, "_", "expression", "_", {"literal":")"}], "postprocess":  v => assign(v[2], {
+    {"name": "expression", "symbols": [{"literal":"("}, "_", "expression", "_", {"literal":")"}], "postprocess":  v => ({
         	type: 'expression_with_parenthesis',
+        	value: v[2]
         }) },
-    {"name": "expression", "symbols": [{"literal":"("}, "_", "expression", "_", {"literal":")"}, "_", "arguments_with_types"], "postprocess":  v => assign(v[2], {
+    {"name": "expression", "symbols": [{"literal":"("}, "_", "expression", "_", {"literal":")"}, "_", "arguments_with_types"], "postprocess":  v => ({
         	type: 'expression_with_parenthesis',
+        	value: v[2],
+        	arguments: v[6]
         }) },
     {"name": "expression$subexpression$1", "symbols": [{"literal":"**"}]},
     {"name": "expression$subexpression$1", "symbols": [/[.+-/*%]/]},
@@ -404,8 +407,9 @@ var grammar = {
         	from: v[0],
         	value: v[4]
         }) },
-    {"name": "value", "symbols": [{"literal":"("}, "_", "value", "_", {"literal":")"}], "postprocess":  v => assign(v[2], {
-        	type: 'expression_with_parenthesis'
+    {"name": "value", "symbols": [{"literal":"("}, "_", "value", "_", {"literal":")"}], "postprocess":  v => ({
+        	type: 'expression_with_parenthesis',
+        	value: v[2]
         }) },
     {"name": "value", "symbols": ["expression"], "postprocess": id},
     {"name": "value$subexpression$1", "symbols": [{"literal":"new"}]},
@@ -458,12 +462,6 @@ var grammar = {
         		attributes: v[0][1]
         	})
         } },
-    {"name": "html", "symbols": ["html", "__", {"literal":"with"}, "__", {"literal":"elements"}, "__", "value"], "postprocess":  v => {
-        	return assign(v[0], {
-        		type: 'html',
-        		elements: v[6]
-        	})
-        } },
     {"name": "html$ebnf$2$subexpression$1", "symbols": [{"literal":"#"}, "identifier"]},
     {"name": "html$ebnf$2", "symbols": ["html$ebnf$2$subexpression$1"], "postprocess": id},
     {"name": "html$ebnf$2", "symbols": [], "postprocess": function(d) {return null;}},
@@ -478,7 +476,7 @@ var grammar = {
         		classList: v[3].length ? v[3].map(i => i[1]) : null
         	})
         } },
-    {"name": "html", "symbols": [{"literal":"text"}, "__", "value"], "postprocess":  v => assign(v[0], {
+    {"name": "html", "symbols": [{"literal":"@text"}, "__", "value"], "postprocess":  v => assign(v[0], {
         	type: 'html_text',
         	value: v[2]
         }) },
@@ -592,15 +590,22 @@ var grammar = {
         		value: output
         	});
         } },
-    {"name": "pair", "symbols": ["key", "_", "arguments", "_", "statements_block"], "postprocess":  v => assign(v[0], {
+    {"name": "pair$ebnf$1$subexpression$1", "symbols": [{"literal":"async"}, "__"]},
+    {"name": "pair$ebnf$1", "symbols": ["pair$ebnf$1$subexpression$1"], "postprocess": id},
+    {"name": "pair$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "pair", "symbols": ["pair$ebnf$1", "key", "_", "arguments", "_", "statements_block"], "postprocess":  v => assign(v[1], {
         	type: 'annonymous_function',
-        	arguments: v[2],
-        	value: v[4],
+        	arguments: v[3],
+        	value: v[5],
+        	async: v[0] ? true : false
         	// .text is the key
         }) },
     {"name": "pair", "symbols": ["key", "_", {"literal":":"}, "_", "value"], "postprocess": v => [v[0], v[4]]},
     {"name": "key", "symbols": ["string"], "postprocess": id},
     {"name": "key", "symbols": ["identifier"], "postprocess": id},
+    {"name": "function_declaration$ebnf$1$subexpression$1", "symbols": [{"literal":"async"}, "__"]},
+    {"name": "function_declaration$ebnf$1", "symbols": ["function_declaration$ebnf$1$subexpression$1"], "postprocess": id},
+    {"name": "function_declaration$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "function_declaration$subexpression$1", "symbols": [{"literal":"string"}]},
     {"name": "function_declaration$subexpression$1", "symbols": [{"literal":"int"}]},
     {"name": "function_declaration$subexpression$1", "symbols": [{"literal":"float"}]},
@@ -610,26 +615,31 @@ var grammar = {
     {"name": "function_declaration$subexpression$1", "symbols": [{"literal":"symbol"}]},
     {"name": "function_declaration$subexpression$1", "symbols": [{"literal":"null"}]},
     {"name": "function_declaration$subexpression$1", "symbols": [{"literal":"number"}]},
-    {"name": "function_declaration$ebnf$1", "symbols": []},
-    {"name": "function_declaration$ebnf$1$subexpression$1", "symbols": ["_", "statement"]},
-    {"name": "function_declaration$ebnf$1$subexpression$1", "symbols": ["_", "return"]},
-    {"name": "function_declaration$ebnf$1", "symbols": ["function_declaration$ebnf$1", "function_declaration$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "function_declaration", "symbols": ["function_declaration$subexpression$1", "__", "identifier", "_", "arguments_with_types", "_", {"literal":"{"}, "function_declaration$ebnf$1", "_", {"literal":"}"}], "postprocess":  v => {
+    {"name": "function_declaration$ebnf$2", "symbols": []},
+    {"name": "function_declaration$ebnf$2$subexpression$1", "symbols": ["_", "statement"]},
+    {"name": "function_declaration$ebnf$2$subexpression$1", "symbols": ["_", "return"]},
+    {"name": "function_declaration$ebnf$2", "symbols": ["function_declaration$ebnf$2", "function_declaration$ebnf$2$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "function_declaration", "symbols": ["function_declaration$ebnf$1", "function_declaration$subexpression$1", "__", "identifier", "_", "arguments_with_types", "_", {"literal":"{"}, "function_declaration$ebnf$2", "_", {"literal":"}"}], "postprocess":  v => {
         	// console.log(v[0][0].value)
-        	return assign(v[0][0], {
+        	return assign(v[1][0], {
         		type: 'function_declaration',
-        		identifier: v[2],
-        		arguments: v[4],
-        		value: v[7] ? v[7].map(i => i[1]) : [],
+        		identifier: v[3],
+        		arguments: v[5],
+        		value: v[8] ? v[8].map(i => i[1]) : [],
+        		async: v[0] ? true : false
         		// text is one of the options above: string; int...
         	})
         } },
     {"name": "annonymous_function", "symbols": [{"literal":"("}, "_", "annonymous_function", "_", {"literal":")"}, "_", "arguments"], "postprocess":  v => {
-        	return assign(v[2], {
+        	return ({
         		type: 'iife',
-        		call_arguments: v[6]
+        		value: v[2],
+        		call_arguments: v[6],
         	})
         } },
+    {"name": "annonymous_function$ebnf$1$subexpression$1", "symbols": [{"literal":"async"}, "__"]},
+    {"name": "annonymous_function$ebnf$1", "symbols": ["annonymous_function$ebnf$1$subexpression$1"], "postprocess": id},
+    {"name": "annonymous_function$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "annonymous_function$subexpression$1", "symbols": [{"literal":"string"}]},
     {"name": "annonymous_function$subexpression$1", "symbols": [{"literal":"int"}]},
     {"name": "annonymous_function$subexpression$1", "symbols": [{"literal":"float"}]},
@@ -639,21 +649,22 @@ var grammar = {
     {"name": "annonymous_function$subexpression$1", "symbols": [{"literal":"symbol"}]},
     {"name": "annonymous_function$subexpression$1", "symbols": [{"literal":"null"}]},
     {"name": "annonymous_function$subexpression$1", "symbols": [{"literal":"number"}]},
-    {"name": "annonymous_function$ebnf$1$subexpression$1", "symbols": ["__", "identifier"]},
-    {"name": "annonymous_function$ebnf$1", "symbols": ["annonymous_function$ebnf$1$subexpression$1"], "postprocess": id},
-    {"name": "annonymous_function$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "annonymous_function$ebnf$2", "symbols": []},
-    {"name": "annonymous_function$ebnf$2$subexpression$1", "symbols": ["_", "statement"]},
-    {"name": "annonymous_function$ebnf$2$subexpression$1", "symbols": ["_", "return"]},
-    {"name": "annonymous_function$ebnf$2", "symbols": ["annonymous_function$ebnf$2", "annonymous_function$ebnf$2$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "annonymous_function", "symbols": ["annonymous_function$subexpression$1", "annonymous_function$ebnf$1", "_", "arguments_with_types", "_", {"literal":"{"}, "annonymous_function$ebnf$2", "_", {"literal":"}"}], "postprocess":  v => {
+    {"name": "annonymous_function$ebnf$2$subexpression$1", "symbols": ["__", "identifier"]},
+    {"name": "annonymous_function$ebnf$2", "symbols": ["annonymous_function$ebnf$2$subexpression$1"], "postprocess": id},
+    {"name": "annonymous_function$ebnf$2", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "annonymous_function$ebnf$3", "symbols": []},
+    {"name": "annonymous_function$ebnf$3$subexpression$1", "symbols": ["_", "statement"]},
+    {"name": "annonymous_function$ebnf$3$subexpression$1", "symbols": ["_", "return"]},
+    {"name": "annonymous_function$ebnf$3", "symbols": ["annonymous_function$ebnf$3", "annonymous_function$ebnf$3$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "annonymous_function", "symbols": ["annonymous_function$ebnf$1", "annonymous_function$subexpression$1", "annonymous_function$ebnf$2", "_", "arguments_with_types", "_", {"literal":"{"}, "annonymous_function$ebnf$3", "_", {"literal":"}"}], "postprocess":  v => {
         	// console.log(v[0][0].value)
-        	return assign(v[0][0], {
+        	return assign(v[1][0], {
         		type: 'annonymous_function',
-        		identifier: v[1] ? v[1][1] : '',
-        		arguments: v[3],
-        		value: v[6] ? v[6].map(i => i[1]) : [],
-        		result: v[0][0].text
+        		identifier: v[2] ? v[2][1] : '',
+        		arguments: v[4],
+        		value: v[7] ? v[7].map(i => i[1]) : [],
+        		result: v[1][0].text,
+        		async: v[0] ? true : false
         		// text is one of the options above: string; int...
         	})
         } },

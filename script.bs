@@ -1,6 +1,9 @@
 \table = <table/>;
 \possibles = ['X', 'O'];
 \turn = 0;
+(async function () {
+    console.log(10);
+})();
 for i of range(3) {
     \tr = <tr/>;
     for j of range(3) {
@@ -10,7 +13,7 @@ for i of range(3) {
             border: '10px solid black',
             textAlign: 'center'
         }).events({
-            click () {
+            async click () {
                 this.text(possibles[turn]);
                 turn = Number(!turn);
             }

@@ -123,6 +123,10 @@ try {
     let table = globalThis.BS.Node("table", null, null, null);
     let possibles = ["X", "O"];
     let turn = 0;
+    (async function() {
+
+        console.log(10);
+    })();
     for (const i of range(3)) {
         let tr = globalThis.BS.Node("tr", null, null, null);
         for (const j of range(3)) {
@@ -132,7 +136,7 @@ try {
                 border: "10px solid black",
                 textAlign: "center",
             }).events({
-                click: function() {
+                click: async function() {
 
                     this.text(possibles[turn]);
                     turn = Number(!turn);
