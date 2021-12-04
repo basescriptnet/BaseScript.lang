@@ -1,24 +1,4 @@
-\table = <table/>;
-\possibles = ['X', 'O'];
-\turn = 0;
-(async function () {
-    console.log(10);
-})();
-for i of range(3) {
-    \tr = <tr/>;
-    for j of range(3) {
-        tr.append(<td/>.css({
-            width: 100px,
-            height: 100px,
-            border: '10px solid black',
-            textAlign: 'center'
-        }).events({
-            async click () {
-                this.text(possibles[turn]);
-                turn = Number(!turn);
-            }
-        }));
-    }
-    table.append(tr);
-}
-document.body.append(table);
+//
+\a = 10_000_000.5;
+a += 10;
+a = a ? 20;

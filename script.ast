@@ -3,56 +3,6 @@
         "type": "var_assign",
         "use_let": true,
         "use_const": false,
-        "line": 1,
-        "col": 1,
-        "value": {
-            "type": "var_assign_group",
-            "line": 1,
-            "col": 2,
-            "value": [
-                {
-                    "type": "var_reassign",
-                    "identifier": {
-                        "type": "identifier",
-                        "value": "table",
-                        "text": "table",
-                        "offset": 1,
-                        "lineBreaks": 0,
-                        "line": 1,
-                        "col": 2
-                    },
-                    "line": 1,
-                    "col": 2,
-                    "value": {
-                        "type": "html",
-                        "value": {
-                            "type": "identifier",
-                            "value": "table",
-                            "text": "table",
-                            "offset": 10,
-                            "lineBreaks": 0,
-                            "line": 1,
-                            "col": 11
-                        },
-                        "text": "<",
-                        "offset": 9,
-                        "lineBreaks": 0,
-                        "line": 1,
-                        "col": 10,
-                        "id": null,
-                        "classList": null
-                    },
-                    "offset": 1
-                }
-            ],
-            "offset": 1
-        },
-        "offset": 0
-    },
-    {
-        "type": "var_assign",
-        "use_let": true,
-        "use_const": false,
         "line": 2,
         "col": 1,
         "value": {
@@ -64,9 +14,9 @@
                     "type": "var_reassign",
                     "identifier": {
                         "type": "identifier",
-                        "value": "possibles",
-                        "text": "possibles",
-                        "offset": 21,
+                        "value": "a",
+                        "text": "a",
+                        "offset": 5,
                         "lineBreaks": 0,
                         "line": 2,
                         "col": 2
@@ -74,682 +24,20 @@
                     "line": 2,
                     "col": 2,
                     "value": {
-                        "type": "array",
-                        "value": [
-                            {
-                                "type": "string",
-                                "value": "X",
-                                "text": "'X'",
-                                "offset": 34,
-                                "lineBreaks": 0,
-                                "line": 2,
-                                "col": 15
-                            },
-                            {
-                                "type": "string",
-                                "value": "O",
-                                "text": "'O'",
-                                "offset": 39,
-                                "lineBreaks": 0,
-                                "line": 2,
-                                "col": 20
-                            }
-                        ],
-                        "offset": 33,
+                        "type": "number",
+                        "value": "10000000.5",
+                        "text": "10_000_000.5",
+                        "offset": 9,
                         "lineBreaks": 0,
                         "line": 2,
-                        "col": 14
+                        "col": 6
                     },
-                    "offset": 21
+                    "offset": 5
                 }
             ],
-            "offset": 21
+            "offset": 5
         },
-        "offset": 20
-    },
-    {
-        "type": "var_assign",
-        "use_let": true,
-        "use_const": false,
-        "line": 3,
-        "col": 1,
-        "value": {
-            "type": "var_assign_group",
-            "line": 3,
-            "col": 2,
-            "value": [
-                {
-                    "type": "var_reassign",
-                    "identifier": {
-                        "type": "identifier",
-                        "value": "turn",
-                        "text": "turn",
-                        "offset": 47,
-                        "lineBreaks": 0,
-                        "line": 3,
-                        "col": 2
-                    },
-                    "line": 3,
-                    "col": 2,
-                    "value": {
-                        "type": "number",
-                        "value": "0",
-                        "text": "0",
-                        "offset": 54,
-                        "lineBreaks": 0,
-                        "line": 3,
-                        "col": 9
-                    },
-                    "offset": 47
-                }
-            ],
-            "offset": 47
-        },
-        "offset": 46
-    },
-    {
-        "type": "statement_value",
-        "value": {
-            "type": "iife",
-            "value": {
-                "type": "annonymous_function",
-                "value": [
-                    {
-                        "type": "statement_value",
-                        "value": {
-                            "type": "expression",
-                            "value": [
-                                {
-                                    "type": "identifier",
-                                    "value": "console",
-                                    "text": "console",
-                                    "offset": 84,
-                                    "lineBreaks": 0,
-                                    "line": 5,
-                                    "col": 5
-                                },
-                                {
-                                    "type": "period",
-                                    "value": ".",
-                                    "text": ".",
-                                    "offset": 91,
-                                    "lineBreaks": 0,
-                                    "line": 5,
-                                    "col": 12
-                                },
-                                {
-                                    "type": "function_call",
-                                    "value": "log",
-                                    "text": "log",
-                                    "offset": 92,
-                                    "lineBreaks": 0,
-                                    "line": 5,
-                                    "col": 13,
-                                    "arguments": {
-                                        "type": "arguments",
-                                        "value": [
-                                            {
-                                                "type": "number",
-                                                "value": "10",
-                                                "text": "10",
-                                                "offset": 96,
-                                                "lineBreaks": 0,
-                                                "line": 5,
-                                                "col": 17
-                                            }
-                                        ],
-                                        "offset": 95,
-                                        "lineBreaks": 0,
-                                        "line": 5,
-                                        "col": 16
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "text": "function",
-                "offset": 65,
-                "lineBreaks": 0,
-                "line": 4,
-                "col": 8,
-                "identifier": "",
-                "arguments": {
-                    "type": "arguments_with_types",
-                    "value": [],
-                    "text": "(",
-                    "offset": 74,
-                    "lineBreaks": 0,
-                    "line": 4,
-                    "col": 17
-                },
-                "result": "function",
-                "async": true
-            },
-            "call_arguments": {
-                "type": "arguments_with_types",
-                "value": [],
-                "text": "(",
-                "offset": 104,
-                "lineBreaks": 0,
-                "line": 6,
-                "col": 3
-            }
-        }
-    },
-    {
-        "type": "for_of",
-        "value": [
-            {
-                "type": "var_assign",
-                "use_let": true,
-                "use_const": false,
-                "line": 8,
-                "col": 5,
-                "value": {
-                    "type": "var_assign_group",
-                    "line": 8,
-                    "col": 6,
-                    "value": [
-                        {
-                            "type": "var_reassign",
-                            "identifier": {
-                                "type": "identifier",
-                                "value": "tr",
-                                "text": "tr",
-                                "offset": 135,
-                                "lineBreaks": 0,
-                                "line": 8,
-                                "col": 6
-                            },
-                            "line": 8,
-                            "col": 6,
-                            "value": {
-                                "type": "html",
-                                "value": {
-                                    "type": "identifier",
-                                    "value": "tr",
-                                    "text": "tr",
-                                    "offset": 141,
-                                    "lineBreaks": 0,
-                                    "line": 8,
-                                    "col": 12
-                                },
-                                "text": "<",
-                                "offset": 140,
-                                "lineBreaks": 0,
-                                "line": 8,
-                                "col": 11,
-                                "id": null,
-                                "classList": null
-                            },
-                            "offset": 135
-                        }
-                    ],
-                    "offset": 135
-                },
-                "offset": 134
-            },
-            {
-                "type": "for_of",
-                "value": [
-                    {
-                        "type": "statement_value",
-                        "value": {
-                            "type": "expression",
-                            "value": [
-                                {
-                                    "type": "identifier",
-                                    "value": "tr",
-                                    "text": "tr",
-                                    "offset": 181,
-                                    "lineBreaks": 0,
-                                    "line": 10,
-                                    "col": 9
-                                },
-                                {
-                                    "type": "period",
-                                    "value": ".",
-                                    "text": ".",
-                                    "offset": 183,
-                                    "lineBreaks": 0,
-                                    "line": 10,
-                                    "col": 11
-                                },
-                                {
-                                    "type": "function_call",
-                                    "value": "append",
-                                    "text": "append",
-                                    "offset": 184,
-                                    "lineBreaks": 0,
-                                    "line": 10,
-                                    "col": 12,
-                                    "arguments": {
-                                        "type": "arguments",
-                                        "value": [
-                                            {
-                                                "type": "expression",
-                                                "value": [
-                                                    {
-                                                        "type": "html",
-                                                        "value": {
-                                                            "type": "identifier",
-                                                            "value": "td",
-                                                            "text": "td",
-                                                            "offset": 192,
-                                                            "lineBreaks": 0,
-                                                            "line": 10,
-                                                            "col": 20
-                                                        },
-                                                        "text": "<",
-                                                        "offset": 191,
-                                                        "lineBreaks": 0,
-                                                        "line": 10,
-                                                        "col": 19,
-                                                        "id": null,
-                                                        "classList": null
-                                                    },
-                                                    {
-                                                        "type": "period",
-                                                        "value": ".",
-                                                        "text": ".",
-                                                        "offset": 196,
-                                                        "lineBreaks": 0,
-                                                        "line": 10,
-                                                        "col": 24
-                                                    },
-                                                    {
-                                                        "type": "expression",
-                                                        "value": [
-                                                            {
-                                                                "type": "function_call",
-                                                                "value": "css",
-                                                                "text": "css",
-                                                                "offset": 197,
-                                                                "lineBreaks": 0,
-                                                                "line": 10,
-                                                                "col": 25,
-                                                                "arguments": {
-                                                                    "type": "arguments",
-                                                                    "value": [
-                                                                        {
-                                                                            "type": "object",
-                                                                            "value": {
-                                                                                "width": {
-                                                                                    "type": "string",
-                                                                                    "value": "100px",
-                                                                                    "text": "100",
-                                                                                    "offset": 223,
-                                                                                    "lineBreaks": 0,
-                                                                                    "line": 11,
-                                                                                    "col": 20
-                                                                                },
-                                                                                "height": {
-                                                                                    "type": "string",
-                                                                                    "value": "100px",
-                                                                                    "text": "100",
-                                                                                    "offset": 251,
-                                                                                    "lineBreaks": 0,
-                                                                                    "line": 12,
-                                                                                    "col": 21
-                                                                                },
-                                                                                "border": {
-                                                                                    "type": "string",
-                                                                                    "value": "10px solid black",
-                                                                                    "text": "'10px solid black'",
-                                                                                    "offset": 279,
-                                                                                    "lineBreaks": 0,
-                                                                                    "line": 13,
-                                                                                    "col": 21
-                                                                                },
-                                                                                "textAlign": {
-                                                                                    "type": "string",
-                                                                                    "value": "center",
-                                                                                    "text": "'center'",
-                                                                                    "offset": 323,
-                                                                                    "lineBreaks": 0,
-                                                                                    "line": 14,
-                                                                                    "col": 24
-                                                                                }
-                                                                            },
-                                                                            "offset": 201,
-                                                                            "lineBreaks": 0,
-                                                                            "line": 10,
-                                                                            "col": 29
-                                                                        }
-                                                                    ],
-                                                                    "offset": 200,
-                                                                    "lineBreaks": 0,
-                                                                    "line": 10,
-                                                                    "col": 28
-                                                                }
-                                                            },
-                                                            {
-                                                                "type": "period",
-                                                                "value": ".",
-                                                                "text": ".",
-                                                                "offset": 343,
-                                                                "lineBreaks": 0,
-                                                                "line": 15,
-                                                                "col": 11
-                                                            },
-                                                            {
-                                                                "type": "function_call",
-                                                                "value": "events",
-                                                                "text": "events",
-                                                                "offset": 344,
-                                                                "lineBreaks": 0,
-                                                                "line": 15,
-                                                                "col": 12,
-                                                                "arguments": {
-                                                                    "type": "arguments",
-                                                                    "value": [
-                                                                        {
-                                                                            "type": "object",
-                                                                            "value": {
-                                                                                "click": {
-                                                                                    "type": "annonymous_function",
-                                                                                    "value": [
-                                                                                        {
-                                                                                            "type": "statement_value",
-                                                                                            "value": {
-                                                                                                "type": "expression",
-                                                                                                "value": [
-                                                                                                    {
-                                                                                                        "type": "keyword",
-                                                                                                        "value": "this",
-                                                                                                        "text": "this",
-                                                                                                        "offset": 400,
-                                                                                                        "lineBreaks": 0,
-                                                                                                        "line": 17,
-                                                                                                        "col": 17
-                                                                                                    },
-                                                                                                    {
-                                                                                                        "type": "period",
-                                                                                                        "value": ".",
-                                                                                                        "text": ".",
-                                                                                                        "offset": 404,
-                                                                                                        "lineBreaks": 0,
-                                                                                                        "line": 17,
-                                                                                                        "col": 21
-                                                                                                    },
-                                                                                                    {
-                                                                                                        "type": "function_call",
-                                                                                                        "value": "text",
-                                                                                                        "text": "text",
-                                                                                                        "offset": 405,
-                                                                                                        "lineBreaks": 0,
-                                                                                                        "line": 17,
-                                                                                                        "col": 22,
-                                                                                                        "arguments": {
-                                                                                                            "type": "arguments",
-                                                                                                            "value": [
-                                                                                                                {
-                                                                                                                    "type": "item_retraction",
-                                                                                                                    "from": {
-                                                                                                                        "type": "identifier",
-                                                                                                                        "value": "possibles",
-                                                                                                                        "text": "possibles",
-                                                                                                                        "offset": 410,
-                                                                                                                        "lineBreaks": 0,
-                                                                                                                        "line": 17,
-                                                                                                                        "col": 27
-                                                                                                                    },
-                                                                                                                    "value": {
-                                                                                                                        "type": "identifier",
-                                                                                                                        "value": "turn",
-                                                                                                                        "text": "turn",
-                                                                                                                        "offset": 420,
-                                                                                                                        "lineBreaks": 0,
-                                                                                                                        "line": 17,
-                                                                                                                        "col": 37
-                                                                                                                    }
-                                                                                                                }
-                                                                                                            ],
-                                                                                                            "offset": 409,
-                                                                                                            "lineBreaks": 0,
-                                                                                                            "line": 17,
-                                                                                                            "col": 26
-                                                                                                        }
-                                                                                                    }
-                                                                                                ]
-                                                                                            }
-                                                                                        },
-                                                                                        {
-                                                                                            "type": "statement_value",
-                                                                                            "value": {
-                                                                                                "type": "var_reassign",
-                                                                                                "identifier": {
-                                                                                                    "type": "identifier",
-                                                                                                    "value": "turn",
-                                                                                                    "text": "turn",
-                                                                                                    "offset": 445,
-                                                                                                    "lineBreaks": 0,
-                                                                                                    "line": 18,
-                                                                                                    "col": 17
-                                                                                                },
-                                                                                                "line": 18,
-                                                                                                "col": 17,
-                                                                                                "value": {
-                                                                                                    "type": "function_call",
-                                                                                                    "value": "Number",
-                                                                                                    "text": "Number",
-                                                                                                    "offset": 452,
-                                                                                                    "lineBreaks": 0,
-                                                                                                    "line": 18,
-                                                                                                    "col": 24,
-                                                                                                    "arguments": {
-                                                                                                        "type": "arguments",
-                                                                                                        "value": [
-                                                                                                            {
-                                                                                                                "type": "boolean_reversed",
-                                                                                                                "value": {
-                                                                                                                    "type": "identifier",
-                                                                                                                    "value": "turn",
-                                                                                                                    "text": "turn",
-                                                                                                                    "offset": 460,
-                                                                                                                    "lineBreaks": 0,
-                                                                                                                    "line": 18,
-                                                                                                                    "col": 32
-                                                                                                                }
-                                                                                                            }
-                                                                                                        ],
-                                                                                                        "offset": 458,
-                                                                                                        "lineBreaks": 0,
-                                                                                                        "line": 18,
-                                                                                                        "col": 30
-                                                                                                    }
-                                                                                                },
-                                                                                                "offset": 445
-                                                                                            },
-                                                                                            "line": 18,
-                                                                                            "col": 17,
-                                                                                            "offset": 445
-                                                                                        }
-                                                                                    ],
-                                                                                    "text": "click",
-                                                                                    "offset": 372,
-                                                                                    "lineBreaks": 0,
-                                                                                    "line": 16,
-                                                                                    "col": 19,
-                                                                                    "arguments": {
-                                                                                        "type": "arguments",
-                                                                                        "value": [],
-                                                                                        "text": "(",
-                                                                                        "offset": 378,
-                                                                                        "lineBreaks": 0,
-                                                                                        "line": 16,
-                                                                                        "col": 25
-                                                                                    },
-                                                                                    "async": true
-                                                                                }
-                                                                            },
-                                                                            "offset": 351,
-                                                                            "lineBreaks": 0,
-                                                                            "line": 15,
-                                                                            "col": 19
-                                                                        }
-                                                                    ],
-                                                                    "offset": 350,
-                                                                    "lineBreaks": 0,
-                                                                    "line": 15,
-                                                                    "col": 18
-                                                                }
-                                                            }
-                                                        ]
-                                                    }
-                                                ]
-                                            }
-                                        ],
-                                        "offset": 190,
-                                        "lineBreaks": 0,
-                                        "line": 10,
-                                        "col": 18
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "text": "for",
-                "offset": 152,
-                "lineBreaks": 0,
-                "line": 9,
-                "col": 5,
-                "condition": " ",
-                "identifier": {
-                    "type": "identifier",
-                    "value": "j",
-                    "text": "j",
-                    "offset": 156,
-                    "lineBreaks": 0,
-                    "line": 9,
-                    "col": 9
-                },
-                "iterable": {
-                    "type": "function_call",
-                    "value": "range",
-                    "text": "range",
-                    "offset": 161,
-                    "lineBreaks": 0,
-                    "line": 9,
-                    "col": 14,
-                    "arguments": {
-                        "type": "arguments",
-                        "value": [
-                            {
-                                "type": "number",
-                                "value": "3",
-                                "text": "3",
-                                "offset": 167,
-                                "lineBreaks": 0,
-                                "line": 9,
-                                "col": 20
-                            }
-                        ],
-                        "offset": 166,
-                        "lineBreaks": 0,
-                        "line": 9,
-                        "col": 19
-                    }
-                }
-            },
-            {
-                "type": "statement_value",
-                "value": {
-                    "type": "expression",
-                    "value": [
-                        {
-                            "type": "identifier",
-                            "value": "table",
-                            "text": "table",
-                            "offset": 508,
-                            "lineBreaks": 0,
-                            "line": 22,
-                            "col": 5
-                        },
-                        {
-                            "type": "period",
-                            "value": ".",
-                            "text": ".",
-                            "offset": 513,
-                            "lineBreaks": 0,
-                            "line": 22,
-                            "col": 10
-                        },
-                        {
-                            "type": "function_call",
-                            "value": "append",
-                            "text": "append",
-                            "offset": 514,
-                            "lineBreaks": 0,
-                            "line": 22,
-                            "col": 11,
-                            "arguments": {
-                                "type": "arguments",
-                                "value": [
-                                    {
-                                        "type": "identifier",
-                                        "value": "tr",
-                                        "text": "tr",
-                                        "offset": 521,
-                                        "lineBreaks": 0,
-                                        "line": 22,
-                                        "col": 18
-                                    }
-                                ],
-                                "offset": 520,
-                                "lineBreaks": 0,
-                                "line": 22,
-                                "col": 17
-                            }
-                        }
-                    ]
-                }
-            }
-        ],
-        "text": "for",
-        "offset": 109,
-        "lineBreaks": 0,
-        "line": 7,
-        "col": 1,
-        "condition": " ",
-        "identifier": {
-            "type": "identifier",
-            "value": "i",
-            "text": "i",
-            "offset": 113,
-            "lineBreaks": 0,
-            "line": 7,
-            "col": 5
-        },
-        "iterable": {
-            "type": "function_call",
-            "value": "range",
-            "text": "range",
-            "offset": 118,
-            "lineBreaks": 0,
-            "line": 7,
-            "col": 10,
-            "arguments": {
-                "type": "arguments",
-                "value": [
-                    {
-                        "type": "number",
-                        "value": "3",
-                        "text": "3",
-                        "offset": 124,
-                        "lineBreaks": 0,
-                        "line": 7,
-                        "col": 16
-                    }
-                ],
-                "offset": 123,
-                "lineBreaks": 0,
-                "line": 7,
-                "col": 15
-            }
-        }
+        "offset": 4
     },
     {
         "type": "statement_value",
@@ -757,74 +45,97 @@
             "type": "expression",
             "value": [
                 {
-                    "type": "expression",
-                    "value": [
-                        {
-                            "type": "identifier",
-                            "value": "document",
-                            "text": "document",
-                            "offset": 530,
-                            "lineBreaks": 0,
-                            "line": 24,
-                            "col": 1
-                        },
-                        {
-                            "type": "period",
-                            "value": ".",
-                            "text": ".",
-                            "offset": 538,
-                            "lineBreaks": 0,
-                            "line": 24,
-                            "col": 9
-                        },
-                        {
-                            "type": "identifier",
-                            "value": "body",
-                            "text": "body",
-                            "offset": 539,
-                            "lineBreaks": 0,
-                            "line": 24,
-                            "col": 10
-                        }
-                    ]
+                    "type": "identifier",
+                    "value": "a",
+                    "text": "a",
+                    "offset": 24,
+                    "lineBreaks": 0,
+                    "line": 3,
+                    "col": 1
                 },
                 {
-                    "type": "period",
-                    "value": ".",
-                    "text": ".",
-                    "offset": 543,
+                    "type": "operator",
+                    "value": "+=",
+                    "text": "+",
+                    "offset": 26,
                     "lineBreaks": 0,
-                    "line": 24,
-                    "col": 14
+                    "line": 3,
+                    "col": 3
                 },
                 {
-                    "type": "function_call",
-                    "value": "append",
-                    "text": "append",
-                    "offset": 544,
+                    "type": "number",
+                    "value": "10",
+                    "text": "10",
+                    "offset": 29,
                     "lineBreaks": 0,
-                    "line": 24,
-                    "col": 15,
-                    "arguments": {
-                        "type": "arguments",
-                        "value": [
-                            {
-                                "type": "identifier",
-                                "value": "table",
-                                "text": "table",
-                                "offset": 551,
-                                "lineBreaks": 0,
-                                "line": 24,
-                                "col": 22
-                            }
-                        ],
-                        "offset": 550,
-                        "lineBreaks": 0,
-                        "line": 24,
-                        "col": 21
-                    }
+                    "line": 3,
+                    "col": 6
                 }
             ]
         }
+    },
+    {
+        "type": "var_assign",
+        "use_let": false,
+        "use_const": false,
+        "line": 4,
+        "col": 1,
+        "value": {
+            "type": "var_assign_group",
+            "line": 4,
+            "col": 1,
+            "value": [
+                {
+                    "type": "var_reassign",
+                    "identifier": {
+                        "type": "identifier",
+                        "value": "a",
+                        "text": "a",
+                        "offset": 34,
+                        "lineBreaks": 0,
+                        "line": 4,
+                        "col": 1
+                    },
+                    "line": 4,
+                    "col": 1,
+                    "value": {
+                        "type": "ternary",
+                        "left": {
+                            "type": "number",
+                            "value": "20",
+                            "text": "20",
+                            "offset": 42,
+                            "lineBreaks": 0,
+                            "line": 4,
+                            "col": 9
+                        },
+                        "right": null,
+                        "value": {
+                            "type": "condition",
+                            "value": {
+                                "type": "identifier",
+                                "value": "a",
+                                "text": "a",
+                                "offset": 38,
+                                "lineBreaks": 0,
+                                "line": 4,
+                                "col": 5
+                            },
+                            "line": 4,
+                            "lineBreaks": 0,
+                            "offset": 38,
+                            "col": 5
+                        },
+                        "line": 4,
+                        "lineBreaks": 0,
+                        "offset": 38,
+                        "col": 5
+                    },
+                    "offset": 34
+                }
+            ],
+            "offset": 34
+        },
+        "offset": 34
     }
 ]

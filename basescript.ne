@@ -5,7 +5,7 @@
 
 @lexer lexer
 
-process -> statements {% v => v[0] %}
+process -> %comment:* statements %comment:* {% v => v[1] %}
 # statements
 statements -> (_ statement {% v => v[1] %}):* _ {% v => v[0] %}
 
@@ -41,6 +41,14 @@ statement -> var_assign _ ";" {% id %}
 	}) %}
 	| %eval __ value _ ";" {% v => assign(v[0], {
 		type: 'eval',
+		value: v[2]
+	}) %}
+	| "@import" __ value _ ";" {% v => assign(v[0], {
+		type: '@import',
+		value: v[2]
+	}) %}
+	| "@include" __ string _ ";" {% v => assign(v[0], {
+		type: '@include',
 		value: v[2]
 	}) %}
 	| value _ ";" {% v => ({
@@ -322,6 +330,10 @@ expression ->  "(" _ expression _ ")" {% v => ({
 		value: v[2],
 		arguments: v[6]
 	}) %}
+	| expression _ ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ expression {% v => ({
+		type: 'expression',
+		value: [v[0], assign(v[2][0], {value: v[2][0].value+'='}), v[4]]
+	}) %}
 	| expression _ ("**" | [.+-/*%]) _ expression {% v => ({
 		type: 'expression',
 		value: [v[0], v[2][0], v[4]]
@@ -332,6 +344,7 @@ expression ->  "(" _ expression _ ")" {% v => ({
 	| identifier {% id %}
 	| array {% id %}
 	| string {% id %}
+	| bigInt {% id %}
 	| number {% id %}
 	| "this" {% id %}
 	| html {% id %}
@@ -486,6 +499,16 @@ value -> value _ "[" _ value _ "]" _ arguments {% v => {
 		type: 'instanceof',
 		left: v[0],
 		value: v[4]
+	}) %}
+	| condition _ "?" _ value (_ ":" _ value):? {% v => ({
+		type: 'ternary',
+		left: v[4],
+		right: v[5] ? v[5][3] : null,
+		value: v[0],
+		line: v[0].line,
+		lineBreaks: v[0].lineBreaks,
+		offset: v[0].offset,
+		col: v[0].col,
 	}) %}
 	| boolean {% id %}
 	# | "(" _ switch _ ")" {% v => v[2] %}
@@ -811,12 +834,20 @@ arguments_with_types -> "(" _ ")" {% v => Object.assign(v[0], {
 # 	| "(" _ additive _ ")" {% v => v[2] %}
 
 #numbers
-number -> %number {% v => {
-	return Object.assign(v[0], {
-		value: v[0].value
-	})
-	//v[0].value
-} %}
+number -> %number {% v => assign(v[0], {
+	value: v[0].value.replace(/_/g, '') 
+}) %}
+# | (number "_" {% v => v[0].value %}):+ number {% v => {
+# 	console.log(v[0])
+# 	return ({
+# 		type: 'number',
+# 		value: `${v[0][0].value}${v[1].value}`
+# 	})
+# } %}
+bigInt -> %number "n" {% v => assign(v[0], {
+	type: 'bigInt',
+	value: v[0].value + 'n'
+}) %}
 # strings
 string -> string _ "[" _ number _ ":" ":":? _ number _ "]" {% v => {
 		return Object.assign(v[0], {

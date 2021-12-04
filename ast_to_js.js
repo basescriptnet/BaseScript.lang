@@ -1,3 +1,5 @@
+const fs = require('fs');
+const to_ast = require('./parser.js');
 module.exports = function parse (statements, tmp) {
     // statememnts must be an array, if no, make it an array
     if (statements === void 0) {
@@ -20,6 +22,9 @@ module.exports = function parse (statements, tmp) {
                     r.push(parse(value[i]))
                 }
                 result += r.join(statement.separator.replace('or', '||').replace('and', '&&'));
+                break;
+            case 'ternary':
+                result += `${parse(value)} ? ${parse(statement.left)} : ${statement.right === null ? null : parse(statement.right)}`;
                 break;
             case 'debugger':
                 result += 'debugger;';
@@ -47,6 +52,7 @@ module.exports = function parse (statements, tmp) {
                 result += ']';
                 break;
             case 'number':
+            case 'bigInt':
                 result += value;
                 break;
             case 'string':
@@ -315,6 +321,14 @@ module.exports = function parse (statements, tmp) {
                 break;
             case 'throw':
                 result += `throw ${parse(value)};`;
+                break;
+            case '@import':
+                result += `eval(globalThis.BS.parse(globalThis.BS.ast(globalThis.BS.fs.readFileSync(${parse(value)}, 'utf8'))));`;
+                break;
+            case '@include':
+                var content = fs.readFileSync(parse(value).slice(1, -1), 'utf8');
+                // console.log(`${parse(to_ast(content))}`);
+                result += `${parse(to_ast(content))}`;
                 break;
             case 'eval':
                 // var BS = require('./index');

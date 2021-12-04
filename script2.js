@@ -127,7 +127,5 @@ try {
 
     // your code below this line!
 
-    let a = 10000000.5;
-    a += 10;
-    a = a ? 20 : null;
+    console.log("success");
 })();

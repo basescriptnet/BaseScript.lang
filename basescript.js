@@ -34,7 +34,11 @@ function id(x) { return x[0]; }
 var grammar = {
     Lexer: lexer,
     ParserRules: [
-    {"name": "process", "symbols": ["statements"], "postprocess": v => v[0]},
+    {"name": "process$ebnf$1", "symbols": []},
+    {"name": "process$ebnf$1", "symbols": ["process$ebnf$1", (lexer.has("comment") ? {type: "comment"} : comment)], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "process$ebnf$2", "symbols": []},
+    {"name": "process$ebnf$2", "symbols": ["process$ebnf$2", (lexer.has("comment") ? {type: "comment"} : comment)], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "process", "symbols": ["process$ebnf$1", "statements", "process$ebnf$2"], "postprocess": v => v[1]},
     {"name": "statements$ebnf$1", "symbols": []},
     {"name": "statements$ebnf$1$subexpression$1", "symbols": ["_", "statement"], "postprocess": v => v[1]},
     {"name": "statements$ebnf$1", "symbols": ["statements$ebnf$1", "statements$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
@@ -71,6 +75,14 @@ var grammar = {
         }) },
     {"name": "statement", "symbols": [(lexer.has("eval") ? {type: "eval"} : eval), "__", "value", "_", {"literal":";"}], "postprocess":  v => assign(v[0], {
         	type: 'eval',
+        	value: v[2]
+        }) },
+    {"name": "statement", "symbols": [{"literal":"@import"}, "__", "value", "_", {"literal":";"}], "postprocess":  v => assign(v[0], {
+        	type: '@import',
+        	value: v[2]
+        }) },
+    {"name": "statement", "symbols": [{"literal":"@include"}, "__", "string", "_", {"literal":";"}], "postprocess":  v => assign(v[0], {
+        	type: '@include',
         	value: v[2]
         }) },
     {"name": "statement", "symbols": ["value", "_", {"literal":";"}], "postprocess":  v => ({
@@ -329,9 +341,17 @@ var grammar = {
         	value: v[2],
         	arguments: v[6]
         }) },
-    {"name": "expression$subexpression$1", "symbols": [{"literal":"**"}]},
-    {"name": "expression$subexpression$1", "symbols": [/[.+-/*%]/]},
+    {"name": "expression$subexpression$1", "symbols": [{"literal":"+"}, {"literal":"="}]},
+    {"name": "expression$subexpression$1", "symbols": [{"literal":"-"}, {"literal":"="}]},
+    {"name": "expression$subexpression$1", "symbols": [{"literal":"*"}, {"literal":"="}]},
+    {"name": "expression$subexpression$1", "symbols": [{"literal":"/"}, {"literal":"="}]},
     {"name": "expression", "symbols": ["expression", "_", "expression$subexpression$1", "_", "expression"], "postprocess":  v => ({
+        	type: 'expression',
+        	value: [v[0], assign(v[2][0], {value: v[2][0].value+'='}), v[4]]
+        }) },
+    {"name": "expression$subexpression$2", "symbols": [{"literal":"**"}]},
+    {"name": "expression$subexpression$2", "symbols": [/[.+-/*%]/]},
+    {"name": "expression", "symbols": ["expression", "_", "expression$subexpression$2", "_", "expression"], "postprocess":  v => ({
         	type: 'expression',
         	value: [v[0], v[2][0], v[4]]
         }) },
@@ -341,6 +361,7 @@ var grammar = {
     {"name": "expression", "symbols": ["identifier"], "postprocess": id},
     {"name": "expression", "symbols": ["array"], "postprocess": id},
     {"name": "expression", "symbols": ["string"], "postprocess": id},
+    {"name": "expression", "symbols": ["bigInt"], "postprocess": id},
     {"name": "expression", "symbols": ["number"], "postprocess": id},
     {"name": "expression", "symbols": [{"literal":"this"}], "postprocess": id},
     {"name": "expression", "symbols": ["html"], "postprocess": id},
@@ -426,6 +447,19 @@ var grammar = {
         	type: 'instanceof',
         	left: v[0],
         	value: v[4]
+        }) },
+    {"name": "value$ebnf$1$subexpression$1", "symbols": ["_", {"literal":":"}, "_", "value"]},
+    {"name": "value$ebnf$1", "symbols": ["value$ebnf$1$subexpression$1"], "postprocess": id},
+    {"name": "value$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "value", "symbols": ["condition", "_", {"literal":"?"}, "_", "value", "value$ebnf$1"], "postprocess":  v => ({
+        	type: 'ternary',
+        	left: v[4],
+        	right: v[5] ? v[5][3] : null,
+        	value: v[0],
+        	line: v[0].line,
+        	lineBreaks: v[0].lineBreaks,
+        	offset: v[0].offset,
+        	col: v[0].col,
         }) },
     {"name": "value", "symbols": ["boolean"], "postprocess": id},
     {"name": "value", "symbols": ["myNull"], "postprocess": id},
@@ -757,12 +791,13 @@ var grammar = {
         		types: types
         	});
         } },
-    {"name": "number", "symbols": [(lexer.has("number") ? {type: "number"} : number)], "postprocess":  v => {
-        	return Object.assign(v[0], {
-        		value: v[0].value
-        	})
-        	//v[0].value
-        } },
+    {"name": "number", "symbols": [(lexer.has("number") ? {type: "number"} : number)], "postprocess":  v => assign(v[0], {
+        	value: v[0].value.replace(/_/g, '') 
+        }) },
+    {"name": "bigInt", "symbols": [(lexer.has("number") ? {type: "number"} : number), {"literal":"n"}], "postprocess":  v => assign(v[0], {
+        	type: 'bigInt',
+        	value: v[0].value + 'n'
+        }) },
     {"name": "string$ebnf$1", "symbols": [{"literal":":"}], "postprocess": id},
     {"name": "string$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "string", "symbols": ["string", "_", {"literal":"["}, "_", "number", "_", {"literal":":"}, "string$ebnf$1", "_", "number", "_", {"literal":"]"}], "postprocess":  v => {

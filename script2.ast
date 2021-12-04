@@ -1,0 +1,55 @@
+[
+    {
+        "type": "statement_value",
+        "value": {
+            "type": "expression",
+            "value": [
+                {
+                    "type": "identifier",
+                    "value": "console",
+                    "text": "console",
+                    "offset": 0,
+                    "lineBreaks": 0,
+                    "line": 1,
+                    "col": 1
+                },
+                {
+                    "type": "period",
+                    "value": ".",
+                    "text": ".",
+                    "offset": 7,
+                    "lineBreaks": 0,
+                    "line": 1,
+                    "col": 8
+                },
+                {
+                    "type": "function_call",
+                    "value": "log",
+                    "text": "log",
+                    "offset": 8,
+                    "lineBreaks": 0,
+                    "line": 1,
+                    "col": 9,
+                    "arguments": {
+                        "type": "arguments",
+                        "value": [
+                            {
+                                "type": "string",
+                                "value": "success",
+                                "text": "'success'",
+                                "offset": 12,
+                                "lineBreaks": 0,
+                                "line": 1,
+                                "col": 13
+                            }
+                        ],
+                        "offset": 11,
+                        "lineBreaks": 0,
+                        "line": 1,
+                        "col": 12
+                    }
+                }
+            ]
+        }
+    }
+]

@@ -15,6 +15,42 @@ globalThis.BS = {
         }
         return el;
     },
+    DOMtoJSON (node) {
+        // credit to sumn2u
+        node = node || this;
+        let obj = {
+            nodeType: node.nodeType
+        };
+        if (node.tagName) {
+            obj.tagName = node.tagName.toLowerCase();
+        } else
+        if (node.nodeName) {
+            obj.nodeName = node.nodeName;
+        }
+        if (node.nodeValue) {
+            obj.nodeValue = node.nodeValue;
+        }
+        let attrs = node.attributes;
+        let childNodes = node.childNodes;
+        let length;
+        let arr;
+        if (attrs) {
+            length = attrs.length;
+            arr = obj.attributes = new Array(length);
+            for (let i = 0; i < length; i++) {
+                const attr = attrs[i];
+                arr[i] = [attr.nodeName, attr.nodeValue];
+            }
+        }
+        if (childNodes) {
+            length = childNodes.length;
+            arr = obj.childNodes = new Array(length);
+            for (let i = 0; i < length; i++) {
+                arr[i] = toJSON(childNodes[i]);
+            }
+        }
+        return obj;
+    },
     ast: (function () {
         let r = globalThis.require('./index.js');
         if (r) return r;
@@ -24,6 +60,11 @@ globalThis.BS = {
         let r = globalThis.require('./ast_to_js.js');
         if (r) return r;
         return function () {console.warn('@eval is not supported yet in browsers.')}
+    })(),
+    fs: (function () {
+        let r = globalThis.require('fs');
+        if (r) return r;
+        return function () {console.warn('@import is not supported yet in browsers.')};
     })(),
     // require('./ast_to_js.js')// || function () {console.warn('@eval is not supported yet in browsers.')}
 };
