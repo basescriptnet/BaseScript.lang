@@ -470,7 +470,11 @@ module.exports = function parse (statements, tmp) {
                     // if (value[i].type == 'identifier' && value[i].value == 'inherit') {
                     //     output += `${i}:(function (self) {return self["${i}"]})(this),`;
                     // } else {
+                    if (value[i].type == 'es6_key_value') {
+                        output += `${parse(value[i])},`;
+                    } else {
                         output += `${i}:${parse(value[i])},`;
+                    }
                     // }
                 }
                 output += '}';
@@ -490,10 +494,14 @@ module.exports = function parse (statements, tmp) {
                 break;
             case 'es6_key_value':
                 var args = parse(statement.arguments);
-                result += `${parse(statement.key)} (${args[0]}) {
+                var key = statement.key.value;
+                result += `${key} (${args[0]}) {
                     ${args[1]}
                     ${parse(value)}
                 }`
+                break;
+            case 'arguments':
+                result += value.join(', ');
                 break;
             case 'construct':
                 var args = parse(statement.arguments);

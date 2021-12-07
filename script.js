@@ -58,7 +58,7 @@ globalThis.BS = {
             length = childNodes.length;
             arr = obj.childNodes = new Array(length);
             for (let i = 0; i < length; i++) {
-                arr[i] = toJSON(childNodes[i]);
+                arr[i] = this.DOMtoJSON(childNodes[i]);
             }
         }
         return obj;
@@ -109,9 +109,6 @@ globalThis.BS = {
         string(value) {
             return typeof value === 'string';
         },
-        object(value) {
-            return typeof value === 'object' && value !== null;
-        },
         function(value) {
             return typeof value === 'function';
         },
@@ -120,7 +117,13 @@ globalThis.BS = {
         },
         boolean(value) {
             return typeof value === 'boolean';
-        }
+        },
+        HTML(value) {
+            return value instanceof Element;
+        },
+        object(value) {
+            return typeof value === 'object' && value !== null;
+        },
     },
     getType(value) {
         for (let i in this.types) {
@@ -150,6 +153,9 @@ Element.prototype.append = function(children) {
         this._append(children);
     }
     return this;
+}
+Element.prototype.json = function() {
+    return globalThis.BS.DOMtoJSON(this);
 }
 Element.prototype.text = function(content) {
     if (content === void 0) {
@@ -227,22 +233,38 @@ globalThis.BS.types["Unique"] = function(value, required = false) {
     return true;
 };
 
-function join(a, b) {
-    if (!globalThis.BS.types["Unique"](a)) throw new TypeError("Argument \"a\" is not type of Unique at line 9, col 15.");
-    if (!globalThis.BS.types["Unique"](b)) throw new TypeError("Argument \"b\" is not type of Unique at line 9, col 15.");
-    let r = [];
-    for (const i in a) {
-        r.push(a[i]);
+function dumpHTML(el) {
+    if (!globalThis.BS.types["HTML"](el)) throw new TypeError("Argument \"el\" is not type of HTML at line 9, col 19.");
+    let result = "<pre>";
+    el = el.json();
+    for (const i in el) {
+        if ((globalThis.BS.getType(el[i])) == "int") {
+            result += `<span style=\"color: darkblue;\">${i}</span>: <span style=\"color: purple\">${el[i]}</span><br>`;
+        } else {
+            if ((globalThis.BS.getType(el[i])) == "array") {
+                result += `<span style=\"color: darkblue;\">${i}</span>: <span style=\"color: purple\">${JSON.stringify(el[i], null, 2)}</span><br>`;
+            }
+        }
     }
-    for (const i in b) {
-        r.push(b[i]);
-    }
-    return r;
+    document.body.innerHTML = result + "</pre>";
 }
-log(globalThis.BS.getType(1 + 1 + 1.5));
-log(join([1, 10, 2, 3], [0, 10, 2]));
-log("success");
-let obj = {
-    if: 1,
-};
+let canvas = globalThis.BS.Node("canvas", "canvas", null, null);
+let ctx = canvas.getContext("2d");
+canvas.width = 600;
+canvas.height = 600;
+document.body.append(canvas);
+let p = 600 / 8;
+let r = true;
+for (const i of range(8)) {
+    for (const j of range(8)) {
+        if (r) {
+            ctx.fillStyle = "black";
+        } else {
+            ctx.fillStyle = "white";
+        }
+        ctx.fillRect(p * j, p * i, p, p);
+        r = !r;
+    }
+    r = !r;
+}
 //})();

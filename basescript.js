@@ -43,9 +43,7 @@ var grammar = {
     {"name": "statements$ebnf$1$subexpression$1", "symbols": ["_", "statement"], "postprocess": v => v[1]},
     {"name": "statements$ebnf$1", "symbols": ["statements$ebnf$1", "statements$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "statements", "symbols": ["statements$ebnf$1", "_"], "postprocess": v => v[0]},
-    {"name": "statement$subexpression$1", "symbols": [{"literal":";"}]},
-    {"name": "statement$subexpression$1", "symbols": [/[\n]/]},
-    {"name": "statement", "symbols": ["var_assign", "_", "statement$subexpression$1"], "postprocess": id},
+    {"name": "statement", "symbols": ["var_assign", "EOL"], "postprocess": id},
     {"name": "statement", "symbols": ["function_declaration"], "postprocess": id},
     {"name": "statement", "symbols": ["class_declaration"], "postprocess": id},
     {"name": "statement", "symbols": ["with"], "postprocess": id},
@@ -54,9 +52,7 @@ var grammar = {
     {"name": "statement", "symbols": ["for_block"], "postprocess": id},
     {"name": "statement", "symbols": ["try_catch_finally"], "postprocess": id},
     {"name": "statement", "symbols": ["type_declaration"], "postprocess": id},
-    {"name": "statement$subexpression$2", "symbols": [{"literal":";"}]},
-    {"name": "statement$subexpression$2", "symbols": [/[\n]/]},
-    {"name": "statement", "symbols": ["value_reassign", "_", "statement$subexpression$2"], "postprocess":  v => ({
+    {"name": "statement", "symbols": ["value_reassign", "EOL"], "postprocess":  v => ({
         	type: 'statement_value',
         	value: v[0],
         	line: v[0].line,
@@ -64,53 +60,35 @@ var grammar = {
         	lineBreak: v[0].lineBreak,
         	offset: v[0].offset,
         }) },
-    {"name": "statement$subexpression$3", "symbols": [{"literal":";"}]},
-    {"name": "statement$subexpression$3", "symbols": [/[\n]/]},
-    {"name": "statement", "symbols": [{"literal":"debugger"}, "_", "statement$subexpression$3"], "postprocess": v => Object.assign(v[0], {type: 'debugger'})},
-    {"name": "statement$subexpression$4", "symbols": [{"literal":";"}]},
-    {"name": "statement$subexpression$4", "symbols": [/[\n]/]},
-    {"name": "statement", "symbols": [{"literal":"delete"}, "__", "value", "_", "statement$subexpression$4"], "postprocess": v => assign(v[0], {type: 'delete', value: v[2] })},
+    {"name": "statement", "symbols": [{"literal":"debugger"}, "EOL"], "postprocess": v => Object.assign(v[0], {type: 'debugger'})},
+    {"name": "statement", "symbols": [{"literal":"delete"}, "__", "value", "EOL"], "postprocess": v => assign(v[0], {type: 'delete', value: v[2] })},
     {"name": "statement", "symbols": ["return"], "postprocess": id},
-    {"name": "statement$subexpression$5", "symbols": [{"literal":";"}]},
-    {"name": "statement$subexpression$5", "symbols": [/[\n]/]},
-    {"name": "statement", "symbols": [{"literal":"throw"}, "__", "value", "_", "statement$subexpression$5"], "postprocess":  v => assign(v[0], {
+    {"name": "statement", "symbols": [{"literal":"throw"}, "__", "value", "EOL"], "postprocess":  v => assign(v[0], {
         	type: 'throw',
         	value: v[2]
         }) },
-    {"name": "statement$subexpression$6", "symbols": [{"literal":"break"}]},
-    {"name": "statement$subexpression$6", "symbols": [{"literal":"continue"}]},
-    {"name": "statement$subexpression$7", "symbols": [{"literal":";"}]},
-    {"name": "statement$subexpression$7", "symbols": [/[\n]/]},
-    {"name": "statement", "symbols": ["statement$subexpression$6", "_", "statement$subexpression$7"], "postprocess":  v => assign(v[0][0], {
+    {"name": "statement$subexpression$1", "symbols": [{"literal":"break"}]},
+    {"name": "statement$subexpression$1", "symbols": [{"literal":"continue"}]},
+    {"name": "statement", "symbols": ["statement$subexpression$1", "EOL"], "postprocess":  v => assign(v[0][0], {
         	type: 'break_continue',
         }) },
-    {"name": "statement$subexpression$8", "symbols": [{"literal":";"}]},
-    {"name": "statement$subexpression$8", "symbols": [/[\n]/]},
-    {"name": "statement", "symbols": [{"literal":"echo"}, "__", "value", "_", "statement$subexpression$8"], "postprocess":  v => assign(v[0], {
+    {"name": "statement", "symbols": [{"literal":"echo"}, "__", "value", "EOL"], "postprocess":  v => assign(v[0], {
         	type: 'echo',
         	value: v[2]
         }) },
-    {"name": "statement$subexpression$9", "symbols": [{"literal":";"}]},
-    {"name": "statement$subexpression$9", "symbols": [/[\n]/]},
-    {"name": "statement", "symbols": [(lexer.has("eval") ? {type: "eval"} : eval), "__", "value", "_", "statement$subexpression$9"], "postprocess":  v => assign(v[0], {
+    {"name": "statement", "symbols": [(lexer.has("eval") ? {type: "eval"} : eval), "__", "value", "EOL"], "postprocess":  v => assign(v[0], {
         	type: 'eval',
         	value: v[2]
         }) },
-    {"name": "statement$subexpression$10", "symbols": [{"literal":";"}]},
-    {"name": "statement$subexpression$10", "symbols": [/[\n]/]},
-    {"name": "statement", "symbols": [{"literal":"@import"}, "__", "value", "_", "statement$subexpression$10"], "postprocess":  v => assign(v[0], {
+    {"name": "statement", "symbols": [{"literal":"@import"}, "__", "value", "EOL"], "postprocess":  v => assign(v[0], {
         	type: '@import',
         	value: v[2]
         }) },
-    {"name": "statement$subexpression$11", "symbols": [{"literal":";"}]},
-    {"name": "statement$subexpression$11", "symbols": [/[\n]/]},
-    {"name": "statement", "symbols": [{"literal":"@include"}, "__", "string", "_", "statement$subexpression$11"], "postprocess":  v => assign(v[0], {
+    {"name": "statement", "symbols": [{"literal":"@include"}, "__", "string", "EOL"], "postprocess":  v => assign(v[0], {
         	type: '@include',
         	value: v[2]
         }) },
-    {"name": "statement$subexpression$12", "symbols": [{"literal":";"}]},
-    {"name": "statement$subexpression$12", "symbols": [/[\n]/]},
-    {"name": "statement", "symbols": ["value", "_", "statement$subexpression$12"], "postprocess":  v => ({
+    {"name": "statement", "symbols": ["value", "EOL"], "postprocess":  v => ({
         	type: 'statement_value',
         	value: v[0],
         	line: v[0].line,
@@ -119,6 +97,13 @@ var grammar = {
         	offset: v[0].offset,
         }) },
     {"name": "statement", "symbols": [{"literal":";"}], "postprocess": id},
+    {"name": "EOL", "symbols": ["_", {"literal":";"}], "postprocess": v => v[1]},
+    {"name": "EOL$ebnf$1", "symbols": []},
+    {"name": "EOL$ebnf$1$subexpression$1", "symbols": [/[ \t]/, (lexer.has("comment") ? {type: "comment"} : comment)]},
+    {"name": "EOL$ebnf$1", "symbols": ["EOL$ebnf$1", "EOL$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "EOL$ebnf$2", "symbols": []},
+    {"name": "EOL$ebnf$2", "symbols": ["EOL$ebnf$2", /[ \t]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "EOL", "symbols": ["EOL$ebnf$1", "EOL$ebnf$2", /[\n]/, "_"]},
     {"name": "sleep", "symbols": [{"literal":"sleep"}, "_", {"literal":"("}, "_", "number", "_", {"literal":")"}], "postprocess":  v => ({
         	type: 'sleep',
         	value: v[4],
@@ -220,6 +205,7 @@ var grammar = {
         }) },
     {"name": "statements_block", "symbols": ["_", {"literal":"{"}, "statements", {"literal":"}"}], "postprocess": v => v[2]},
     {"name": "statements_block", "symbols": ["_", {"literal":":"}, "_", "statement"], "postprocess": v => [v[3]]},
+    {"name": "statements_block", "symbols": ["_", {"literal":"do"}, "_", "statement"], "postprocess": v => [v[3]]},
     {"name": "while_block", "symbols": [{"literal":"while"}, "statement_condition", "statements_block"], "postprocess":   v => {
         	return Object.assign(v[0], {
         		type: 'while',
@@ -496,6 +482,10 @@ var grammar = {
         		value: v[2]
         	})
         } },
+    {"name": "value", "symbols": [{"literal":"@text"}, "__", "value"], "postprocess":  v => assign(v[0], {
+        	type: 'html_text',
+        	value: v[2]
+        }) },
     {"name": "value", "symbols": ["value", "__", {"literal":"instanceof"}, "__", "value"], "postprocess":  v => ({
         	type: 'instanceof',
         	left: v[0],
@@ -583,9 +573,7 @@ var grammar = {
         		value: output
         	});*/
         } },
-    {"name": "case_single_valued$ebnf$1$subexpression$1$subexpression$1", "symbols": [{"literal":";"}]},
-    {"name": "case_single_valued$ebnf$1$subexpression$1$subexpression$1", "symbols": [/[\n]/]},
-    {"name": "case_single_valued$ebnf$1$subexpression$1", "symbols": ["value", "_", "case_single_valued$ebnf$1$subexpression$1$subexpression$1"]},
+    {"name": "case_single_valued$ebnf$1$subexpression$1", "symbols": ["value", "EOL"]},
     {"name": "case_single_valued$ebnf$1", "symbols": ["case_single_valued$ebnf$1$subexpression$1"], "postprocess": id},
     {"name": "case_single_valued$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "case_single_valued", "symbols": [{"literal":"|"}, "_", "value", "_", {"literal":":"}, "_", "case_single_valued$ebnf$1"], "postprocess":  v => Object.assign(v[0], {
@@ -598,9 +586,7 @@ var grammar = {
         	value: v[2],
         	statements: v[6] ? v[6][0] : []
         }) },
-    {"name": "case_single_valued$ebnf$2$subexpression$1$subexpression$1", "symbols": [{"literal":";"}]},
-    {"name": "case_single_valued$ebnf$2$subexpression$1$subexpression$1", "symbols": [/[\n]/]},
-    {"name": "case_single_valued$ebnf$2$subexpression$1", "symbols": ["value", "_", "case_single_valued$ebnf$2$subexpression$1$subexpression$1"]},
+    {"name": "case_single_valued$ebnf$2$subexpression$1", "symbols": ["value", "EOL"]},
     {"name": "case_single_valued$ebnf$2", "symbols": ["case_single_valued$ebnf$2$subexpression$1"], "postprocess": id},
     {"name": "case_single_valued$ebnf$2", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "case_single_valued", "symbols": [{"literal":"default"}, "_", {"literal":":"}, "_", "case_single_valued$ebnf$2"], "postprocess":  v => Object.assign(v[0], {
@@ -684,13 +670,14 @@ var grammar = {
     {"name": "pair$ebnf$1$subexpression$1", "symbols": [{"literal":"async"}, "__"]},
     {"name": "pair$ebnf$1", "symbols": ["pair$ebnf$1$subexpression$1"], "postprocess": id},
     {"name": "pair$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "pair", "symbols": ["pair$ebnf$1", "key", "_", "arguments", "_", "statements_block"], "postprocess":  v => assign(v[1], {
-        	type: 'annonymous_function',
+    {"name": "pair", "symbols": ["pair$ebnf$1", "key", "_", "arguments_with_types", "_", "statements_block"], "postprocess":  v => [v[1], {
+        	type: 'es6_key_value',
         	arguments: v[3],
+        	key: v[1],
         	value: v[5],
         	async: v[0] ? true : false
         	// .text is the key
-        }) },
+        }] },
     {"name": "pair", "symbols": ["key", "_", {"literal":":"}, "_", "value"], "postprocess": v => [v[0], v[4]]},
     {"name": "key", "symbols": ["string"], "postprocess": id},
     {"name": "key", "symbols": ["identifier"], "postprocess": id},
@@ -744,17 +731,13 @@ var grammar = {
         		// text is one of the options above: string; int...
         	})
         } },
-    {"name": "return$subexpression$1", "symbols": [{"literal":";"}]},
-    {"name": "return$subexpression$1", "symbols": [/[\n]/]},
-    {"name": "return", "symbols": [{"literal":"return"}, "__", "value", "_", "return$subexpression$1"], "postprocess":  v => {
+    {"name": "return", "symbols": [{"literal":"return"}, "__", "value", "EOL"], "postprocess":  v => {
         	return assign(v[0], {
         		type: 'return',
         		value: v[2]
         	})
         } },
-    {"name": "return$subexpression$2", "symbols": [{"literal":";"}]},
-    {"name": "return$subexpression$2", "symbols": [/[\n]/]},
-    {"name": "return", "symbols": [{"literal":"return"}, "_", "return$subexpression$2"], "postprocess":  v => {
+    {"name": "return", "symbols": [{"literal":"return"}, "EOL"], "postprocess":  v => {
         	return assign(v[0], {
         		type: 'return',
         		value: undefined

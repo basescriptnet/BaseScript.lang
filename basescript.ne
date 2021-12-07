@@ -9,7 +9,7 @@ process -> %comment:* statements %comment:* {% v => v[1] %}
 # statements
 statements -> (_ statement {% v => v[1] %}):* _ {% v => v[0] %}
 
-statement -> var_assign _ (";" | [\n]) {% id %}
+statement -> var_assign EOL {% id %}
 	# | var_reassign _ (";" | [\n]) {% id %}
 	| function_declaration {% id %}
 	| class_declaration {% id %}
@@ -20,7 +20,7 @@ statement -> var_assign _ (";" | [\n]) {% id %}
 	| try_catch_finally {% id %}
 	| type_declaration {% id %}
 	# | sleep _ (";" | [\n]) {% id %}
-	| value_reassign _ (";" | [\n]) {% v => ({
+	| value_reassign EOL {% v => ({
 		type: 'statement_value',
 		value: v[0],
 		line: v[0].line,
@@ -28,33 +28,33 @@ statement -> var_assign _ (";" | [\n]) {% id %}
 		lineBreak: v[0].lineBreak,
 		offset: v[0].offset,
 	}) %}
-	| "debugger" _ (";" | [\n]) {% v => Object.assign(v[0], {type: 'debugger'}) %}
-	| "delete" __ value _ (";" | [\n]) {% v => assign(v[0], {type: 'delete', value: v[2] }) %}
+	| "debugger" EOL {% v => Object.assign(v[0], {type: 'debugger'}) %}
+	| "delete" __ value EOL {% v => assign(v[0], {type: 'delete', value: v[2] }) %}
 	| return {% id %}
-	| "throw" __ value _ (";" | [\n]) {% v => assign(v[0], {
+	| "throw" __ value EOL {% v => assign(v[0], {
 		type: 'throw',
 		value: v[2]
 	}) %}
-	| ("break" | "continue") _ (";" | [\n]) {% v => assign(v[0][0], {
+	| ("break" | "continue") EOL {% v => assign(v[0][0], {
 		type: 'break_continue',
 	}) %}
-	| "echo" __ value _ (";" | [\n]) {% v => assign(v[0], {
+	| "echo" __ value EOL {% v => assign(v[0], {
 		type: 'echo',
 		value: v[2]
 	}) %}
-	| %eval __ value _ (";" | [\n]) {% v => assign(v[0], {
+	| %eval __ value EOL {% v => assign(v[0], {
 		type: 'eval',
 		value: v[2]
 	}) %}
-	| "@import" __ value _ (";" | [\n]) {% v => assign(v[0], {
+	| "@import" __ value EOL {% v => assign(v[0], {
 		type: '@import',
 		value: v[2]
 	}) %}
-	| "@include" __ string _ (";" | [\n]) {% v => assign(v[0], {
+	| "@include" __ string EOL {% v => assign(v[0], {
 		type: '@include',
 		value: v[2]
 	}) %}
-	| value _ (";" | [\n]) {% v => ({
+	| value EOL {% v => ({
 		type: 'statement_value',
 		value: v[0],
 		line: v[0].line,
@@ -65,6 +65,9 @@ statement -> var_assign _ (";" | [\n]) {% id %}
 	| ";" {% id %}
 	
 	# | switch {% id %}
+
+EOL -> _ ";" {% v => v[1] %}
+	| ([ \t] %comment):* [ \t]:* [\n] _
 
 sleep -> "sleep" _ "(" _ number _ ")" {% v => ({
 	type: 'sleep',
@@ -161,6 +164,7 @@ with -> "with" __ value statements_block  {% v => assign(v[0], {
 }) %}
 statements_block -> _ "{" statements "}" {% v => v[2] %}
 	| _ ":" _ statement {% v => [v[3]] %}
+	| _ "do" _ statement {% v => [v[3]] %}
 
 # loops
 while_block -> "while" statement_condition statements_block {%  v => {
@@ -526,6 +530,10 @@ value -> value _ "[" _ value _ "]" _ arguments {% v => {
 			value: v[2]
 		})
 	} %}
+	| "@text" __ value {% v => assign(v[0], {
+		type: 'html_text',
+		value: v[2]
+	}) %}
 	| value __ "instanceof" __ value {% v => ({
 		type: 'instanceof',
 		left: v[0],
@@ -613,7 +621,7 @@ attrubutes -> var_reassign (__ var_reassign):* {% v => {
 } %}
 
 # switch case addons
-case_single_valued -> "|" _ value _ ":" _ (value _ (";" | [\n])):? {% v => Object.assign(v[0], {
+case_single_valued -> "|" _ value _ ":" _ (value EOL):? {% v => Object.assign(v[0], {
 		type: 'case_with_break',
 		value: v[2],
 		statements: v[6] ? v[6][0] : []
@@ -623,7 +631,7 @@ case_single_valued -> "|" _ value _ ":" _ (value _ (";" | [\n])):? {% v => Objec
 		value: v[2],
 		statements: v[6] ? v[6][0] : []
 	}) %}
-	| "default" _ ":" _ (value _ (";" | [\n])):? {% v => Object.assign(v[0], {
+	| "default" _ ":" _ (value EOL):? {% v => Object.assign(v[0], {
 		type: 'case_default',
 		value: v[4] ? v[4][0] : [null],
 	}) %}
@@ -702,13 +710,19 @@ object -> "{" _ "}" {% v => {
 		});
 	} %}
 
-pair -> ("async" __):? key _ arguments _ statements_block {% v => assign(v[1], {
-		type: 'annonymous_function',
+pair -> 
+# ("async" __):? es6_key_value {% v => assign(v[1], {
+# 	type: 'es6_key_value',
+# 	async: v[0],
+# }) %}
+	("async" __):? key _ arguments_with_types _ statements_block {% v => [v[1], {
+		type: 'es6_key_value',
 		arguments: v[3],
+		key: v[1],
 		value: v[5],
 		async: v[0] ? true : false
 		// .text is the key
-	}) %}
+	}] %}
 	| key _ ":" _ value {% v => [v[0], v[4]] %}
 
 key -> string {% id %}
@@ -750,13 +764,13 @@ annonymous_function -> "(" _ annonymous_function _ ")" _ arguments {% v => {
 	})
 } %}
 
-return -> "return" __ value _ (";" | [\n]) {% v => {
+return -> "return" __ value EOL {% v => {
 	return assign(v[0], {
 		type: 'return',
 		value: v[2]
 	})
 } %}
-	| "return" _ (";" | [\n])  {% v => {
+	| "return" EOL  {% v => {
 	return assign(v[0], {
 		type: 'return',
 		value: undefined

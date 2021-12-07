@@ -6,17 +6,33 @@ type Unique (array value) {
     }
     return true
 }
-function join (Unique a, Unique b) {
-    \r = []
-    for i in a:
-        r.push(a[i])
-    for i in b:
-        r.push(b[i])
-    return r
+function dumpHTML (HTML el) {
+    \result = '<pre>'
+    el = el.json()
+    for i in el {
+        if (typeof el[i]) == 'int' {
+            result += `<span style="color: darkblue;">${i}</span>: <span style="color: purple">${el[i]}</span><br>`
+        } else if (typeof el[i]) == 'array' {
+            result += `<span style="color: darkblue;">${i}</span>: <span style="color: purple">${JSON.stringify(el[i], null, 2)}</span><br>`
+        }
+    }
+    document.body.innerHTML = result + '</pre>'
 }
-log(typeof 1+1+1.5)
-log(join([1, 10, 2, 3], [0, 10, 2]))
-log('success')
-\obj = {
-    if: 1
+// dumpHTML(document.body)
+\canvas = <canvas#canvas/>
+\ctx = canvas.getContext('2d')
+canvas.width = 600
+canvas.height = 600
+document.body.append(canvas)
+\p = 600 / 8
+\r = true
+for i of range(8) {
+    for j of range(8) {
+        if r: ctx.fillStyle = 'black'
+        else ctx.fillStyle = 'white'
+        ctx.fillRect(p * j, p * i, p, p);
+        r = !r
+    }
+    r = !r
+    //
 }

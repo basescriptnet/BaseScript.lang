@@ -46,7 +46,7 @@ globalThis.BS = {
             length = childNodes.length;
             arr = obj.childNodes = new Array(length);
             for (let i = 0; i < length; i++) {
-                arr[i] = toJSON(childNodes[i]);
+                arr[i] = this.DOMtoJSON(childNodes[i]);
             }
         }
         return obj;
@@ -91,9 +91,6 @@ globalThis.BS = {
         string (value) {
             return typeof value === 'string';
         },
-        object (value) {
-            return typeof value === 'object' && value !== null;
-        },
         function (value) {
             return typeof value === 'function';
         },
@@ -102,7 +99,13 @@ globalThis.BS = {
         },
         boolean (value) {
             return typeof value === 'boolean';
-        }
+        },
+        HTML (value) {
+            return value instanceof Element;
+        },
+        object (value) {
+            return typeof value === 'object' && value !== null;
+        },
     },
     getType (value) {
         for (let i in this.types) {
@@ -128,6 +131,9 @@ Element.prototype.append = function (children) {
         this._append(children);
     }
     return this;
+}
+Element.prototype.json = function () {
+    return globalThis.BS.DOMtoJSON(this);
 }
 Element.prototype.text = function (content) {
     if (content === void 0) {
