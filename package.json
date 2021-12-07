@@ -37,5 +37,8 @@
     "moo": "^0.5.1",
     "nearley": "^2.20.1",
     "npm-watch": "^0.11.0"
+  },
+  "devDependencies": {
+    "nearley-unparse": "^1.0.1"
   }
 }

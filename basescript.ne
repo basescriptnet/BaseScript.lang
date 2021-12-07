@@ -9,16 +9,18 @@ process -> %comment:* statements %comment:* {% v => v[1] %}
 # statements
 statements -> (_ statement {% v => v[1] %}):* _ {% v => v[0] %}
 
-statement -> var_assign _ ";" {% id %}
-	# | var_reassign _ ";" {% id %}
+statement -> var_assign _ (";" | [\n]) {% id %}
+	# | var_reassign _ (";" | [\n]) {% id %}
 	| function_declaration {% id %}
+	| class_declaration {% id %}
 	| with {% id %}
 	| if_block {% id %}
 	| while_block {% id %}
 	| for_block {% id %}
 	| try_catch_finally {% id %}
-	# | sleep _ ";" {% id %}
-	| value_reassign _ ";" {% v => ({
+	| type_declaration {% id %}
+	# | sleep _ (";" | [\n]) {% id %}
+	| value_reassign _ (";" | [\n]) {% v => ({
 		type: 'statement_value',
 		value: v[0],
 		line: v[0].line,
@@ -26,32 +28,33 @@ statement -> var_assign _ ";" {% id %}
 		lineBreak: v[0].lineBreak,
 		offset: v[0].offset,
 	}) %}
-	| "debugger" _ ";" {% v => Object.assign(v[0], {type: 'debugger'}) %}
+	| "debugger" _ (";" | [\n]) {% v => Object.assign(v[0], {type: 'debugger'}) %}
+	| "delete" __ value _ (";" | [\n]) {% v => assign(v[0], {type: 'delete', value: v[2] }) %}
 	| return {% id %}
-	| "throw" __ value _ ";" {% v => assign(v[0], {
+	| "throw" __ value _ (";" | [\n]) {% v => assign(v[0], {
 		type: 'throw',
 		value: v[2]
 	}) %}
-	| ("break" | "continue") _ ";" {% v => assign(v[0][0], {
+	| ("break" | "continue") _ (";" | [\n]) {% v => assign(v[0][0], {
 		type: 'break_continue',
 	}) %}
-	| "echo" __ value _ ";" {% v => assign(v[0], {
+	| "echo" __ value _ (";" | [\n]) {% v => assign(v[0], {
 		type: 'echo',
 		value: v[2]
 	}) %}
-	| %eval __ value _ ";" {% v => assign(v[0], {
+	| %eval __ value _ (";" | [\n]) {% v => assign(v[0], {
 		type: 'eval',
 		value: v[2]
 	}) %}
-	| "@import" __ value _ ";" {% v => assign(v[0], {
+	| "@import" __ value _ (";" | [\n]) {% v => assign(v[0], {
 		type: '@import',
 		value: v[2]
 	}) %}
-	| "@include" __ string _ ";" {% v => assign(v[0], {
+	| "@include" __ string _ (";" | [\n]) {% v => assign(v[0], {
 		type: '@include',
 		value: v[2]
 	}) %}
-	| value _ ";" {% v => ({
+	| value _ (";" | [\n]) {% v => ({
 		type: 'statement_value',
 		value: v[0],
 		line: v[0].line,
@@ -71,10 +74,38 @@ sleep -> "sleep" _ "(" _ number _ ")" {% v => ({
 	col: v[0].col
 }) %}
 
+type_declaration -> "type" __ identifier _ arguments_with_types _ statements_block {% v => {
+	return assign(v[0], {
+		type: 'type_declaration',
+		identifier: v[2],
+		arguments: v[4],
+		value: v[6]
+	})
+} %}
+
 switch -> "switch*" _ value _ "{" (_ case_single_valued):* _ "}" {% v => Object.assign(v[0], {
 	type: 'switch*',
 	value: v[2],
 	cases: v[5] ? v[5].map(i => i[1]) : []
+}) %}
+# classes
+class_declaration -> "class" _ identifier _ "{" _ construct (_ es6_key_value {% v => v[1] %}):* _ "}" {% v => assign(v[0], {
+	type: 'class_declaration',
+	identifier: v[2],
+	construct: v[6],
+	value: v[7] 
+}) %}
+construct -> "constructor" _ arguments_with_types statements_block {% v => ({
+	type: 'construct',
+	arguments: v[2],
+	value: v[3]
+}) %}
+# add async
+es6_key_value -> identifier _ arguments_with_types statements_block {% v => ({
+	type: 'es6_key_value',
+	key: v[0],
+	arguments: v[2],
+	value: v[3],
 }) %}
 # try catch finally
 try_catch_finally -> try_catch (_ finally):? {% v => ({
@@ -582,7 +613,7 @@ attrubutes -> var_reassign (__ var_reassign):* {% v => {
 } %}
 
 # switch case addons
-case_single_valued -> "|" _ value _ ":" _ (value _ ";"):? {% v => Object.assign(v[0], {
+case_single_valued -> "|" _ value _ ":" _ (value _ (";" | [\n])):? {% v => Object.assign(v[0], {
 		type: 'case_with_break',
 		value: v[2],
 		statements: v[6] ? v[6][0] : []
@@ -592,7 +623,7 @@ case_single_valued -> "|" _ value _ ":" _ (value _ ";"):? {% v => Object.assign(
 		value: v[2],
 		statements: v[6] ? v[6][0] : []
 	}) %}
-	| "default" _ ":" _ (value _ ";"):? {% v => Object.assign(v[0], {
+	| "default" _ ":" _ (value _ (";" | [\n])):? {% v => Object.assign(v[0], {
 		type: 'case_default',
 		value: v[4] ? v[4][0] : [null],
 	}) %}
@@ -679,17 +710,14 @@ pair -> ("async" __):? key _ arguments _ statements_block {% v => assign(v[1], {
 		// .text is the key
 	}) %}
 	| key _ ":" _ value {% v => [v[0], v[4]] %}
-# {% v => assign(v[0], {
-# 	type: 'key_value',
-# 	key: v[0].text,
-# 	value: v[4]
-# }) %}
 
 key -> string {% id %}
 	| identifier {% id %}
+	| %keyword {% id %}
 
 # functions
-function_declaration -> ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") __ identifier _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
+# function_declaration -> ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") __ identifier _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
+function_declaration -> ("async" __):? ("function") __ identifier _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
 	// console.log(v[0][0].value)
 	return assign(v[1][0], {
 		type: 'function_declaration',
@@ -708,7 +736,8 @@ annonymous_function -> "(" _ annonymous_function _ ")" _ arguments {% v => {
 		call_arguments: v[6],
 	})
 } %}
-	| ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
+	# | ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
+	| ("async" __):? ("function") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
 	// console.log(v[0][0].value)
 	return assign(v[1][0], {
 		type: 'annonymous_function',
@@ -721,13 +750,13 @@ annonymous_function -> "(" _ annonymous_function _ ")" _ arguments {% v => {
 	})
 } %}
 
-return -> "return" __ value _ ";" {% v => {
+return -> "return" __ value _ (";" | [\n]) {% v => {
 	return assign(v[0], {
 		type: 'return',
 		value: v[2]
 	})
 } %}
-	| "return" _ ";"  {% v => {
+	| "return" _ (";" | [\n])  {% v => {
 	return assign(v[0], {
 		type: 'return',
 		value: undefined
@@ -735,28 +764,12 @@ return -> "return" __ value _ ";" {% v => {
 } %}
 
 function_call -> identifier _ arguments {% v => {
-	//debugger
-	return Object.assign(v[0], {
+	return assign(v[0], {
 		type: 'function_call',
 		arguments: v[2],
 		//identifier: v[0].value
 	})
 } %}
-# 	identifier _ arguments {% v => {
-# 	//debugger
-# 	return Object.assign(v[0], {
-# 		type: 'function_call',
-# 		arguments: v[2],
-# 		//identifier: v[0].value
-# 	})
-# } %}
-# 	| expression _ arguments {% v => {
-# 	//debugger
-# 	return Object.assign(v[0], {
-# 		type: 'function_call',
-# 		arguments: v[2],
-# 		//identifier: v[0].value
-# 	})
 # } %}
 	# this has a bug. It repeats twice
 	# | identifier __ value {% v => assign(v[0], {
@@ -768,14 +781,7 @@ function_call -> identifier _ arguments {% v => {
 	# 	//identifier: v[0].value
 	# }) %}
 
-	# | value _ arguments {% v => {
-	# 	return ({
-	# 	type: 'function_call_from_value',
-	# 	arguments: v[2],
-	# 	value: v[0],
-	# }) } %}
-
-arguments -> "(" _ ")" {% v => Object.assign(v[0], {
+arguments -> "(" _ ")" {% v => assign(v[0], {
 	type: 'arguments',
 	value: []
 }) %}
@@ -791,11 +797,11 @@ arguments -> "(" _ ")" {% v => Object.assign(v[0], {
 		});
 	} %}
 	# | value {% v => [v[0]] %}
-arguments_with_types -> "(" _ ")" {% v => Object.assign(v[0], {
+arguments_with_types -> "(" _ ")" {% v => assign(v[0], {
 	type: 'arguments_with_types',
 	value: []
 }) %}
-	| "(" _ (("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") __):? value (_ "," _ (("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") __):? value):* (_ ","):? _ ")" {% v => {
+	| "(" _ ((identifier | %keywords) __):? value (_ "," _ ((identifier | %keywords) __):? value):* (_ ","):? _ ")" {% v => {
 		let output = [v[3]];
 		let types = [v[2] ? v[2][0][0].value : 'none'];
 		for (let i in v[4]) {
@@ -809,6 +815,21 @@ arguments_with_types -> "(" _ ")" {% v => Object.assign(v[0], {
 			types: types
 		});
 	} %}
+	# | "(" _ (("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") __):? value (_ "," _ (("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") __):? value):* (_ ","):? _ ")" {% v => {
+	# 	let output = [v[3]];
+	# 	let types = [v[2] ? v[2][0][0].value : 'none'];
+	# 	for (let i in v[4]) {
+	# 		output.push(v[4][i][4]);
+	# 		types.push(v[4][i][3] ? v[4][i][3][0][0].value : 'none');
+	# 	}
+	# 	delete v[0].text
+	# 	return Object.assign(v[0], {
+	# 		type: 'arguments_with_types',
+	# 		value: output,
+	# 		types: types
+	# 	});
+	# } %}
+
 # unused math
 # additive -> multiplicative _ [+-] _ additive {% v => {
 # 	switch (v[2].value) {
@@ -837,13 +858,7 @@ arguments_with_types -> "(" _ ")" {% v => Object.assign(v[0], {
 number -> %number {% v => assign(v[0], {
 	value: v[0].value.replace(/_/g, '') 
 }) %}
-# | (number "_" {% v => v[0].value %}):+ number {% v => {
-# 	console.log(v[0])
-# 	return ({
-# 		type: 'number',
-# 		value: `${v[0][0].value}${v[1].value}`
-# 	})
-# } %}
+
 bigInt -> %number "n" {% v => assign(v[0], {
 	type: 'bigInt',
 	value: v[0].value + 'n'

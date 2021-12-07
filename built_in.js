@@ -66,6 +66,51 @@ globalThis.BS = {
         if (r) return r;
         return function () {console.warn('@import is not supported yet in browsers.')};
     })(),
+    types: {
+        array (value) {
+            return Array.isArray(value);
+        },
+        null (value) {
+            return value === null;
+        },
+        undefined (value) {
+            return value === void 0;
+        },
+        int (value) {
+            return parseInt(value) === value && !Number.isNaN(value);
+        },
+        float (value) {
+            return typeof value === 'number' && !Number.isNaN(value);
+        },
+        number (value) {
+            return typeof value === 'number' && !Number.isNaN(value);
+        },
+        NaN (value) {
+            return Number.isNaN(value);
+        },
+        string (value) {
+            return typeof value === 'string';
+        },
+        object (value) {
+            return typeof value === 'object' && value !== null;
+        },
+        function (value) {
+            return typeof value === 'function';
+        },
+        symbol (value) {
+            return typeof value === 'symbol';
+        },
+        boolean (value) {
+            return typeof value === 'boolean';
+        }
+    },
+    getType (value) {
+        for (let i in this.types) {
+            try {
+                if (this.types[i](value)) return i;
+            } catch (err) {continue}
+        }
+    }
     // require('./ast_to_js.js')// || function () {console.warn('@eval is not supported yet in browsers.')}
 };
 try {
@@ -136,6 +181,7 @@ function range(n){
     }
 }
 const PI = 3.141592653589793,
-    E = 2.718281828459045;
+    E = 2.718281828459045,
+    log = (...args) => console.log(...args);
 
 // your code below this line!

@@ -1,4 +1,22 @@
-//
-\a = 10_000_000.5;
-a += 10;
-a = a ? 20;
+type Unique (array value) {
+    \r = []
+    for i of value {
+        if r.includes(i): return false
+        r.push(i)
+    }
+    return true
+}
+function join (Unique a, Unique b) {
+    \r = []
+    for i in a:
+        r.push(a[i])
+    for i in b:
+        r.push(b[i])
+    return r
+}
+log(typeof 1+1+1.5)
+log(join([1, 10, 2, 3], [0, 10, 2]))
+log('success')
+\obj = {
+    if: 1
+}

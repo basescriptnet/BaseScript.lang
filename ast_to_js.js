@@ -9,6 +9,7 @@ module.exports = function parse (statements, tmp) {
     if (!Array.isArray(statements)) 
         statements = [statements];
     let result = '';
+    let extraResult = '';
     for (let i = 0; i < statements.length; i++) {
         let statement = statements[i];
         let value = statement.value;
@@ -26,6 +27,12 @@ module.exports = function parse (statements, tmp) {
             case 'ternary':
                 result += `${parse(value)} ? ${parse(statement.left)} : ${statement.right === null ? null : parse(statement.right)}`;
                 break;
+            case 'delete':
+                result += `delete ${parse(value)};`;
+                break;
+            // case 'inherit':
+            //     result += `${parse(value)};`;
+            //     break;
             case 'debugger':
                 result += 'debugger;';
                 break;
@@ -90,8 +97,10 @@ module.exports = function parse (statements, tmp) {
             case 'new':
             case 'await':
             case 'yield':
-            case 'typeof':
                 result += `${statement.type} ${parse(value)}`;
+                break;
+            case 'typeof':
+                result += `globalThis.BS.getType(${parse(value)})`;
                 break;
             case 'instanceof':
                 result += `${parse(statement.left)} instanceof ${parse(value)}`;
@@ -99,29 +108,35 @@ module.exports = function parse (statements, tmp) {
             case 'function_declaration':
                 var types = [];
                 result += `${statement.async ? 'async ' : ''}function ${parse(statement.identifier)}`;
-                var sav = statement.arguments.value;
-                for (let i = 0; i < sav.length; i++) {
-                    r.push(parse(sav[i], tmp));
-                    if (statement.arguments.types[i] !== 'none') {
-                        let type = statement.arguments.types[i];
-                        // types.push([statement.arguments.types[i], sav[i]]);
-                        switch (type) {
-                            case 'int':
-                                types.push(`if (parseInt(${parse(sav[i])}) !== ${parse(sav[i])}) {
-                                        throw new TypeError('"${parse(sav[i])}" should be type of int')
-                                    }`);
-                                break;
-                            case 'string':
-                                types.push(`if (typeof ${parse(sav[i])} !== 'string') {
-                                        throw new TypeError('"${parse(sav[i])}" should be type of string')
-                                    }`);
-                                break;
-                        }
-                    }
-                } 
-                // console.log(types)
-                result += `(${r.join(', ')}) {
-                    ${types.length ? types.join('') : ''}
+                // var sav = statement.arguments.value;
+                // for (let i = 0; i < sav.length; i++) {
+                //     r.push(parse(sav[i], tmp));
+                //     if (statement.arguments.types[i] !== 'none') {
+                //         let type = statement.arguments.types[i];
+                //         // types.push([statement.arguments.types[i], sav[i]]);
+                //         switch (type) {
+                //             case 'int':
+                //                 types.push(`if (parseInt(${parse(sav[i])}) !== ${parse(sav[i])}) {
+                //                         throw new TypeError('"${parse(sav[i])}" should be type of int')
+                //                     }`);
+                //                 break;
+                //             case 'string':
+                //                 types.push(`if (typeof ${parse(sav[i])} !== 'string') {
+                //                         throw new TypeError('"${parse(sav[i])}" should be type of string')
+                //                     }`);
+                //                 break;
+                //         }
+                //     }
+                // } 
+                // // console.log(types)
+                // result += `(${r.join(', ')}) {
+                //     ${types.length ? types.join('') : ''}
+                //     ${parse(statement.value, statement.text)}
+                // }`;
+                
+                var t = parse(statement.arguments);
+                result += `(${t[0]}) {
+                    ${t[1]}
                     ${parse(statement.value, statement.text)}
                 }`;
                 break;
@@ -133,31 +148,36 @@ module.exports = function parse (statements, tmp) {
             case 'annonymous_function':
                 var types = [];
                 result += `${statement.async ? 'async ' : ''}function ${statement.identifier ? parse(statement.identifier) : ''}`;
-                var sav = statement.arguments.value;
-                for (let i = 0; i < sav.length; i++) {
-                    r.push(parse(sav[i], tmp));
-                    if (statement.arguments.types[i] !== 'none') {
-                        let type = statement.arguments.types[i];
-                        // types.push([statement.arguments.types[i], sav[i]]);
-                        switch (type) {
-                            case 'int':
-                                types.push(`if (parseInt(${parse(sav[i])}) !== ${parse(sav[i])}) {
-                                        throw new TypeError('"${parse(sav[i])}" should be type of int')
-                                    }`);
-                                break;
-                            case 'string':
-                                types.push(`if (typeof ${parse(sav[i])} !== 'string') {
-                                        throw new TypeError('"${parse(sav[i])}" should be type of string')
-                                    }`);
-                                break;
-                        }
-                    }
-                } 
+                // var sav = statement.arguments.value;
+                // for (let i = 0; i < sav.length; i++) {
+                //     r.push(parse(sav[i], tmp));
+                //     if (statement.arguments.types[i] !== 'none') {
+                //         let type = statement.arguments.types[i];
+                //         // types.push([statement.arguments.types[i], sav[i]]);
+                //         switch (type) {
+                //             case 'int':
+                //                 types.push(`if (parseInt(${parse(sav[i])}) !== ${parse(sav[i])}) {
+                //                         throw new TypeError('"${parse(sav[i])}" should be type of int')
+                //                     }`);
+                //                 break;
+                //             case 'string':
+                //                 types.push(`if (typeof ${parse(sav[i])} !== 'string') {
+                //                         throw new TypeError('"${parse(sav[i])}" should be type of string')
+                //                     }`);
+                //                 break;
+                //         }
+                //     }
+                // } 
                 // console.log(types)
-                result += `(${r.join(', ')}) {
-                    ${types.length ? types.join('') : ''}
+                var t = parse(statement.arguments);
+                result += `(${t[0]}) {
+                    ${t[1]}
                     ${parse(statement.value, statement.text)}
                 }`;
+                // result += `(${r.join(', ')}) {
+                //     ${types.length ? types.join('') : ''}
+                //     ${parse(statement.value, statement.text)}
+                // }`;
                 break;
             case 'return':
                 if (value === void 0) {
@@ -165,21 +185,27 @@ module.exports = function parse (statements, tmp) {
                 } else {
                     value = parse(value, tmp);
                 }
-                switch (tmp) {
-                    case 'int':
-                        result += `if (parseInt(${value}) !== ${value}) {
-                                throw new TypeError('Returned value should be type of int')
-                            }`
-                        break;
-                    case 'string':
-                        result += `if (typeof ${value} !== 'string') {
-                                throw new TypeError('Returned value should be type of string')
-                            }`
-                        break;
-                    default:
-                        result += 'if (null) {}'
+                var t = '';
+                // switch (tmp) {
+                //     case 'int':
+                //         t += `if (parseInt(${value}) !== ${value}) {
+                //                 throw new TypeError('Returned value should be type of int')
+                //             }`
+                //         break;
+                //     case 'string':
+                //         t += `if (typeof ${value} !== 'string') {
+                //                 throw new TypeError('Returned value should be type of string')
+                //             }`
+                //         break;
+                //     default:
+                //         t += ''
+                // }
+                if (tmp && tmp != 'function') {
+                    result += `return globalThis.BS.types["${tmp}"](${value});`
+                    break;
                 }
-                result += `else return ${value};`;
+                result += `return ${value};`
+                // result += `${t ? t + 'else ' : ''} return ${value};`;
                 break;
             case 'identifier':
                 result += value;
@@ -441,7 +467,11 @@ module.exports = function parse (statements, tmp) {
             case 'object':
                 var output = '{';
                 for (let i in value) {
-                    output += `${i}:${parse(value[i])},`;
+                    // if (value[i].type == 'identifier' && value[i].value == 'inherit') {
+                    //     output += `${i}:(function (self) {return self["${i}"]})(this),`;
+                    // } else {
+                        output += `${i}:${parse(value[i])},`;
+                    // }
                 }
                 output += '}';
                 result += output;
@@ -451,6 +481,71 @@ module.exports = function parse (statements, tmp) {
                     result += 'this';
                     break;
                 }
+                break;
+            case 'class_declaration':
+                result += `class ${parse(statement.identifier)} {
+                    ${parse(statement.construct)}
+                    ${value ? value.map(i => parse(i)).join('\n') : ''}
+                }`
+                break;
+            case 'es6_key_value':
+                var args = parse(statement.arguments);
+                result += `${parse(statement.key)} (${args[0]}) {
+                    ${args[1]}
+                    ${parse(value)}
+                }`
+                break;
+            case 'construct':
+                var args = parse(statement.arguments);
+                result += `constructor (${args[0]}) {
+                    ${args[1]}
+                    ${parse(value, tmp)}
+                }`
+                break;
+            case 'type_declaration':
+                var t = parse(statement.arguments);
+                result += `
+                    globalThis.BS.types["${parse(statement.identifier)}"] = function (${t[0]}, required = false) {
+                        ${t[1]}
+                        if (required && typeof arguments[0] === void 0) {
+                            throw new TypeError("Missing argument at ${statement.line}:${statement.col}");
+                        }
+                        ${parse(value)}
+                    };
+                `;
+                break;
+            case 'arguments_with_types':
+                var types = [];
+                var sav = statement.value;
+                
+                for (let i = 0; i < sav.length; i++) {
+                    r.push(parse(sav[i], tmp));
+                    if (statement.types[i] !== 'none') {
+                        let type = statement.types[i];
+                        types.push(`if (!globalThis.BS.types["${type}"](${parse(sav[i])})) throw new TypeError("Argument \\"${parse(sav[i])}\\" is not type of ${type} at line ${statement.line}, col ${statement.col}.");`);
+                        // types.push([statement.types[i], sav[i]]);
+                        // switch (type) {
+                        //     case 'int':
+                        //         types.push(`if (parseInt(${parse(sav[i])}) !== ${parse(sav[i])}) {
+                        //                 throw new TypeError('"${parse(sav[i])}" should be type of int')
+                        //             }`);
+                        //         break;
+                        //     case 'string':
+                        //         types.push(`if (typeof ${parse(sav[i])} !== 'string') {
+                        //                 throw new TypeError('"${parse(sav[i])}" should be type of string')
+                        //             }`);
+                        //         break;
+                        // }
+                    }
+                } 
+                // result += `(${r.join(', ')})`;
+                return [r.join(', '), types.length ? types.join('') : '']
+                // result += `(${r.join(', ')}) {
+                //     ${types.length ? types.join('') : ''}
+                //     ${parse(statement.value, statement.text)}
+                // }`;
+                // result += `constructor (${parse(statement.arguments)}) {
+                // }`
                 break;
             case 'try':
                 result += `try {${parse(statement.value)}}`

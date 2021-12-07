@@ -14,7 +14,7 @@ module.exports = (string) => {
     // console.log(1)
     if (!/\.bs$/.test(string)) { 
         try {
-            let result = parser(string);
+            let result = parser(string+'\n');
             return result;
         } catch (err) {
             console.log(err)
@@ -24,7 +24,7 @@ module.exports = (string) => {
     // if file path is provided
     let file = readFile(string);
     try {
-        let result = parser(file);
+        let result = parser(file+'\n');
         return result;
     } catch (err) {
         console.log(err)
