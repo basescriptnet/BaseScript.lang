@@ -1,38 +1,44 @@
-type Unique (array value) {
-    \r = []
-    for i of value {
-        if r.includes(i): return false
-        r.push(i)
-    }
-    return true
-}
-function dumpHTML (HTML el) {
-    \result = '<pre>'
-    el = el.json()
-    for i in el {
-        if (typeof el[i]) == 'int' {
-            result += `<span style="color: darkblue;">${i}</span>: <span style="color: purple">${el[i]}</span><br>`
-        } else if (typeof el[i]) == 'array' {
-            result += `<span style="color: darkblue;">${i}</span>: <span style="color: purple">${JSON.stringify(el[i], null, 2)}</span><br>`
-        }
-    }
-    document.body.innerHTML = result + '</pre>'
-}
+
+// document.body.append(canvas)(canvas) // *2 results
+// type Unique (Array value) {
+//     \r = []
+//     for i of value {
+//         if r.includes(i): return false // *2 results
+//         r.push.f(i).r
+//         r +=1
+//     }
+//     return true
+// }
+// function dumpHTML (el) { // *2 result for functions
+//     \result = '<pre>'
+//     el = el.json()
+//     for i in el {
+// // //         // log(typeof el[i]);
+// //         // if (typeof el[i]) == 'int' { // *2 results
+// //         //     // result += `<span style="color: darkblue;">${i}</span>: <span style="color: purple">${el[i]}</span><br>`;
+// //         // }
+// //         // else if (typeof el[i]) == 'array' { // *2 results
+// //         // //     result += `<span style="color: darkblue;">${i}</span>: <span style="color: purple">${JSON.stringify(el[i], null, 2)}</span><br>`;
+// //         // }
+//     }
+// //     // document.body.innerHTML = result + '</pre>'; // *2 results
+// // }
 // dumpHTML(document.body)
 \canvas = <canvas#canvas/>
-\ctx = canvas.getContext('2d')
+\ctx = canvas.getContext('2d') // *2 results
 canvas.width = 600
 canvas.height = 600
-document.body.append(canvas)
+document.body.append(canvas) // *2 results
 \p = 600 / 8
 \r = true
 for i of range(8) {
     for j of range(8) {
         if r: ctx.fillStyle = 'black'
         else ctx.fillStyle = 'white'
-        ctx.fillRect(p * j, p * i, p, p);
+        ctx.fillRect(p * j, p * i, p, p) // *75 results
         r = !r
+        null
+        // "100px" " solid" // *2 results
     }
     r = !r
-    //
 }

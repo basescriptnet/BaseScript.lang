@@ -218,36 +218,6 @@ const PI = 3.141592653589793,
 
 // your code below this line!
 
-globalThis.BS.types["Unique"] = function(value, required = false) {
-    if (!globalThis.BS.types["array"](value)) throw new TypeError("Argument \"value\" is not type of array at line 1, col 13.");
-    if (required && typeof arguments[0] === void 0) {
-        throw new TypeError("Missing argument at 1:1");
-    }
-    let r = [];
-    for (const i of value) {
-        if (r.includes(i)) {
-            return false;
-        }
-        r.push(i);
-    }
-    return true;
-};
-
-function dumpHTML(el) {
-    if (!globalThis.BS.types["HTML"](el)) throw new TypeError("Argument \"el\" is not type of HTML at line 9, col 19.");
-    let result = "<pre>";
-    el = el.json();
-    for (const i in el) {
-        if ((globalThis.BS.getType(el[i])) == "int") {
-            result += `<span style=\"color: darkblue;\">${i}</span>: <span style=\"color: purple\">${el[i]}</span><br>`;
-        } else {
-            if ((globalThis.BS.getType(el[i])) == "array") {
-                result += `<span style=\"color: darkblue;\">${i}</span>: <span style=\"color: purple\">${JSON.stringify(el[i], null, 2)}</span><br>`;
-            }
-        }
-    }
-    document.body.innerHTML = result + "</pre>";
-}
 let canvas = globalThis.BS.Node("canvas", "canvas", null, null);
 let ctx = canvas.getContext("2d");
 canvas.width = 600;
@@ -264,6 +234,7 @@ for (const i of range(8)) {
         }
         ctx.fillRect(p * j, p * i, p, p);
         r = !r;
+        null;
     }
     r = !r;
 }

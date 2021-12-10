@@ -1,115 +1,68 @@
 @{%
 	console.clear();
 	const lexer = require('./lexer');
+	const assign = Object.assign.bind(Object);
 %}
 
 @lexer lexer
 
-process -> %comment:* statements %comment:* {% v => v[1] %}
-# statements
+process -> statements {% id %}
+### statements ###
 statements -> (_ statement {% v => v[1] %}):* _ {% v => v[0] %}
 
-statement -> var_assign EOL {% id %}
-	# | var_reassign _ (";" | [\n]) {% id %}
-	| function_declaration {% id %}
+statement -> blocks {% id %}
 	| class_declaration {% id %}
 	| with {% id %}
+	| "debugger" EOL {% statement.debugger %}
+	| "delete" __ value EOL {% statement.delete %}
+	| return {% id %}
+	| "throw" __ value EOL {% statement.throw %}
+	| ("break" | "continue") EOL {% statement.break_continue %}
+	| "echo" __ value EOL {% statement.echo %}
+	| %eval __ value EOL {% statement.eval %}
+	| "@import" __ value EOL {% statement.import %}
+	| "@include" __ string EOL {% statement.include %}
+	# | value _ "=" _ value {% v => %}
+	| var_assign EOL {% id %}
+	| value_reassign EOL {% statement.value_reassign %}
+	| value EOL {% statement.value %}
+	# | (value {% statement.value %} | value_reassign {% statement.value_reassign %} | var_assign {% id %}) EOL {% id %}
+	| ";" {% id %}
+
+blocks -> function_declaration {% id %}
+	| type_declaration {% id %}
 	| if_block {% id %}
 	| while_block {% id %}
 	| for_block {% id %}
 	| try_catch_finally {% id %}
-	| type_declaration {% id %}
-	# | sleep _ (";" | [\n]) {% id %}
-	| value_reassign EOL {% v => ({
-		type: 'statement_value',
-		value: v[0],
-		line: v[0].line,
-		col: v[0].col,
-		lineBreak: v[0].lineBreak,
-		offset: v[0].offset,
-	}) %}
-	| "debugger" EOL {% v => Object.assign(v[0], {type: 'debugger'}) %}
-	| "delete" __ value EOL {% v => assign(v[0], {type: 'delete', value: v[2] }) %}
-	| return {% id %}
-	| "throw" __ value EOL {% v => assign(v[0], {
-		type: 'throw',
-		value: v[2]
-	}) %}
-	| ("break" | "continue") EOL {% v => assign(v[0][0], {
-		type: 'break_continue',
-	}) %}
-	| "echo" __ value EOL {% v => assign(v[0], {
-		type: 'echo',
-		value: v[2]
-	}) %}
-	| %eval __ value EOL {% v => assign(v[0], {
-		type: 'eval',
-		value: v[2]
-	}) %}
-	| "@import" __ value EOL {% v => assign(v[0], {
-		type: '@import',
-		value: v[2]
-	}) %}
-	| "@include" __ string EOL {% v => assign(v[0], {
-		type: '@include',
-		value: v[2]
-	}) %}
-	| value EOL {% v => ({
-		type: 'statement_value',
-		value: v[0],
-		line: v[0].line,
-		col: v[0].col,
-		lineBreak: v[0].lineBreak,
-		offset: v[0].offset,
-	}) %}
-	| ";" {% id %}
-	
-	# | switch {% id %}
+### END statements ###
 
-EOL -> _ ";" {% v => v[1] %}
-	| ([ \t] %comment):* [ \t]:* [\n] _
-
-sleep -> "sleep" _ "(" _ number _ ")" {% v => ({
-	type: 'sleep',
-	value: v[4],
-	offset: v[0].offset,
-	line: v[0].line,
-	col: v[0].col
-}) %}
-
-type_declaration -> "type" __ identifier _ arguments_with_types _ statements_block {% v => {
+type_declaration -> "type" __ identifier _ arguments_with_types statements_block {% v => {
+	if (v[2].value[0].toUpperCase() != v[2].value[0]) {
+		throw new SyntaxError(`Type name must be capitalized.`)
+	}
+	//debugger
+	if (v[4].value.length == 0) {
+	//	throw new Error(`Type declaration requires at least one argument.`)
+	}
 	return assign(v[0], {
 		type: 'type_declaration',
 		identifier: v[2],
 		arguments: v[4],
-		value: v[6]
+		value: v[5]
 	})
 } %}
 
-switch -> "switch*" _ value _ "{" (_ case_single_valued):* _ "}" {% v => Object.assign(v[0], {
+switch -> "switch*" _ value _ "{" (_ case_single_valued):* _ "}" {% v => assign(v[0], {
 	type: 'switch*',
 	value: v[2],
 	cases: v[5] ? v[5].map(i => i[1]) : []
 }) %}
 # classes
-class_declaration -> "class" _ identifier _ "{" _ construct (_ es6_key_value {% v => v[1] %}):* _ "}" {% v => assign(v[0], {
-	type: 'class_declaration',
-	identifier: v[2],
-	construct: v[6],
-	value: v[7] 
-}) %}
-construct -> "constructor" _ arguments_with_types statements_block {% v => ({
-	type: 'construct',
-	arguments: v[2],
-	value: v[3]
-}) %}
+class_declaration -> "class" _ identifier _ "{" _ construct (_ es6_key_value {% v => v[1] %}):* _ "}" {% classes.parse %}
+construct -> "constructor" _ arguments_with_types statements_block {% classes.construct %}
 # add async
-es6_key_value -> identifier _ arguments_with_types statements_block {% v => ({
-	type: 'es6_key_value',
-	key: v[0],
-	arguments: v[2],
-	value: v[3],
-}) %}
+es6_key_value -> identifier _ arguments_with_types statements_block {% classes.es6_key_value %}
 # try catch finally
 try_catch_finally -> try_catch (_ finally):? {% v => ({
 	type: 'try_catch_finally',
@@ -162,6 +115,7 @@ with -> "with" __ value statements_block  {% v => assign(v[0], {
 	obj: v[2],
 	value: v[3]
 }) %}
+
 statements_block -> _ "{" statements "}" {% v => v[2] %}
 	| _ ":" _ statement {% v => [v[3]] %}
 	| _ "do" _ statement {% v => [v[3]] %}
@@ -279,14 +233,7 @@ condition -> condition __ ("and" | "or") __ condition {% v => {
 			col: v[0].col,
 		}
 	} %}
-	| value {% v => ({
-		type: 'condition',
-		value: v[0],
-		line: v[0].line,
-		lineBreaks: v[0].lineBreaks,
-		offset: v[0].offset,
-		col: v[0].col,
-	}) %}
+	| value {% condition.value %}
 
 comparision_operators -> "is greater than" {% v => assign(v[0], {type: 'comparision_operator', value: '>' }) %}
 	| "is greater or equal to" {% v => assign(v[0], {type: 'comparision_operator', value: '>=' }) %}
@@ -321,29 +268,9 @@ value_reassign -> value _ "=" _ (switch | value) {% v => {
 	}
 } %} 
 
-var_assign -> ("let" __ | "const" __ | "\\"):? var_assign_list {% v => {
-	let f = v[0] ? v[0][0] : v[1];
-	return {
-		type: 'var_assign',
-		use_let: v[0] && (v[0][0].value == 'let' || v[0][0].value == '\\') ? true : false,
-		use_const: v[0] && v[0][0].value == 'const' ? true : false,
-		line: f.line,
-		col: f.col,
-		value: v[1],
-		offset: f.offset
-	}
-} %}
+var_assign -> ("let" __ | "const" __ | "\\") var_assign_list {% vars.assign %}
 
-var_assign_list -> var_reassign (_ "," _ var_reassign):* {% v => {
-	v[1] = v[1].map(i => Object.assign(i[3], {type: 'var_reassign'}));
-	return {
-		type: 'var_assign_group',
-		line: v[0].line,
-		col: v[0].col,
-		value: v[1] ? [v[0], ...v[1]] : [v[0]],
-		offset: v[0].offset
-	}
-} %}
+var_assign_list -> var_reassign (_ "," _ var_reassign):* {% vars.var_assign_list %}
 
 var_reassign -> identifier _ "=" _ (switch | value) {% v => {
 	return {
@@ -356,23 +283,26 @@ var_reassign -> identifier _ "=" _ (switch | value) {% v => {
 	}
 } %}
 # expressions
-expression ->  "(" _ expression _ ")" {% v => ({
-		type: 'expression_with_parenthesis',
-		value: v[2]
-	}) %}
-	| "(" _ expression _ ")" _ arguments_with_types {% v => ({
-		type: 'expression_with_parenthesis',
-		value: v[2],
-		arguments: v[6]
-	}) %}
-	| expression _ ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ expression {% v => ({
+expression -> 
+	# | "(" _ expression _ ")" _ arguments_with_types {% v => ({
+	# 	type: 'expression_with_parenthesis',
+	# 	value: v[2],
+	# 	arguments: v[6]
+	# }) %}
+	expression _ ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ expression {% v => ({
 		type: 'expression',
 		value: [v[0], assign(v[2][0], {value: v[2][0].value+'='}), v[4]]
 	}) %}
-	| expression _ ("**" | [.+-/*%]) _ expression {% v => ({
+	| expression _ ("**" | "*" | "+" | "-" | "/" | "%") _ expression {% v => ({
 		type: 'expression',
 		value: [v[0], v[2][0], v[4]]
 	}) %}
+	| "(" _ expression _ ")" (_ arguments):? {% v => ({
+		type: 'expression_with_parenthesis',
+		value: v[2],
+		arguments: v[5] ? v[5][1] : null
+	}) %}
+	| object_retraction {% id %}
 	| regexp {% id %}
 	| annonymous_function {% id %}
 	| function_call {% id %}
@@ -383,173 +313,84 @@ expression ->  "(" _ expression _ ")" {% v => ({
 	| number {% id %}
 	| "this" {% id %}
 	| html {% id %}
-	# | array {% id %}
 	| object {% id %}
+	| boolean {% id %}
 # base line
 identifier -> %identifier {% v => v[0] %}
-# /\/(?:\\[bfnrt.+*^$[\]{}|?:]|[^\/\\])*?\//
-# regexp -> "/" ( ("\\" [bfnrt.+*^$[] | "\\" "]") [A-Za-z_]) "/" {% v => assign(v[0], {
-# 	type: 'regexp',
-# 	value: v.slice(1, -1) 
-# }) %}
-regexp -> %regexp (regexp_flags):* {% v => assign(v[0], {
-	value: v[0] + (v[1] ? v[1].join('') : '')
+
+object_retraction -> single_retraction (_ "." _ right_side_retraction {% v => v[3] %}):+ {% v => ({
+	type: 'dot_retraction',
+	from: v[0],
+	value: v[1],
+	//value: v[0].value + '.' + v[4].value
 }) %}
 
-regexp_flags -> [gmi] {% v => v[0].value %}
-dot_retraction -> dot_retraction _ "." _ (function_call | identifier | value) {% v => {
-	return {
-		type: 'dot_retraction',
-		from: v[0],
-		value: v[4][0],
-		line: v[0].line,
-		col: v[0].col,
-		lineBreaks: v[0].lineBreaks,
-		offset: v[0].offset,
-	}
-} %}
-	| (function_call | identifier | "this") {% v => v[0] %}
-	# | (function_call | identifier | value | "this") _ "." _ (function_call | identifier | value) {% v => {
-	# 	return {
-	# 		type: 'dot_retraction',
-	# 		from: v[0][0],
-	# 		value: v[4][0],
-	# 		line: v[0][0].line,
-	# 		col: v[0][0].col,
-	# 		lineBreaks: v[0][0].lineBreaks,
-	# 		offset: v[0][0].offset,
-	# 	}
-	# } %}
+# _object_retraction ->  object_retraction {% id %}
+# 	| single_retraction {% id %}
 
-object_retraction -> dot_retraction {% id %}
-	####### | (dot_retraction | function_call | identifier | value) _ "of" _ (dot_retraction | function_call | identifier | value) {% v => {
-	# 	return {
-	# 		type: 'dot_retraction',
-	# 		from: v[4][0],
-	# 		value: v[0][0],
-	# 		line: v[0][0].line,
-	# 		col: v[0][0].col,
-	# 		lineBreaks: v[0][0].lineBreaks,
-	# 		offset: v[0][0].offset,
-	# 	}
-	#### } %}
-	# | (dot_retraction | function_call | identifier | value) _ "of" _ (dot_retraction | function_call | identifier | value) {% v => {
-	# 	return {
-	# 		type: 'dot_retraction',
-	# 		from: v[4][0],
-	# 		value: v[0][0],
-	# 		line: v[0][0].line,
-	# 		col: v[0][0].col,
-	# 		lineBreaks: v[0][0].lineBreaks,
-	# 		offset: v[0][0].offset,
-	# 	}
-	# } %}
+single_retraction -> left_side_retraction _ "." _ right_side_retraction {% v => ({
+	type: 'dot_retraction',
+	from: v[0],
+	value: v[4],
+	//value: v[0].value + '.' + v[4].value
+})
+/*({
+	type: 'expression',
+	value: v[0].value + '.' + v[4].value 
+})*/
+%}
+	| left_side_retraction {% id %}
 
-object_retraction_ -> (object_retraction | function_call | identifier | value | "this") _ "." _ (object_retraction | function_call | identifier | value)  {% v => {
-		return {
-			type: 'dot_retraction',
-			value: v[4][0],
-			from: v[0][0],
-			line: v[0][0].line,
-			col: v[0][0].col,
-			lineBreaks: v[0][0].lineBreaks,
-			offset: v[0][0].offset,
-		}
-	} %}
-	# | (object_retraction | function_call | identifier | value) _ "." _ (object_retraction | function_call | identifier | value) {% v => {
-	# 	return {
-	# 		type: 'dot_retraction',
-	# 		value: v[4][0],
-	# 		from: v[0][0],
-	# 		line: v[0][0].line,
-	# 		col: v[0][0].col,
-	# 		lineBreaks: v[0][0].lineBreaks,
-	# 		offset: v[0][0].offset,
-	# 	}
-	# } %}
-	### | (object_retraction | function_call | identifier | value) _ "of" _ (object_retraction | function_call | identifier | value) {% v => {
-	# 	return {
-	# 		type: 'dot_retraction',
-	# 		value: v[0][0],
-	# 		from: v[4][0],
-	# 		line: v[0][0].line,
-	# 		col: v[0][0].col,
-	# 		lineBreaks: v[0][0].lineBreaks,
-	# 		offset: v[0][0].offset,
-	# 	}
-	### } %}
-	# | (function_call | identifier | value) _ "of" _ (value) {% v => {
-	# 	return {
-	# 		type: 'dot_retraction',
-	# 		value: v[0][0],
-	# 		from: v[4][0],
-	# 		line: v[0][0].line,
-	# 		col: v[0][0].col,
-	# 		lineBreaks: v[0][0].lineBreaks,
-	# 		offset: v[0][0].offset,
-	# 	}
-	# } %}
+right_side_retraction -> %keyword {% id %}
+	| function_call {% id %}
+	| identifier {% id %}
 
-# obj_retract -> prefixExp (_ "." _ (function_call | identifier) {% v => v[3] %}):* {% v => {
-# 	return {
-# 		type: 'dot_retraction',
-# 		value: v[1] ? v[1] : [],
-# 		from: v[0],
-# 		line: v[0].line,
-# 		col: v[0].col,
-# 		lineBreaks: v[0].lineBreaks,
-# 		offset: v[0].offset,
-# 	}
-# } %}
-	# | ("this" | identifier | html | object | number | function_call) {% id %}
-	# | value
+left_side_retraction -> function_call {% id %}
+	| object {% id %}
+	| array {% id %}
+	| identifier {% id %}
+	| string {% id %}
+	| bigInt {% id %}
+	| number {% id %}
+	| "this" {% id %}
+	| html {% id %}
+	| object {% id %}
+	| boolean {% id %}
 
-value -> value _ "[" _ value _ "]" _ arguments {% v => {
+value -> expression {% id %}
+	| value _ "[" _ value _ "]" (_ arguments):? {% v => {
 	//debugger
 		return {
 			type: 'item_retraction',
-			arguments: v[8],
+			arguments: v[7] ? v[7][1] : null,
 			from: v[0],
 			value: v[4]
 			//identifier: v[0].value
 		}
 	} %}
-	| value _ "[" _ value _ "]" {% v => ({
-		type: 'item_retraction',
-		from: v[0],
-		value: v[4]
-	}) %}
-	| "(" _ value _ ")" {% v => ({
-		type: 'expression_with_parenthesis',
-		value: v[2]
-	}) %}
-	| expression {% id %}
-	| ("new" | "await" | "yield" | "typeof") __ value {% v => {
+	# | "(" _ value _ ")" {% v => ({
+	# 	type: 'expression_with_parenthesis',
+	# 	value: v[2]
+	# }) %}
+	# | value _ arguments {% v => ({
+	# 	type: 'function_call',
+	# 	value: v[0],
+	# 	arguments: v[2]
+	# }) %}
+	| ("new" | "await" | "yield") __ value {% v => {
 		return assign(v[0][0], {
 			type: v[0][0].text,
 			value: v[2]
 		})
 	} %}
-	| "@text" __ value {% v => assign(v[0], {
-		type: 'html_text',
-		value: v[2]
-	}) %}
+	| "@text" __ value {% html.value_to_string %}
 	| value __ "instanceof" __ value {% v => ({
 		type: 'instanceof',
 		left: v[0],
 		value: v[4]
 	}) %}
-	| condition _ "?" _ value (_ ":" _ value):? {% v => ({
-		type: 'ternary',
-		left: v[4],
-		right: v[5] ? v[5][3] : null,
-		value: v[0],
-		line: v[0].line,
-		lineBreaks: v[0].lineBreaks,
-		offset: v[0].offset,
-		col: v[0].col,
-	}) %}
-	| boolean {% id %}
+	# |
+	| condition _ "?" _ value (_ ":" _ value):? {% condition.ternary %}
 	# | "(" _ switch _ ")" {% v => v[2] %}
 	# | number {% id %}
 	# | string {% id %}
@@ -557,71 +398,16 @@ value -> value _ "[" _ value _ "]" _ arguments {% v => {
 	# | ("this" | identifier | html | object | number | function_call) _ "." _ ("this" | identifier | html | object | number | function_call) {% v => v %}
 	| myNull {% id %}
 	# | function_call {% id %}
-	| annonymous_function {% id %}
+	# | annonymous_function {% id %}
 	# | identifier {% id %}
+	# | boolean {% id %}
 
 prefixExp -> identifier {% id %}
 	| function_call {% id %}
 	| "this" {% id %}
-# html
-opening_tag -> "<" identifier (__ attrubutes {% v => v[1] %}):? _ ">" {% v => [v[1], v[2] ? v[2] : []] %}
-closing_tag -> "<" "/" identifier ">" {% v => v[2] %}
-html_content -> string {% id %}
-	| html {% id %}
-html -> opening_tag (_ html_content):* _ closing_tag {% v => {
-	if (!Array.isArray(v[0][0].value)) {
-		if (v[0][0].value != v[3].value) {
-			throw new Error(`Opening tag does not much the closing tag at ${v[0].line}:${v[0].col}`);
-		}
-	} else {
-		debugger
-		// add case, when attribute is not a string
-	}
-	//debugger
-
-	return assign(v[0][0], {
-		type: 'html_expression',
-		opening_tag: v[0][0].value,
-		closing_tag: v[3].value,
-		value: v[1],
-		attributes: v[0][1]
-	})
-} %}
-	# | html __ "with" __ "elements" __ value {% v => {
-	# 	return assign(v[0], {
-	# 		type: 'html',
-	# 		elements: v[6]
-	# 	})
-	# } %}
-| "<" identifier ("#" identifier):? ("." identifier):* "/" ">" {% v => {
-	return assign(v[0], {
-		type: 'html',
-		value: v[1],
-		id: v[2] ? v[2][1] : null,
-		classList: v[3].length ? v[3].map(i => i[1]) : null
-	})
-} %}
-	| "@text" __ value {% v => assign(v[0], {
-		type: 'html_text',
-		value: v[2]
-	}) %}
-
-attrubutes -> var_reassign (__ var_reassign):* {% v => {
-	let output = [v[0]];
-	for (let i in v[1]) {
-		output.push(v[1][i][1])
-	}
-	// delete v[0].text
-	//debugger
-	return output;
-	/*return Object.assign(v[0], {
-		type: 'array',
-		value: output
-	});*/
-} %}
 
 # switch case addons
-case_single_valued -> "|" _ value _ ":" _ (value EOL):? {% v => Object.assign(v[0], {
+case_single_valued -> "|" _ value _ ":" _ (value EOL):? {% v => assign(v[0], {
 		type: 'case_with_break',
 		value: v[2],
 		statements: v[6] ? v[6][0] : []
@@ -635,308 +421,485 @@ case_single_valued -> "|" _ value _ ":" _ (value EOL):? {% v => Object.assign(v[
 		type: 'case_default',
 		value: v[4] ? v[4][0] : [null],
 	}) %}
-# arrays
-array -> array _ "[" _ number _ ":" ":":? _ number _ "]" {% v => {
-		return Object.assign(v[0], {
-			type: 'array_slice',
-			start: v[4],
-			end: v[9],
-			reversed: v[7] ? true : false
-		});
-	} %}
-	| "[" _ "]" {% v => {
-	v[0].value = []
-	v[0].type = 'array'
-	delete v[0].text;
-	return v[0]
-} %}
-	| "[" _ value (_ "," _ value):* (_ ","):? _ "]" {% v => {
-		let output = [v[2]];
-		for (let i in v[3]) {
-			output.push(v[3][i][3])
-		}
-		delete v[0].text
-		return Object.assign(v[0], {
-			type: 'array',
-			value: output
-		});
-	} %}
-	| "[" _ number ".." number _ "]" {% v => {
-		let output = [];
-		let min = Math.min(v[2], v[4]);
-		let max = Math.max(v[2], v[4]);
-		for (let i = min; i <= max; i++) {
-			output.push({
-				type: 'number',
-				value: i
-			});
-		}
-		if (v[2] != min) 
-			output = output.reverse()
-		return Object.assign(v[0], {
-			type: 'array',
-			value: output
-		});
-	} %}
-	# | value (_ "," _ value):* {% v => {
-	# 	//debugger
-	# 	let output = [v[0]];
-	# 	for (let i in v[1]) {
-	# 		output.push(v[1][i][3])
-	# 	}
-	# 	// delete v[0].text
-	# 	return {
-	# 		type: 'array',
-	# 		value: output
-	# 	};
-	# } %}
-
-object -> "{" _ "}" {% v => {
-	v[0].value = {}
-	v[0].type = 'object'
-	delete v[0].text;
-	return v[0]
-} %}
-	| "{" _ pair (_ "," _ pair):* (_ ","):? _ "}" {% v => {
-		let output = {};
-		extractPair(v[2], output);
-		for (let i in v[3]) {
-			extractPair(v[3][i][3], output)
-		}
-		delete v[0].text
-		return Object.assign(v[0], {
-			type: 'object',
-			value: output
-		});
-	} %}
-
-pair -> 
-# ("async" __):? es6_key_value {% v => assign(v[1], {
-# 	type: 'es6_key_value',
-# 	async: v[0],
-# }) %}
-	("async" __):? key _ arguments_with_types _ statements_block {% v => [v[1], {
-		type: 'es6_key_value',
-		arguments: v[3],
-		key: v[1],
-		value: v[5],
-		async: v[0] ? true : false
-		// .text is the key
-	}] %}
-	| key _ ":" _ value {% v => [v[0], v[4]] %}
-
-key -> string {% id %}
-	| identifier {% id %}
-	| %keyword {% id %}
 
 # functions
 # function_declaration -> ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") __ identifier _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
-function_declaration -> ("async" __):? ("function") __ identifier _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
-	// console.log(v[0][0].value)
-	return assign(v[1][0], {
-		type: 'function_declaration',
-		identifier: v[3],
-		arguments: v[5],
-		value: v[8] ? v[8].map(i => i[1]) : [],
-		async: v[0] ? true : false
-		// text is one of the options above: string; int...
-	})
-} %}
+function_declaration -> ("async" __):? ("function") __ identifier _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% functions.declaration %}
 
-annonymous_function -> "(" _ annonymous_function _ ")" _ arguments {% v => {
-	return ({
-		type: 'iife',
-		value: v[2],
-		call_arguments: v[6],
-	})
-} %}
+annonymous_function -> "(" _ annonymous_function _ ")" _ arguments {% functions.iife %}
 	# | ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
-	| ("async" __):? ("function") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
-	// console.log(v[0][0].value)
-	return assign(v[1][0], {
-		type: 'annonymous_function',
-		identifier: v[2] ? v[2][1] : '',
-		arguments: v[4],
-		value: v[7] ? v[7].map(i => i[1]) : [],
-		result: v[1][0].text,
-		async: v[0] ? true : false
-		// text is one of the options above: string; int...
-	})
-} %}
+	| ("async" __):? ("function") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% functions.annonymous %}
 
-return -> "return" __ value EOL {% v => {
-	return assign(v[0], {
-		type: 'return',
-		value: v[2]
-	})
-} %}
-	| "return" EOL  {% v => {
-	return assign(v[0], {
-		type: 'return',
-		value: undefined
-	})
-} %}
+return -> "return" [ \t]:+ value EOL {% returns.value %}
+	| "return" EOL  {% returns.empty %}
 
-function_call -> identifier _ arguments {% v => {
+function_call -> callable _ arguments {% v => {
 	return assign(v[0], {
 		type: 'function_call',
 		arguments: v[2],
 		//identifier: v[0].value
 	})
 } %}
-# } %}
-	# this has a bug. It repeats twice
-	# | identifier __ value {% v => assign(v[0], {
-	# 	type: 'function_call',
-	# 	arguments: {
-	# 		type: 'arguments',
-	# 		value: [v[2]],
-	# 	}
-	# 	//identifier: v[0].value
-	# }) %}
 
-arguments -> "(" _ ")" {% v => assign(v[0], {
-	type: 'arguments',
-	value: []
-}) %}
-	| "(" _ value (_ "," _ value):* (_ ","):? _ ")" {% v => {
-		let output = [v[2]];
-		for (let i in v[3]) {
-			output.push(v[3][i][3])
-		}
-		delete v[0].text
-		return Object.assign(v[0], {
-			type: 'arguments',
-			value: output
-		});
-	} %}
-	# | value {% v => [v[0]] %}
-arguments_with_types -> "(" _ ")" {% v => assign(v[0], {
-	type: 'arguments_with_types',
-	value: []
-}) %}
-	| "(" _ ((identifier | %keywords) __):? value (_ "," _ ((identifier | %keywords) __):? value):* (_ ","):? _ ")" {% v => {
-		let output = [v[3]];
-		let types = [v[2] ? v[2][0][0].value : 'none'];
-		for (let i in v[4]) {
-			output.push(v[4][i][4]);
-			types.push(v[4][i][3] ? v[4][i][3][0][0].value : 'none');
-		}
-		delete v[0].text
-		return Object.assign(v[0], {
-			type: 'arguments_with_types',
-			value: output,
-			types: types
-		});
-	} %}
-	# | "(" _ (("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") __):? value (_ "," _ (("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") __):? value):* (_ ","):? _ ")" {% v => {
-	# 	let output = [v[3]];
-	# 	let types = [v[2] ? v[2][0][0].value : 'none'];
-	# 	for (let i in v[4]) {
-	# 		output.push(v[4][i][4]);
-	# 		types.push(v[4][i][3] ? v[4][i][3][0][0].value : 'none');
-	# 	}
-	# 	delete v[0].text
-	# 	return Object.assign(v[0], {
-	# 		type: 'arguments_with_types',
-	# 		value: output,
-	# 		types: types
-	# 	});
-	# } %}
+callable -> function_call {% id %}
+	| identifier {% id %}
+	# | object_retraction {% id %}
 
-# unused math
-# additive -> multiplicative _ [+-] _ additive {% v => {
-# 	switch (v[2].value) {
-# 		case '+':
-# 			return v[0] + v[4];
-# 		case '-':
-# 			return v[0] - v[4];
-# 	}
-# } %}
-# 	| multiplicative {% id %}
+arguments -> "(" _ ")" {% args.empty %}
+	| "(" _ value (_ "," _ value):* (_ ","):? _ ")" {% args.extract %}
+arguments_with_types -> "(" _ ")" {% args.empty_arguments_with_types %}
+	| "(" _ argument_type:? identifier (_ "," _ argument_type:? identifier):* (_ ","):? _ ")" {% args.arguments_with_types %}
 
-# multiplicative -> unary_expression _ [*/] _ multiplicative {% v => {
-# 	switch (v[2].value) {
-# 		case '*':
-# 			return v[0] * v[4];
-# 		case '/':
-# 			return v[0] / v[4];
-# 	}
-# } %}
-# 	| unary_expression {% id %}
-	
-# unary_expression -> number {% id %}
-# 	| "(" _ additive _ ")" {% v => v[2] %}
+argument_type -> identifier __ {% v => {
+	let n = v[0].value[0];
+	if (n.toUpperCase() != n) {
+		throw new SyntaxError(`Argument type must be capitalized.`);
+	}
+	return v[0];
+} %}
+	# | %keywords __ {% id %}
+# typed_argument -> identifier identifier
+### primitives' essentials ###
+# objects
+pair -> ("async" __):? key _ arguments_with_types _ statements_block {% object.es6_key_value %}
+	| key _ ":" _ value {% v => [v[0], v[4]] %}
 
-#numbers
-number -> %number {% v => assign(v[0], {
-	value: v[0].value.replace(/_/g, '') 
-}) %}
+key -> string {% id %}
+	| identifier {% id %}
+	| %keyword {% id %}
 
-bigInt -> %number "n" {% v => assign(v[0], {
-	type: 'bigInt',
-	value: v[0].value + 'n'
-}) %}
 # strings
-string -> string _ "[" _ number _ ":" ":":? _ number _ "]" {% v => {
-		return Object.assign(v[0], {
+string_concat -> string_concat __ %string {% string_concat %}
+	| %string {% id %}
+
+# html
+opening_tag -> "<" identifier (__ attrubutes {% v => v[1] %}):? _ ">" {% html.opening_tag %}
+closing_tag -> "<" "/" identifier ">" {% html.closing_tag %}
+html_content -> string {% id %}
+	| html {% id %}
+attrubutes -> var_reassign (__ var_reassign):* {% html.attributes %}
+
+# regexp
+regexp_flags -> [gmi] {% regexp.flag %}
+### END primitives' essentials ###
+
+### primitives ###
+# null
+myNull -> "null" {% Null %}
+
+# booleans
+boolean -> (%boolean | "!" _ value) {% boolean %}
+
+# strings
+string -> string _ "[" _ number _ ":" ":":? _ number _ "]" {% string.slice %}
+	| string_concat {% id %}
+	| number "px" {% string.px %}
+
+# numbers
+bigInt -> %number "n" {% number.bigInt %}
+
+number -> %number {% number.float %}
+
+# html
+html -> opening_tag (_ html_content):* _ closing_tag {% html.with_content %}
+	| "<" identifier ("#" identifier):? ("." identifier):* "/" ">" {% html.self_closing_tag %}
+	| "@text" __ value {% html.value_to_string %}
+
+# objects
+object -> "{" _ "}" {% object.empty %}
+	| "{" _ pair (_ "," _ pair):* (_ ","):? _ "}" {% object.extractObject %}
+
+# arrays
+array -> array _ "[" _ number _ ":" ":":? _ number _ "]" {% array.slice %}
+	| "[" _ "]" {% array.empty %}
+	| "[" _ value (_ "," _ value):* (_ ","):? _ "]" {% array.extract %}
+	| "[" _ number ".." number _ "]" {% array.loop %}
+
+# regexp
+regexp -> %regexp (regexp_flags):* {% regexp.parse %}
+
+### END primitives ###
+
+### whitespace ###
+# comments
+# comment -> %space %comment
+# space -> %space
+# # not mandatory whitespace
+# _ -> comment:* %space {% v => '' %}
+# 	| null {% v => '' %}
+# # mandatory whitespace
+# __ -> comment:* %space {% v => ' ' %}
+
+_ -> %space {% v => '' %}
+	| null {% v => '' %}
+# mandatory whitespace
+__ -> %space {% v => ' ' %}
+
+# wschar -> [ \t\n\v\f] {% id %}
+# s -> [ \t] | null
+# end of line token
+# WS_NO_LINE_BREAKS -> s (%comment [ \t]):*
+# 	# | [ \t]
+# 	# | %comment
+# 	# | null
+# WS_WITH_LINE_BREAKS -> [\s] (%comment [\s]):*
+# 	# | %comment
+# 	| null
+# End of line
+EOL -> %space {% v => 'EOL' %}
+	# | WS_NO_LINE_BREAKS [\n] WS_WITH_LINE_BREAKS
+	| _ ";" {% v => v[1] %}
+
+### END whitespace ###
+
+@{%
+	const functions = {
+		annonymous: v => {
+			// console.log(v[0][0].value)
+			return assign(v[1][0], {
+				type: 'annonymous_function',
+				identifier: v[2] ? v[2][1] : '',
+				arguments: v[4],
+				value: v[7] ? v[7].map(i => i[1]) : [],
+				result: v[1][0].text,
+				async: v[0] ? true : false
+				// text is one of the options above: string; int...
+			})
+		},
+		iffe: v => ({
+			type: 'iife',
+			value: v[2],
+			call_arguments: v[6],
+		}),
+		declaration: v => {
+			// console.log(v[0][0].value)
+			return assign(v[1][0], {
+				type: 'function_declaration',
+				identifier: v[3],
+				arguments: v[5],
+				value: v[8] ? v[8].map(i => i[1]) : [],
+				async: v[0] ? true : false
+				// text is one of the options above: string; int...
+			})
+		}
+	}
+	const returns = {
+		value: v => assign(v[0], {
+			type: 'return',
+			value: v[2]
+		}),
+		empty: v => assign(v[0], {
+			type: 'return',
+			value: undefined
+		})
+	}
+	const condition = {
+		value: v => ({
+			type: 'condition',
+			value: v[0],
+			line: v[0].line,
+			lineBreaks: v[0].lineBreaks,
+			offset: v[0].offset,
+			col: v[0].col,
+		}),
+		ternary: v => ({
+			type: 'ternary',
+			left: v[4],
+			right: v[5] ? v[5][3] : null,
+			value: v[0],
+			line: v[0].line,
+			lineBreaks: v[0].lineBreaks,
+			offset: v[0].offset,
+			col: v[0].col,
+		}),
+	}
+	const vars = {
+		assign: v => {
+			let f = v[0] ? v[0][0] : v[1];
+			return {
+				type: 'var_assign',
+				use_let: v[0] && (v[0][0].value == 'let' || v[0][0].value == '\\') ? true : false,
+				use_const: v[0] && v[0][0].value == 'const' ? true : false,
+				line: f.line,
+				col: f.col,
+				value: v[1],
+				offset: f.offset
+			}
+		},
+		var_assign_list: v => {
+			v[1] = v[1].map(i => assign(i[3], {type: 'var_reassign'}));
+			return {
+				type: 'var_assign_group',
+				line: v[0].line,
+				col: v[0].col,
+				value: v[1] ? [v[0], ...v[1]] : [v[0]],
+				offset: v[0].offset
+			}
+		}
+	}
+	const args = {
+		empty_arguments_with_types: v => assign(v[0], {
+			type: 'arguments_with_types',
+			value: [],
+			types: []
+		}),
+		arguments_with_types: v => {
+			let output = [v[3]];
+			let types = [v[2] ? v[2].value : 'none'];
+			for (let i in v[4]) {
+				output.push(v[4][i][4]);
+				types.push(v[4][i][3] ? v[4][i][3].value : 'none');
+			}
+			delete v[0].text
+			return assign(v[0], {
+				type: 'arguments_with_types',
+				value: output,
+				types: types
+			});
+		},
+		empty: v => assign(v[0], {
+			type: 'arguments',
+			value: []
+		}),
+		extract: v => {
+			let output = [v[2]];
+			for (let i in v[3]) {
+				output.push(v[3][i][3])
+			}
+			delete v[0].text
+			return Object.assign(v[0], {
+				type: 'arguments',
+				value: output
+			});
+		}
+	}
+	const classes = {
+		es6_key_value: v => ({
+			type: 'es6_key_value',
+			key: v[0],
+			arguments: v[2],
+			value: v[3],
+		}),
+		construct: v => ({
+			type: 'construct',
+			arguments: v[2],
+			value: v[3]
+		}),
+		parse: v => assign(v[0], {
+			type: 'class_declaration',
+			identifier: v[2],
+			construct: v[6],
+			value: v[7] 
+		})
+	}
+	const statement = {
+		value_reassign: v => ({
+			type: 'statement_value',
+			value: v[0],
+			line: v[0].line,
+			col: v[0].col,
+			lineBreak: v[0].lineBreak,
+			offset: v[0].offset,
+		}),
+		debugger: v => assign(v[0], {type: 'debugger'}),
+		delete: v => assign(v[0], {type: 'delete', value: v[2] }),
+		throw: v => assign(v[0], {
+			type: 'throw',
+			value: v[2]
+		}),
+		break_continue: v => assign(v[0][0], {
+			type: 'break_continue',
+		}),
+		echo: v => assign(v[0], {
+			type: 'echo',
+			value: v[2]
+		}),
+		eval: v => assign(v[0], {
+			type: 'eval',
+			value: v[2]
+		}),
+		import: v => assign(v[0], {
+			type: '@import',
+			value: v[2]
+		}),
+		include: v => assign(v[0], {
+			type: '@include',
+			value: v[2]
+		}),
+		value: v => ({
+			type: 'statement_value',
+			value: v[0],
+			line: v[0].line,
+			col: v[0].col,
+			lineBreak: v[0].lineBreak,
+			offset: v[0].offset,
+		})
+	}
+	const regexp = {
+		parse: v => assign(v[0], {
+			value: v[0] + (v[1] ? v[1].join('') : '')
+		}),
+		flag: v => v[0].value,
+	}
+	const html = {
+		value_to_string: v => assign(v[0], {
+			type: 'html_text',
+			value: v[2]
+		}),
+		self_closing_tag: v => assign(v[0], {
+			type: 'html',
+			value: v[1],
+			id: v[2] ? v[2][1] : null,
+			classList: v[3].length ? v[3].map(i => i[1]) : null
+		}),
+		opening_tag: v => [v[1], v[2] ? v[2] : []],
+		closing_tag: v => v[2],
+		with_content (v) {
+			if (!Array.isArray(v[0][0].value)) {
+				if (v[0][0].value != v[3].value) {
+					throw new Error(`Opening tag does not much the closing tag at ${v[0].line}:${v[0].col}`);
+				}
+			} else {
+				debugger
+				// add case, when attribute is not a string
+			}
+			//debugger
+
+			return assign(v[0][0], {
+				type: 'html_expression',
+				opening_tag: v[0][0].value,
+				closing_tag: v[3].value,
+				value: v[1],
+				attributes: v[0][1]
+			})
+		},
+		attributes: v => {
+			let output = [v[0]];
+			for (let i in v[1]) {
+				output.push(v[1][i][1])
+			}
+			return output;
+			/*return Object.assign(v[0], {
+				type: 'array',
+				value: output
+			});*/
+		},
+	}
+	const array = {
+		empty: v => {
+			v[0].value = []
+			v[0].type = 'array'
+			delete v[0].text;
+			return v[0]
+		},
+		extract: v => {
+			let output = [v[2]];
+			for (let i in v[3]) {
+				output.push(v[3][i][3])
+			}
+			delete v[0].text
+			return Object.assign(v[0], {
+				type: 'array',
+				value: output
+			});
+		},
+		loop: v => {
+			let output = [];
+			let min = Math.min(v[2], v[4]);
+			let max = Math.max(v[2], v[4]);
+			for (let i = min; i <= max; i++) {
+				output.push({
+					type: 'number',
+					value: i
+				});
+			}
+			if (v[2] != min) 
+				output = output.reverse()
+			return Object.assign(v[0], {
+				type: 'array',
+				value: output
+			});
+		},
+		slice: v => assign(v[0], {
+			type: 'array_slice',
+			start: v[4],
+			end: v[9],
+			reversed: v[7] ? true : false
+		}),
+	}
+	const object = {
+		empty: v => {
+			v[0].value = {}
+			v[0].type = 'object'
+			delete v[0].text;
+			return v[0]
+		},
+		extractObject (v) {
+			let output = {};
+			extractPair(v[2], output);
+			for (let i in v[3]) {
+				extractPair(v[3][i][3], output);
+			}
+			return assign(v[0], {
+				type: 'object',
+				value: output
+			});
+		},
+		es6_key_value: v => [v[1], {
+			type: 'es6_key_value',
+			arguments: v[3],
+			key: v[1],
+			value: v[5],
+			async: v[0] ? true : false
+			// .text is the key
+		}]
+	}
+	const number = {
+		float: v => assign(v[0], {
+			value: v[0].value.replace(/_/g, '') 
+		}),
+		bigInt: v => assign(v[0], {
+			type: 'bigInt',
+			value: v[0].value.replace(/_/g, '') + 'n'
+		})
+	}
+	const string = {
+		px: v => assign(v[0], {
+			type: 'string',
+			value: v[0].value + 'px'
+		}),
+		slice: v => assign(v[0], {
 			type: 'string_slice',
 			start: v[4],
 			end: v[9],
 			reversed: v[7] ? true : false
-		});
-	} %}
-	| string_concat {% id %}
-	| number "px" {% v => assign(v[0], {
-		type: 'string',
-		value: v[0].value + 'px'
-	}) %}
-	
-string_concat -> string_concat __ %string {% v => {
-	return Object.assign(v[0], {
-	value: v[0].value + v[2].value
-})} %}
-	| %string {% id %}
-# booleans
-boolean -> "!" _ value {% v => ({
-	type: 'boolean_reversed',
-	value: v[2]
-})%}
-	| "true" {% v => ({type: 'boolean', value: true}) %}
-	| "false" {% v => ({type: 'boolean', value: false}) %}
-	
-myNull -> "null" {% v => Object.assign(v[0], {
-	type: 'null',
-	value: null
-}) %}
-# whitespace
-_ -> (%space %comment):* %space {% v => '' %}
-	| null {% v => '' %}
-
-__ -> (%space %comment):* %space {% v => ' ' %}
-
-@{%
-	function extractObject (v) {
-		let output = {};
-		extractPair(v[2], output);
-		for (let i in v[3]) {
-			extractPair(v[3][i][3], output);
-		}
-		return output;
+		})
+	}
+	function string_concat (v) {
+		return assign(v[0], {
+			value: v[0].value + v[2].value
+		})
+	}
+	function Null (v) {
+		// debugger
+		return assign(v[0], {
+			type: 'null',
+			value: null
+		})
+	}
+	function boolean ([v]) {
+		if (v.length > 1) // ! _ value
+			return assign(v[0], {type: 'boolean_reversed', value: v[2] })
+		return assign(v[0], {type: 'boolean', value: v[0].value })
 	}
 	function extractPair (kv, output) {
 		if (kv[0]) {
 			output[kv[0]] = kv[1];
 		} else {
-			// if it is es6 method declaration
-			//debugger
-			//let key = kv.text;
-			//kv.text = 'function';
 			output[kv.text] = kv;
 		}
 	}
 	const global = {};
-	const assign = Object.assign.bind(Object);
 	Object.join = function (obj) {
 		return {...this, ...obj};
 	}

@@ -4,7 +4,10 @@ module.exports = function (str) {
     const parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
     // if (str.trim().length == 0) return '';
     try {
-        let result = (parser.feed(str)).results[0]
+        let parsed = parser.feed(str);
+        console.log(`Parsing result count: ${parsed.results.length}`)
+        console.log(parsed.results);
+        let result = parsed.results[0]
         if (!result) {
             console.log('[Log]: Grammar doesn\'t match.')
             return [];

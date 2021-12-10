@@ -69,14 +69,18 @@ module.exports = function parse (statements, tmp) {
                 result += null;
                 break;
             case 'dot_retraction':
-                let from = parse([statement.from]);
+                let from = parse(statement.from);
                 let v = [];
-                for (let i = 0; i < value.length; i++) {
-                    v.push(parse(value[i]))
+                if (value.length) {
+                    for (let i = 0; value && i < value.length; i++) {
+                        v.push(parse(value[i]))
+                    }
+                    result += `${from}.${v.join('.')}`;
+                    break;
                 }
+                result += `${from}.${parse(value)}`;
                 // console.log(from, v);
                 // debugger;
-                result += `${parse([statement.from])}.${v.join('.')}`;
                 break;
             case 'array_slice':
                 result = result.slice(0, -1);
@@ -134,7 +138,7 @@ module.exports = function parse (statements, tmp) {
                 //     ${parse(statement.value, statement.text)}
                 // }`;
                 
-                var t = parse(statement.arguments);
+                var t = parse(statement.arguments) || ['', ''];
                 result += `(${t[0]}) {
                     ${t[1]}
                     ${parse(statement.value, statement.text)}
@@ -169,7 +173,9 @@ module.exports = function parse (statements, tmp) {
                 //     }
                 // } 
                 // console.log(types)
-                var t = parse(statement.arguments);
+                if (statement.arguments)
+                    var t = parse(statement.arguments)
+                else var t = ['', ''];
                 result += `(${t[0]}) {
                     ${t[1]}
                     ${parse(statement.value, statement.text)}
@@ -493,7 +499,7 @@ module.exports = function parse (statements, tmp) {
                 }`
                 break;
             case 'es6_key_value':
-                var args = parse(statement.arguments);
+                var args = parse(statement.arguments)  || ['', ''];
                 var key = statement.key.value;
                 result += `${key} (${args[0]}) {
                     ${args[1]}
@@ -504,14 +510,14 @@ module.exports = function parse (statements, tmp) {
                 result += value.join(', ');
                 break;
             case 'construct':
-                var args = parse(statement.arguments);
+                var args = parse(statement.arguments) || ['', ''];
                 result += `constructor (${args[0]}) {
                     ${args[1]}
                     ${parse(value, tmp)}
                 }`
                 break;
             case 'type_declaration':
-                var t = parse(statement.arguments);
+                var t = parse(statement.arguments) || ['', ''];
                 result += `
                     globalThis.BS.types["${parse(statement.identifier)}"] = function (${t[0]}, required = false) {
                         ${t[1]}
@@ -579,8 +585,8 @@ module.exports = function parse (statements, tmp) {
             // debugger
                 result += `.`
                 break;
-            case undefined: // whitespace
-                break;
+            // case undefined: // whitespace
+            //     break;
             default:
                 result += '/* Unhandled expression: '+JSON.stringify(statement)+' */'
         }
