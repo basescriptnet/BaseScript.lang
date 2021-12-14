@@ -235,7 +235,8 @@ globalThis.BS = {
                 continue
             }
         }
-    }
+    },
+    storage: [],
     // require('./ast_to_js.js')// || function () {console.warn('@eval is not supported yet in browsers.')}
 };
 try {
@@ -277,6 +278,9 @@ Element.prototype.events = function(obj) {
         this.addEventListener(i, obj[i]);
     }
     return this;
+}
+Array.prototype.last = function() {
+    return this[this.length - 1];
 }
 
 function list(amount, callback) {
@@ -346,11 +350,33 @@ const PI = 3.141592653589793,
 
 // your code below this line!
 
-console.log((() => {
+console.log(...((() => {
     let r = globalThis.BS.convert(10, "Array");
     for (let i = 0; i < r.length; i++) {
         r[i] = globalThis.BS.convert(r[i], "Int");
     };
     return r
+})()));
+globalThis.BS.storage.push([0, 1, 2]);
+globalThis.BS.storage.push(10);
+console.log((() => {
+    if (globalThis.BS.storage.length == 0) {
+        throw new Error("No saved values to use at line 58, col 5.");
+    }
+    return globalThis.BS.storage.last();
+})());
+globalThis.BS.storage.pop();
+console.log((() => {
+    if (globalThis.BS.storage.length == 0) {
+        throw new Error("No saved values to use at line 61, col 5.");
+    }
+    return globalThis.BS.storage.last();
+})());
+globalThis.BS.storage.pop();
+console.log((() => {
+    if (globalThis.BS.storage.length == 0) {
+        throw new Error("No saved values to use at line 64, col 5.");
+    }
+    return globalThis.BS.storage.last();
 })());
 //})();

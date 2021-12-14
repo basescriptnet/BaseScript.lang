@@ -370,6 +370,13 @@ var grammar = {
     {"name": "statement", "symbols": ["class_declaration"], "postprocess": id},
     {"name": "statement", "symbols": ["with"], "postprocess": id},
     {"name": "statement", "symbols": [{"literal":"debugger"}, "EOL"], "postprocess": statement.debugger},
+    {"name": "statement", "symbols": [{"literal":"SAVE"}, "__", "value", "EOL"], "postprocess":  v => ({
+        	type: 'SAVE',
+        	value: v[2]
+        }) },
+    {"name": "statement", "symbols": [{"literal":"DELETE"}, "__", {"literal":"USE"}, "EOL"], "postprocess":  v => ({
+        	type: 'DELETE',
+        }) },
     {"name": "statement", "symbols": [{"literal":"delete"}, "__", "value", "EOL"], "postprocess": statement.delete},
     {"name": "statement", "symbols": ["return"], "postprocess": id},
     {"name": "statement", "symbols": [{"literal":"throw"}, "__", "value", "EOL"], "postprocess": statement.throw},
@@ -684,6 +691,7 @@ var grammar = {
         }) },
     {"name": "expression", "symbols": ["object_retraction"], "postprocess": id},
     {"name": "expression", "symbols": ["convert"], "postprocess": id},
+    {"name": "expression", "symbols": ["array_interactions"], "postprocess": id},
     {"name": "expression", "symbols": ["regexp"], "postprocess": id},
     {"name": "expression", "symbols": ["annonymous_function"], "postprocess": id},
     {"name": "expression", "symbols": ["function_call"], "postprocess": id},
@@ -693,10 +701,12 @@ var grammar = {
     {"name": "expression", "symbols": ["bigInt"], "postprocess": id},
     {"name": "expression", "symbols": ["number"], "postprocess": id},
     {"name": "expression", "symbols": [{"literal":"this"}], "postprocess": id},
+    {"name": "expression", "symbols": [{"literal":"USE"}], "postprocess": v => ({type: 'USE', line: v[0].line, col: v[0].col})},
     {"name": "expression", "symbols": ["html"], "postprocess": id},
     {"name": "expression", "symbols": ["object"], "postprocess": id},
     {"name": "expression", "symbols": ["boolean"], "postprocess": id},
     {"name": "expression", "symbols": ["convert"], "postprocess": id},
+    {"name": "expression", "symbols": ["debugging"], "postprocess": id},
     {"name": "identifier", "symbols": [(lexer.has("identifier") ? {type: "identifier"} : identifier)], "postprocess": v => v[0]},
     {"name": "object_retraction$ebnf$1$subexpression$1", "symbols": ["_", {"literal":"."}, "_", "right_side_retraction"], "postprocess": v => v[3]},
     {"name": "object_retraction$ebnf$1", "symbols": ["object_retraction$ebnf$1$subexpression$1"]},
@@ -720,6 +730,7 @@ var grammar = {
     {"name": "right_side_retraction", "symbols": ["function_call"], "postprocess": id},
     {"name": "right_side_retraction", "symbols": ["identifier"], "postprocess": id},
     {"name": "left_side_retraction", "symbols": ["function_call"], "postprocess": id},
+    {"name": "left_side_retraction", "symbols": [{"literal":"("}, "_", "array_interactions", "_", {"literal":")"}], "postprocess": v => v[2]},
     {"name": "left_side_retraction", "symbols": [{"literal":"("}, "_", "convert", "_", {"literal":")"}], "postprocess": v => v[2]},
     {"name": "left_side_retraction", "symbols": ["object"], "postprocess": id},
     {"name": "left_side_retraction", "symbols": ["array"], "postprocess": id},
@@ -728,6 +739,7 @@ var grammar = {
     {"name": "left_side_retraction", "symbols": ["bigInt"], "postprocess": id},
     {"name": "left_side_retraction", "symbols": ["number"], "postprocess": id},
     {"name": "left_side_retraction", "symbols": [{"literal":"this"}], "postprocess": id},
+    {"name": "left_side_retraction", "symbols": [{"literal":"USE"}], "postprocess": v => ({type: 'USE', line: v[0].line, col: v[0].col})},
     {"name": "left_side_retraction", "symbols": ["html"], "postprocess": id},
     {"name": "left_side_retraction", "symbols": ["boolean"], "postprocess": id},
     {"name": "convert", "symbols": ["value", "__", {"literal":"as"}, "__", "convert_type"], "postprocess":  v => {
@@ -755,6 +767,47 @@ var grammar = {
         	}
         } },
     {"name": "convert_type", "symbols": [{"literal":"Array"}], "postprocess": id},
+    {"name": "array_interactions$subexpression$1", "symbols": [{"literal":"PUSH"}]},
+    {"name": "array_interactions$subexpression$1", "symbols": [{"literal":"UNSHIFT"}]},
+    {"name": "array_interactions", "symbols": ["array_interactions$subexpression$1", "_", "value", "_", {"literal":"INTO"}, "_", "value"], "postprocess":  v => ({
+        	type: 'array_interactions',
+        	method: v[0][0],
+        	into: v[6],
+        	value: v[2],
+        	line: v[0].line,
+        	col: v[0].col
+        }) },
+    {"name": "array_interactions$subexpression$2", "symbols": [{"literal":"POP"}]},
+    {"name": "array_interactions$subexpression$2", "symbols": [{"literal":"SHIFT"}]},
+    {"name": "array_interactions", "symbols": ["array_interactions$subexpression$2", "_", "value"], "postprocess":  v => ({
+        	type: 'array_interactions',
+        	method: v[0][0],
+        	value: v[2],
+        	line: v[0].line,
+        	col: v[0].col
+        }) },
+    {"name": "array_interactions", "symbols": [{"literal":"..."}, "value"], "postprocess":  v => ({
+        	type: 'array_interactions',
+        	method: 'spread',
+        	value: v[1],
+        	line: v[0].line,
+        	col: v[0].col
+        }) },
+    {"name": "debugging", "symbols": [{"literal":"LOG"}, "_", "value"], "postprocess":  v => ({
+        	type: 'debugging',
+        	method: 'log',
+        	value: v[2]
+        }) },
+    {"name": "debugging", "symbols": [{"literal":"ERROR"}, "_", "value"], "postprocess":  v => ({
+        	type: 'debugging',
+        	method: 'error',
+        	value: v[2]
+        }) },
+    {"name": "debugging", "symbols": [{"literal":"WRITE"}, "_", "value"], "postprocess":  v => ({
+        	type: 'debugging',
+        	method: 'write',
+        	value: v[2]
+        }) },
     {"name": "value", "symbols": [{"literal":"("}, "_", "value", "_", {"literal":")"}], "postprocess":  v => ({
         	type: 'expression_with_parenthesis',
         	value: v[2]

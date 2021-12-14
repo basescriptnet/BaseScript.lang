@@ -50,4 +50,18 @@
 //  }
 
 // console.log(f(10))
-console.log(10 as Array[Int])
+LOG ...(10 as Array[Int])
+
+SAVE [0, 1, 2]
+SAVE 10
+
+LOG USE
+DELETE USE
+
+LOG USE
+DELETE USE
+
+LOG USE
+// console.log(10 as Array[Int])
+// console.log(PUSH 1000 INTO [0, 1, 2, 100] as Array[String])
+// console.log([...PUSH 1000 INTO [0, 1, 2, 100], ...[10, 4]])

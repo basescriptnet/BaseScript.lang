@@ -33,7 +33,7 @@ const lexer = moo.compile({
     // }
     ],
     '@constructor': 'constructor',
-    keyword: ['Int', 'Float', 'BEGIN', 'END', 'SET', 'TO', 'typeof', 'instanceof', 'in', 'of', 'type', 'super', 'extends', 'function', 'this', 'echo', 'export', 'as', 'JSON', 'yield', 'async', 'try', 'catch', 'finally', 'static', 'while', 'if', 'else', 'import', 'from', 'let', 'const', 'null', 'of', 'default', 'switch', 'switch*', 'with', 'for', 'case', 'default', 'elif', 'debugger', 'or', 'and', 'return', 'new', 'is', 'is not', 'is greater than', 'is greater or equal to', 'is smaller than', 'is smaller or equal to', 'equal', 'throw', 'break', 'continue'].map(i => new RegExp(`\\b${i}\\b`)),
+    keyword: ['USE', 'DELETE', 'SAVE', 'LOG', 'ERROR', 'WRITE', 'INTO', 'PUSH', 'POP', 'SHIFT', 'UNSHIFT', 'FROM', 'Int', 'Float', 'BEGIN', 'END', 'SET', 'TO', 'typeof', 'instanceof', 'in', 'of', 'type', 'super', 'extends', 'function', 'this', 'echo', 'export', 'as', 'JSON', 'yield', 'async', 'try', 'catch', 'finally', 'static', 'while', 'if', 'else', 'import', 'from', 'let', 'const', 'null', 'of', 'default', 'switch', 'switch*', 'with', 'for', 'case', 'default', 'elif', 'debugger', 'or', 'and', 'return', 'new', 'is', 'is not', 'is greater than', 'is greater or equal to', 'is smaller than', 'is smaller or equal to', 'equal', 'throw', 'break', 'continue'].map(i => new RegExp(`\\b${i}\\b`)),
     regexp: /\/(?:\\[ ><bfnrtswSWdD.+*^$[\]{}|?:]|[^><\n\/\\])*?\//,
     operator: ['+', '-', '/', '**', '*', '%'],
     number: /(?:\+|-)?(?:[0-9]+(?:_?[0-9]+)*)(?:\.[0-9]+)?/,
@@ -61,6 +61,7 @@ const lexer = moo.compile({
     // ')': ')',
     '{': '{',
     '}': '}',
+    spread: '...',
     escape: '\\',
     comma: ',',
     semicolon: ';',

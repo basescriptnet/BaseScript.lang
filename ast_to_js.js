@@ -107,9 +107,52 @@ module.exports = function parse (statements, tmp) {
                 //     return r
                 // })()`;
                 break;
+            case 'array_interactions':
+                if (statement.method == 'spread') {
+                    result += `...${parse(value)}`;
+                    break;
+                }
+                if (statement.into) {
+                    result += `(() => {
+                        let v = ${parse(statement.into)};
+                        v.${statement.method.value.toLowerCase()}(${parse(value)});
+                        return v;
+                    })()`;
+                    break;
+                }
+                result += `(() => {
+                    let v = ${parse(statement.value)};
+                    v.${statement.method.value.toLowerCase()}();
+                    return v;
+                })()`;
+                break;
+            case 'debugging':
+                if (statement.method == 'log' || statement.method == 'error') {
+                    result += `console.${statement.method}(${parse(value)})`
+                } else {
+                    result += `(() => {
+                        let el = document.createTextNode(${parse(value)});
+                        document.body.append(el);
+                    })()`
+                }
+                break;
             case 'number':
             case 'bigInt':
                 result += value;
+                break;
+            case 'SAVE':
+                result += `globalThis.BS.storage.push(${parse(value)});`;
+                break;
+            case 'USE':
+                result += `(() => {
+                    if (globalThis.BS.storage.length == 0) {
+                        throw new Error("No saved values to use at line ${statement.line}, col ${statement.col}.");
+                    }
+                    return globalThis.BS.storage.last();
+                })()`;
+                break;
+            case 'DELETE':
+                result += `globalThis.BS.storage.pop();`;
                 break;
             case 'string':
                 result += value.indexOf('$') > -1 ? `\`${value}\`` : `${JSON.stringify(value)}`;

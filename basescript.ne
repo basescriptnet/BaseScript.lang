@@ -14,6 +14,13 @@ statement -> blocks {% id %}
 	| class_declaration {% id %}
 	| with {% id %}
 	| "debugger" EOL {% statement.debugger %}
+	| "SAVE" __ value EOL {% v => ({
+		type: 'SAVE',
+		value: v[2]
+	}) %}
+	| "DELETE" __ "USE" EOL {% v => ({
+		type: 'DELETE',
+	}) %}
 	| "delete" __ value EOL {% statement.delete %}
 	| return {% id %}
 	| "throw" __ value EOL {% statement.throw %}
@@ -340,6 +347,7 @@ expression ->
 	}) %}
 	| object_retraction {% id %}
 	| convert {% id %}
+	| array_interactions {% id %}
 	| regexp {% id %}
 	| annonymous_function {% id %}
 	| function_call {% id %}
@@ -349,10 +357,12 @@ expression ->
 	| bigInt {% id %}
 	| number {% id %}
 	| "this" {% id %}
+	| "USE" {% v => ({type: 'USE', line: v[0].line, col: v[0].col}) %}
 	| html {% id %}
 	| object {% id %}
 	| boolean {% id %}
 	| convert {% id %}
+	| debugging {% id %}
 # base line
 identifier -> %identifier {% v => v[0] %}
 
@@ -380,6 +390,7 @@ right_side_retraction -> %keyword {% id %}
 	| identifier {% id %}
 
 left_side_retraction -> function_call {% id %}
+	| "(" _ array_interactions _ ")" {% v => v[2] %}
 	| "(" _ convert _ ")" {% v => v[2] %}
 	| object {% id %}
 	| array {% id %}
@@ -388,6 +399,7 @@ left_side_retraction -> function_call {% id %}
 	| bigInt {% id %}
 	| number {% id %}
 	| "this" {% id %}
+	| "USE" {% v => ({type: 'USE', line: v[0].line, col: v[0].col}) %}
 	| html {% id %}
 	| boolean {% id %}
 
@@ -409,6 +421,46 @@ convert_type -> ("List" | "JSON" | "String" | "Number" | "Boolean" | "Object" | 
 		}
 	} %}
 	| "Array" {% id %}
+
+array_interactions -> ("PUSH" | "UNSHIFT") _ value _ "INTO" _ value {% v => ({
+		type: 'array_interactions',
+		method: v[0][0],
+		into: v[6],
+		value: v[2],
+		line: v[0].line,
+		col: v[0].col
+	}) %}
+	| ("POP" | "SHIFT") _ value {% v => ({
+		type: 'array_interactions',
+		method: v[0][0],
+		value: v[2],
+		line: v[0].line,
+		col: v[0].col
+	}) %}
+	| "..." value {% v => ({
+		type: 'array_interactions',
+		method: 'spread',
+		value: v[1],
+		line: v[0].line,
+		col: v[0].col
+	}) %}
+
+debugging -> "LOG" _ value {% v => ({
+	type: 'debugging',
+	method: 'log',
+	value: v[2]
+}) %}
+| "ERROR" _ value {% v => ({
+	type: 'debugging',
+	method: 'error',
+	value: v[2]
+}) %}
+| "WRITE" _ value {% v => ({
+	type: 'debugging',
+	method: 'write',
+	value: v[2]
+}) %}
+
 value -> 
 	"(" _ value _ ")" {% v => ({
 		type: 'expression_with_parenthesis',

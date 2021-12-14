@@ -214,7 +214,8 @@ globalThis.BS = {
                 if (this.types[i](value)) return i;
             } catch (err) {continue}
         }
-    }
+    },
+    storage: [],
     // require('./ast_to_js.js')// || function () {console.warn('@eval is not supported yet in browsers.')}
 };
 try {
@@ -254,6 +255,9 @@ Element.prototype.events = function (obj) {
         this.addEventListener(i, obj[i]);
     }
     return this;
+}
+Array.prototype.last = function () {
+    return this[this.length - 1];
 }
 function list (amount, callback) {
     let array = [];
