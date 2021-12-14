@@ -1,5 +1,4 @@
 
-// document.body.append(canvas)(canvas) // *2 results
 // type Unique (Array value) {
 //     \r = []
 //     for i of value {
@@ -24,21 +23,31 @@
 // //     // document.body.innerHTML = result + '</pre>'; // *2 results
 // // }
 // dumpHTML(document.body)
-\canvas = <canvas#canvas/>
-\ctx = canvas.getContext('2d') // *2 results
-canvas.width = 600
-canvas.height = 600
-document.body.append(canvas) // *2 results
-\p = 600 / 8
-\r = true
-for i of range(8) {
-    for j of range(8) {
-        if r: ctx.fillStyle = 'black'
-        else ctx.fillStyle = 'white'
-        ctx.fillRect(p * j, p * i, p, p) // *75 results
-        r = !r
-        null
-        // "100px" " solid" // *2 results
-    }
-    r = !r
-}
+//
+// ASSIGN <canvas#canvas/> TO canvas
+// ASSIGN canvas.getContext('2d') TO ctx // *2 results
+// SET canvas.width TO 600
+// SET canvas.height TO 600
+// ASSIGN 600 / 8 TO p
+// ASSIGN true TO r
+// console.log(typeof p)
+
+// for i of range(8) BEGIN
+//     for j of range(8) BEGIN
+//         if r: SET ctx.fillStyle TO 'black'
+//         else SET ctx.fillStyle TO 'white'
+//         ctx.fillRect(p * j, p * i, p, p) // *75 results
+//         SET r TO !r
+//     END
+//     r = !r
+// END
+
+// document.body.append(canvas) // *2 results
+
+// function f(Int input) {
+   
+//     return (input as Array[Array[Int]])
+//  }
+
+// console.log(f(10))
+console.log(10 as Array[Int])

@@ -5,8 +5,8 @@ module.exports = function (str) {
     // if (str.trim().length == 0) return '';
     try {
         let parsed = parser.feed(str);
-        console.log(`Parsing result count: ${parsed.results.length}`)
-        console.log(parsed.results);
+        // console.log(`Parsing result count: ${parsed.results.length}`)
+        // console.log(parsed.results);
         let result = parsed.results[0]
         if (!result) {
             console.log('[Log]: Grammar doesn\'t match.')

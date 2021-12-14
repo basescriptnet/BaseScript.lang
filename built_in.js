@@ -67,45 +67,146 @@ globalThis.BS = {
         return function () {console.warn('@import is not supported yet in browsers.')};
     })(),
     types: {
-        array (value) {
+        Array (value) {
             return Array.isArray(value);
         },
-        null (value) {
+        Null (value) {
             return value === null;
         },
-        undefined (value) {
+        Undefined (value) {
             return value === void 0;
         },
-        int (value) {
+        Int (value) {
             return parseInt(value) === value && !Number.isNaN(value);
         },
-        float (value) {
+        Float (value) {
             return typeof value === 'number' && !Number.isNaN(value);
         },
-        number (value) {
+        Number (value) {
             return typeof value === 'number' && !Number.isNaN(value);
         },
         NaN (value) {
             return Number.isNaN(value);
         },
-        string (value) {
+        String (value) {
             return typeof value === 'string';
         },
-        function (value) {
+        Function (value) {
             return typeof value === 'function';
         },
-        symbol (value) {
+        Symbol (value) {
             return typeof value === 'symbol';
         },
-        boolean (value) {
+        Boolean (value) {
             return typeof value === 'boolean';
         },
         HTML (value) {
             return value instanceof Element;
         },
-        object (value) {
+        Object (value) {
             return typeof value === 'object' && value !== null;
         },
+    },
+    convert (value, type) {
+        let t = this.getType(value)
+        if (t) t = t.toLowerCase();
+        let tmp = null;
+        if (typeof type !== 'object' && t == type.toLowerCase()) return value;
+        let gt = function (value, type) {
+            switch (type) {
+                case 'Number':
+                case 'Float':
+                    tmp = parseFloat(value)
+                    if (isNaN(tmp)) return 0;
+                    return tmp;
+                case 'Int':
+                    return value|0;
+                case 'String':
+                    if (t == 'html') return JSON.stringify(this.DOMtoJSON(value));
+                    if (t == 'array') return value.join('');
+                    if (t == 'object') return JSON.stringify(value);
+                    if (t == 'boolean') return !!value;
+                    if (t == 'null') return 'null';
+                    if (t == 'undefined') return 'undefined';
+                    else return value.toString();
+                case 'Array':
+                    if (t == 'html') return Object.values(this.DOMtoJSON(value));
+                    if (t == 'object') return Object.values(value);
+                    if (t == 'string') {
+                        try {
+                            let z = JSON.parse(t)
+                            let v = this.getType(z) == 'array'
+                            if (v) return z;
+                            throw 'err';
+                        } catch (err) {}
+                        return value.split('');
+                    }
+                    if (t == 'number' || t == 'int' || t == 'float') {
+                        return (''+value).split('')
+                    }
+                    else return [value];
+                case 'JSON':
+                    if (t == 'html') return this.DOMtoJSON(value);
+                    if (t == 'object' || t == 'string' || t == 'array' || t == 'null' || t == 'number' )
+                        return value;
+                    throw new TypeError(`Cannot convert ${t} to ${type}`);
+                case 'Object':
+                    return Object(value);
+                case 'Boolean':
+                    return Boolean(value);
+                case 'List':
+                    if (t == 'object' || t == 'array' || t == 'html') {
+                        let ul = document.createElement('ul');
+                        for (let i in value) {
+                            let li = document.createElement('li');
+                            if (t == 'object') {
+                                let span = document.createElement('span');
+                                span.className = 'convert_key';
+                                span.innerText = i;
+                                li.append(span);
+                                li.appendChild(document.createTextNode(': '))
+                            }
+                            let span = document.createElement('span');
+                            span.className = 'convert_value';
+                            if (this.getType(value[i]) == 'string') {
+                                span.className += ' string';
+                                span.innerText = `"${value[i]}"`;
+                            } else if (this.getType(value[i]) == 'number') {
+                                span.className += ' number';
+                                span.innerText = `${value[i]}`;
+                            } else if (this.getType(value[i]) == 'array') {
+                                span.className += ' array';
+                                span.innerText = JSON.stringify(value[i], null, 2);
+                            }
+                            else span.innerText = `${value[i]}`;
+                            li.append(span);
+                            ul.append(li);
+                        }
+                        return ul;
+                    }
+                    return document.createElement('ul');
+            }
+        }
+        if (typeof type != 'string') {
+            let r = value;
+            // debugger
+            console.log(type.length)
+            for (let i = 0; i < type.length; i++) {
+                r = gt(r, type[i]);
+                console.log({r, type: type[i]})
+                if (i != length -1) {
+                    if (r.map) {
+                        r = r.map(j => {
+                            console.log({each: this.convert(j, type[i+1]), type: type[i+1]})
+                            return this.convert(j, type[i+1])
+                        });
+                    }
+                }
+                console.log(r)
+            }
+        }
+        // console.log('h', gt(value,type))
+        return gt(value, type);
     },
     getType (value) {
         for (let i in this.types) {
@@ -188,6 +289,32 @@ function range(n){
 }
 const PI = 3.141592653589793,
     E = 2.718281828459045,
-    log = (...args) => console.log(...args);
+    log = (...args) => console.log(...args),
+    Time = {
+        get now () {
+            return Date.now()
+        },
+        get ms () {
+            return new Date().getMilliseconds()
+        },
+        get seconds () {
+            return new Date().getSeconds()
+        },
+        get minutes () {
+            return new Date().getMinutes()
+        },
+        get hours () {
+            return new Date().getHours()
+        },
+        get day () {
+            return new Date().getDay()
+        },
+        get month () {
+            return new Date().getMonth()
+        },
+        get year () {
+            return new Date().getFullYear()
+        },
+    };
 
 // your code below this line!

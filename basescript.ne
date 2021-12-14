@@ -117,6 +117,7 @@ with -> "with" __ value statements_block  {% v => assign(v[0], {
 }) %}
 
 statements_block -> _ "{" statements "}" {% v => v[2] %}
+	| _ "BEGIN" __ statements _ "END" {% v => v[3] %}
 	| _ ":" _ statement {% v => [v[3]] %}
 	| _ "do" _ statement {% v => [v[3]] %}
 
@@ -267,12 +268,47 @@ value_reassign -> value _ "=" _ (switch | value) {% v => {
 		offset: v[0].offset
 	}
 } %} 
+	| "SET" _ value _ "TO" _ (switch | value) {% v => {
+	return {
+		type: 'var_reassign',
+		identifier: v[2],
+		line: v[0].line,
+		col: v[0].col,
+		value: v[6][0],
+		offset: v[0].offset
+	}
+} %} 
 
 var_assign -> ("let" __ | "const" __ | "\\") var_assign_list {% vars.assign %}
+	| "ASSIGN" _ (switch | value) _ "TO" _  identifier {% v => {
+	return {
+		type: 'var_assign',
+		use_let: true,
+		identifier: v[6],
+		line: v[0].line,
+		col: v[0].col,
+		value: {
+			type: 'var_assign_group',
+			identifier: v[6],
+			value: [v[2][0]]
+		},
+		offset: v[0].offset
+	}
+} %}
 
 var_assign_list -> var_reassign (_ "," _ var_reassign):* {% vars.var_assign_list %}
 
 var_reassign -> identifier _ "=" _ (switch | value) {% v => {
+	return {
+		type: 'var_reassign',
+		identifier: v[0],
+		line: v[0].line,
+		col: v[0].col,
+		value: v[4][0],
+		offset: v[0].offset
+	}
+} %}
+	| "SET" _ identifier _ "TO" _ (switch | value) {% v => {
 	return {
 		type: 'var_reassign',
 		identifier: v[0],
@@ -303,6 +339,7 @@ expression ->
 		arguments: v[5] ? v[5][1] : null
 	}) %}
 	| object_retraction {% id %}
+	| convert {% id %}
 	| regexp {% id %}
 	| annonymous_function {% id %}
 	| function_call {% id %}
@@ -315,6 +352,7 @@ expression ->
 	| html {% id %}
 	| object {% id %}
 	| boolean {% id %}
+	| convert {% id %}
 # base line
 identifier -> %identifier {% v => v[0] %}
 
@@ -326,7 +364,7 @@ object_retraction -> single_retraction (_ "." _ right_side_retraction {% v => v[
 }) %}
 
 # _object_retraction ->  object_retraction {% id %}
-# 	| single_retraction {% id %}
+	# | single_retraction {% id %}
 
 single_retraction -> left_side_retraction _ "." _ right_side_retraction {% v => ({
 	type: 'dot_retraction',
@@ -334,10 +372,6 @@ single_retraction -> left_side_retraction _ "." _ right_side_retraction {% v => 
 	value: v[4],
 	//value: v[0].value + '.' + v[4].value
 })
-/*({
-	type: 'expression',
-	value: v[0].value + '.' + v[4].value 
-})*/
 %}
 	| left_side_retraction {% id %}
 
@@ -346,6 +380,7 @@ right_side_retraction -> %keyword {% id %}
 	| identifier {% id %}
 
 left_side_retraction -> function_call {% id %}
+	| "(" _ convert _ ")" {% v => v[2] %}
 	| object {% id %}
 	| array {% id %}
 	| identifier {% id %}
@@ -354,10 +389,36 @@ left_side_retraction -> function_call {% id %}
 	| number {% id %}
 	| "this" {% id %}
 	| html {% id %}
-	| object {% id %}
 	| boolean {% id %}
 
-value -> expression {% id %}
+convert -> value __ "as" __ convert_type {% v => {
+		return {
+			type: 'convert',
+			value: v[0],
+			convert_type: v[4]
+		}
+	} %}
+
+convert_type -> ("List" | "JSON" | "String" | "Number" | "Boolean" | "Object" | "Float" | "Int") {% v => v[0][0] %}
+	| "Array" "[" convert_type "]" {% v => {
+		return {
+			type: 'array_of_type',
+			value: v[2],
+			line: v[0].line,
+			col: v[0].col
+		}
+	} %}
+	| "Array" {% id %}
+value -> 
+	"(" _ value _ ")" {% v => ({
+		type: 'expression_with_parenthesis',
+		value: v[2]
+	}) %}
+	# | 
+	| "typeof" __ value {% v => ({
+		type: 'typeof',
+		value: v[2]
+	}) %}
 	| value _ "[" _ value _ "]" (_ arguments):? {% v => {
 	//debugger
 		return {
@@ -368,15 +429,14 @@ value -> expression {% id %}
 			//identifier: v[0].value
 		}
 	} %}
-	# | "(" _ value _ ")" {% v => ({
-	# 	type: 'expression_with_parenthesis',
-	# 	value: v[2]
-	# }) %}
-	# | value _ arguments {% v => ({
+	| expression {% id %}
+	# | value _ arguments {% v => {
+	# 	debugger
+	# 	return ({
 	# 	type: 'function_call',
 	# 	value: v[0],
 	# 	arguments: v[2]
-	# }) %}
+	# })} %}
 	| ("new" | "await" | "yield") __ value {% v => {
 		return assign(v[0][0], {
 			type: v[0][0].text,
@@ -424,18 +484,27 @@ case_single_valued -> "|" _ value _ ":" _ (value EOL):? {% v => assign(v[0], {
 
 # functions
 # function_declaration -> ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") __ identifier _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
-function_declaration -> ("async" __):? ("function") __ identifier _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% functions.declaration %}
+function_declaration -> ("async" __):? ("function") __ identifier _ arguments_with_types statements_block {% functions.declaration %}
 
 annonymous_function -> "(" _ annonymous_function _ ")" _ arguments {% functions.iife %}
 	# | ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
 	| ("async" __):? ("function") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% functions.annonymous %}
+	# | ("async" __):? _ arguments_with_types _ "=>" _ statements_block {% v => {
+	# 	return {
+	# 		type: 'annonymous_function',
+	# 		value: v[6],
+	# 		arguments: v[2],
+	# 		async: v[0] ? true : false
+	# 	}
+	# } %}
 
-return -> "return" [ \t]:+ value EOL {% returns.value %}
-	| "return" EOL  {% returns.empty %}
+return -> "return" __ value EOL {% returns.value %}
+	# | "return" EOL  {% returns.empty %}
 
 function_call -> callable _ arguments {% v => {
-	return assign(v[0], {
+	return ({
 		type: 'function_call',
+		value: v[0],
 		arguments: v[2],
 		//identifier: v[0].value
 	})
@@ -443,17 +512,17 @@ function_call -> callable _ arguments {% v => {
 
 callable -> function_call {% id %}
 	| identifier {% id %}
-	# | object_retraction {% id %}
 
 arguments -> "(" _ ")" {% args.empty %}
 	| "(" _ value (_ "," _ value):* (_ ","):? _ ")" {% args.extract %}
 arguments_with_types -> "(" _ ")" {% args.empty_arguments_with_types %}
 	| "(" _ argument_type:? identifier (_ "," _ argument_type:? identifier):* (_ ","):? _ ")" {% args.arguments_with_types %}
 
-argument_type -> identifier __ {% v => {
+argument_type -> (identifier | %keyword) __ {% v => {
+	v[0] = v[0][0]
 	let n = v[0].value[0];
 	if (n.toUpperCase() != n) {
-		throw new SyntaxError(`Argument type must be capitalized.`);
+		throw new SyntaxError(`Argument type must be capitalized at line ${v[0].line}, col ${v[0].col}.`);
 	}
 	return v[0];
 } %}
@@ -491,8 +560,8 @@ myNull -> "null" {% Null %}
 boolean -> (%boolean | "!" _ value) {% boolean %}
 
 # strings
-string -> string _ "[" _ number _ ":" ":":? _ number _ "]" {% string.slice %}
-	| string_concat {% id %}
+string -> string_concat {% id %}
+	| string _ "[" _ number _ ":" ":":? _ number _ "]" {% string.slice %}
 	| number "px" {% string.px %}
 
 # numbers
@@ -577,7 +646,7 @@ EOL -> %space {% v => 'EOL' %}
 				type: 'function_declaration',
 				identifier: v[3],
 				arguments: v[5],
-				value: v[8] ? v[8].map(i => i[1]) : [],
+				value: v[6],
 				async: v[0] ? true : false
 				// text is one of the options above: string; int...
 			})

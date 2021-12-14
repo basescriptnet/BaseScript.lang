@@ -32,7 +32,7 @@ function id(x) { return x[0]; }
 				type: 'function_declaration',
 				identifier: v[3],
 				arguments: v[5],
-				value: v[8] ? v[8].map(i => i[1]) : [],
+				value: v[6],
 				async: v[0] ? true : false
 				// text is one of the options above: string; int...
 			})
@@ -476,6 +476,7 @@ var grammar = {
         	value: v[3]
         }) },
     {"name": "statements_block", "symbols": ["_", {"literal":"{"}, "statements", {"literal":"}"}], "postprocess": v => v[2]},
+    {"name": "statements_block", "symbols": ["_", {"literal":"BEGIN"}, "__", "statements", "_", {"literal":"END"}], "postprocess": v => v[3]},
     {"name": "statements_block", "symbols": ["_", {"literal":":"}, "_", "statement"], "postprocess": v => [v[3]]},
     {"name": "statements_block", "symbols": ["_", {"literal":"do"}, "_", "statement"], "postprocess": v => [v[3]]},
     {"name": "while_block", "symbols": [{"literal":"while"}, "statement_condition", "statements_block"], "postprocess":   v => {
@@ -594,10 +595,39 @@ var grammar = {
         		offset: v[0].offset
         	}
         } },
+    {"name": "value_reassign$subexpression$2", "symbols": ["switch"]},
+    {"name": "value_reassign$subexpression$2", "symbols": ["value"]},
+    {"name": "value_reassign", "symbols": [{"literal":"SET"}, "_", "value", "_", {"literal":"TO"}, "_", "value_reassign$subexpression$2"], "postprocess":  v => {
+        	return {
+        		type: 'var_reassign',
+        		identifier: v[2],
+        		line: v[0].line,
+        		col: v[0].col,
+        		value: v[6][0],
+        		offset: v[0].offset
+        	}
+        } },
     {"name": "var_assign$subexpression$1", "symbols": [{"literal":"let"}, "__"]},
     {"name": "var_assign$subexpression$1", "symbols": [{"literal":"const"}, "__"]},
     {"name": "var_assign$subexpression$1", "symbols": [{"literal":"\\"}]},
     {"name": "var_assign", "symbols": ["var_assign$subexpression$1", "var_assign_list"], "postprocess": vars.assign},
+    {"name": "var_assign$subexpression$2", "symbols": ["switch"]},
+    {"name": "var_assign$subexpression$2", "symbols": ["value"]},
+    {"name": "var_assign", "symbols": [{"literal":"ASSIGN"}, "_", "var_assign$subexpression$2", "_", {"literal":"TO"}, "_", "identifier"], "postprocess":  v => {
+        	return {
+        		type: 'var_assign',
+        		use_let: true,
+        		identifier: v[6],
+        		line: v[0].line,
+        		col: v[0].col,
+        		value: {
+        			type: 'var_assign_group',
+        			identifier: v[6],
+        			value: [v[2][0]]
+        		},
+        		offset: v[0].offset
+        	}
+        } },
     {"name": "var_assign_list$ebnf$1", "symbols": []},
     {"name": "var_assign_list$ebnf$1$subexpression$1", "symbols": ["_", {"literal":","}, "_", "var_reassign"]},
     {"name": "var_assign_list$ebnf$1", "symbols": ["var_assign_list$ebnf$1", "var_assign_list$ebnf$1$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
@@ -605,6 +635,18 @@ var grammar = {
     {"name": "var_reassign$subexpression$1", "symbols": ["switch"]},
     {"name": "var_reassign$subexpression$1", "symbols": ["value"]},
     {"name": "var_reassign", "symbols": ["identifier", "_", {"literal":"="}, "_", "var_reassign$subexpression$1"], "postprocess":  v => {
+        	return {
+        		type: 'var_reassign',
+        		identifier: v[0],
+        		line: v[0].line,
+        		col: v[0].col,
+        		value: v[4][0],
+        		offset: v[0].offset
+        	}
+        } },
+    {"name": "var_reassign$subexpression$2", "symbols": ["switch"]},
+    {"name": "var_reassign$subexpression$2", "symbols": ["value"]},
+    {"name": "var_reassign", "symbols": [{"literal":"SET"}, "_", "identifier", "_", {"literal":"TO"}, "_", "var_reassign$subexpression$2"], "postprocess":  v => {
         	return {
         		type: 'var_reassign',
         		identifier: v[0],
@@ -641,6 +683,7 @@ var grammar = {
         	arguments: v[5] ? v[5][1] : null
         }) },
     {"name": "expression", "symbols": ["object_retraction"], "postprocess": id},
+    {"name": "expression", "symbols": ["convert"], "postprocess": id},
     {"name": "expression", "symbols": ["regexp"], "postprocess": id},
     {"name": "expression", "symbols": ["annonymous_function"], "postprocess": id},
     {"name": "expression", "symbols": ["function_call"], "postprocess": id},
@@ -653,6 +696,7 @@ var grammar = {
     {"name": "expression", "symbols": ["html"], "postprocess": id},
     {"name": "expression", "symbols": ["object"], "postprocess": id},
     {"name": "expression", "symbols": ["boolean"], "postprocess": id},
+    {"name": "expression", "symbols": ["convert"], "postprocess": id},
     {"name": "identifier", "symbols": [(lexer.has("identifier") ? {type: "identifier"} : identifier)], "postprocess": v => v[0]},
     {"name": "object_retraction$ebnf$1$subexpression$1", "symbols": ["_", {"literal":"."}, "_", "right_side_retraction"], "postprocess": v => v[3]},
     {"name": "object_retraction$ebnf$1", "symbols": ["object_retraction$ebnf$1$subexpression$1"]},
@@ -670,16 +714,13 @@ var grammar = {
         	value: v[4],
         	//value: v[0].value + '.' + v[4].value
         })
-        /*({
-        	type: 'expression',
-        	value: v[0].value + '.' + v[4].value 
-        })*/
         },
     {"name": "single_retraction", "symbols": ["left_side_retraction"], "postprocess": id},
     {"name": "right_side_retraction", "symbols": [(lexer.has("keyword") ? {type: "keyword"} : keyword)], "postprocess": id},
     {"name": "right_side_retraction", "symbols": ["function_call"], "postprocess": id},
     {"name": "right_side_retraction", "symbols": ["identifier"], "postprocess": id},
     {"name": "left_side_retraction", "symbols": ["function_call"], "postprocess": id},
+    {"name": "left_side_retraction", "symbols": [{"literal":"("}, "_", "convert", "_", {"literal":")"}], "postprocess": v => v[2]},
     {"name": "left_side_retraction", "symbols": ["object"], "postprocess": id},
     {"name": "left_side_retraction", "symbols": ["array"], "postprocess": id},
     {"name": "left_side_retraction", "symbols": ["identifier"], "postprocess": id},
@@ -688,9 +729,40 @@ var grammar = {
     {"name": "left_side_retraction", "symbols": ["number"], "postprocess": id},
     {"name": "left_side_retraction", "symbols": [{"literal":"this"}], "postprocess": id},
     {"name": "left_side_retraction", "symbols": ["html"], "postprocess": id},
-    {"name": "left_side_retraction", "symbols": ["object"], "postprocess": id},
     {"name": "left_side_retraction", "symbols": ["boolean"], "postprocess": id},
-    {"name": "value", "symbols": ["expression"], "postprocess": id},
+    {"name": "convert", "symbols": ["value", "__", {"literal":"as"}, "__", "convert_type"], "postprocess":  v => {
+        	return {
+        		type: 'convert',
+        		value: v[0],
+        		convert_type: v[4]
+        	}
+        } },
+    {"name": "convert_type$subexpression$1", "symbols": [{"literal":"List"}]},
+    {"name": "convert_type$subexpression$1", "symbols": [{"literal":"JSON"}]},
+    {"name": "convert_type$subexpression$1", "symbols": [{"literal":"String"}]},
+    {"name": "convert_type$subexpression$1", "symbols": [{"literal":"Number"}]},
+    {"name": "convert_type$subexpression$1", "symbols": [{"literal":"Boolean"}]},
+    {"name": "convert_type$subexpression$1", "symbols": [{"literal":"Object"}]},
+    {"name": "convert_type$subexpression$1", "symbols": [{"literal":"Float"}]},
+    {"name": "convert_type$subexpression$1", "symbols": [{"literal":"Int"}]},
+    {"name": "convert_type", "symbols": ["convert_type$subexpression$1"], "postprocess": v => v[0][0]},
+    {"name": "convert_type", "symbols": [{"literal":"Array"}, {"literal":"["}, "convert_type", {"literal":"]"}], "postprocess":  v => {
+        	return {
+        		type: 'array_of_type',
+        		value: v[2],
+        		line: v[0].line,
+        		col: v[0].col
+        	}
+        } },
+    {"name": "convert_type", "symbols": [{"literal":"Array"}], "postprocess": id},
+    {"name": "value", "symbols": [{"literal":"("}, "_", "value", "_", {"literal":")"}], "postprocess":  v => ({
+        	type: 'expression_with_parenthesis',
+        	value: v[2]
+        }) },
+    {"name": "value", "symbols": [{"literal":"typeof"}, "__", "value"], "postprocess":  v => ({
+        	type: 'typeof',
+        	value: v[2]
+        }) },
     {"name": "value$ebnf$1$subexpression$1", "symbols": ["_", "arguments"]},
     {"name": "value$ebnf$1", "symbols": ["value$ebnf$1$subexpression$1"], "postprocess": id},
     {"name": "value$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
@@ -704,6 +776,7 @@ var grammar = {
         		//identifier: v[0].value
         	}
         } },
+    {"name": "value", "symbols": ["expression"], "postprocess": id},
     {"name": "value$subexpression$1", "symbols": [{"literal":"new"}]},
     {"name": "value$subexpression$1", "symbols": [{"literal":"await"}]},
     {"name": "value$subexpression$1", "symbols": [{"literal":"yield"}]},
@@ -751,11 +824,7 @@ var grammar = {
     {"name": "function_declaration$ebnf$1", "symbols": ["function_declaration$ebnf$1$subexpression$1"], "postprocess": id},
     {"name": "function_declaration$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "function_declaration$subexpression$1", "symbols": [{"literal":"function"}]},
-    {"name": "function_declaration$ebnf$2", "symbols": []},
-    {"name": "function_declaration$ebnf$2$subexpression$1", "symbols": ["_", "statement"]},
-    {"name": "function_declaration$ebnf$2$subexpression$1", "symbols": ["_", "return"]},
-    {"name": "function_declaration$ebnf$2", "symbols": ["function_declaration$ebnf$2", "function_declaration$ebnf$2$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "function_declaration", "symbols": ["function_declaration$ebnf$1", "function_declaration$subexpression$1", "__", "identifier", "_", "arguments_with_types", "_", {"literal":"{"}, "function_declaration$ebnf$2", "_", {"literal":"}"}], "postprocess": functions.declaration},
+    {"name": "function_declaration", "symbols": ["function_declaration$ebnf$1", "function_declaration$subexpression$1", "__", "identifier", "_", "arguments_with_types", "statements_block"], "postprocess": functions.declaration},
     {"name": "annonymous_function", "symbols": [{"literal":"("}, "_", "annonymous_function", "_", {"literal":")"}, "_", "arguments"], "postprocess": functions.iife},
     {"name": "annonymous_function$ebnf$1$subexpression$1", "symbols": [{"literal":"async"}, "__"]},
     {"name": "annonymous_function$ebnf$1", "symbols": ["annonymous_function$ebnf$1$subexpression$1"], "postprocess": id},
@@ -769,13 +838,11 @@ var grammar = {
     {"name": "annonymous_function$ebnf$3$subexpression$1", "symbols": ["_", "return"]},
     {"name": "annonymous_function$ebnf$3", "symbols": ["annonymous_function$ebnf$3", "annonymous_function$ebnf$3$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "annonymous_function", "symbols": ["annonymous_function$ebnf$1", "annonymous_function$subexpression$1", "annonymous_function$ebnf$2", "_", "arguments_with_types", "_", {"literal":"{"}, "annonymous_function$ebnf$3", "_", {"literal":"}"}], "postprocess": functions.annonymous},
-    {"name": "return$ebnf$1", "symbols": [/[ \t]/]},
-    {"name": "return$ebnf$1", "symbols": ["return$ebnf$1", /[ \t]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "return", "symbols": [{"literal":"return"}, "return$ebnf$1", "value", "EOL"], "postprocess": returns.value},
-    {"name": "return", "symbols": [{"literal":"return"}, "EOL"], "postprocess": returns.empty},
+    {"name": "return", "symbols": [{"literal":"return"}, "__", "value", "EOL"], "postprocess": returns.value},
     {"name": "function_call", "symbols": ["callable", "_", "arguments"], "postprocess":  v => {
-        	return assign(v[0], {
+        	return ({
         		type: 'function_call',
+        		value: v[0],
         		arguments: v[2],
         		//identifier: v[0].value
         	})
@@ -802,10 +869,13 @@ var grammar = {
     {"name": "arguments_with_types$ebnf$3", "symbols": ["arguments_with_types$ebnf$3$subexpression$1"], "postprocess": id},
     {"name": "arguments_with_types$ebnf$3", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "arguments_with_types", "symbols": [{"literal":"("}, "_", "arguments_with_types$ebnf$1", "identifier", "arguments_with_types$ebnf$2", "arguments_with_types$ebnf$3", "_", {"literal":")"}], "postprocess": args.arguments_with_types},
-    {"name": "argument_type", "symbols": ["identifier", "__"], "postprocess":  v => {
+    {"name": "argument_type$subexpression$1", "symbols": ["identifier"]},
+    {"name": "argument_type$subexpression$1", "symbols": [(lexer.has("keyword") ? {type: "keyword"} : keyword)]},
+    {"name": "argument_type", "symbols": ["argument_type$subexpression$1", "__"], "postprocess":  v => {
+        	v[0] = v[0][0]
         	let n = v[0].value[0];
         	if (n.toUpperCase() != n) {
-        		throw new SyntaxError(`Argument type must be capitalized.`);
+        		throw new SyntaxError(`Argument type must be capitalized at line ${v[0].line}, col ${v[0].col}.`);
         	}
         	return v[0];
         } },
@@ -835,10 +905,10 @@ var grammar = {
     {"name": "boolean$subexpression$1", "symbols": [(lexer.has("boolean") ? {type: "boolean"} : boolean)]},
     {"name": "boolean$subexpression$1", "symbols": [{"literal":"!"}, "_", "value"]},
     {"name": "boolean", "symbols": ["boolean$subexpression$1"], "postprocess": boolean},
+    {"name": "string", "symbols": ["string_concat"], "postprocess": id},
     {"name": "string$ebnf$1", "symbols": [{"literal":":"}], "postprocess": id},
     {"name": "string$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "string", "symbols": ["string", "_", {"literal":"["}, "_", "number", "_", {"literal":":"}, "string$ebnf$1", "_", "number", "_", {"literal":"]"}], "postprocess": string.slice},
-    {"name": "string", "symbols": ["string_concat"], "postprocess": id},
     {"name": "string", "symbols": ["number", {"literal":"px"}], "postprocess": string.px},
     {"name": "bigInt", "symbols": [(lexer.has("number") ? {type: "number"} : number), {"literal":"n"}], "postprocess": number.bigInt},
     {"name": "number", "symbols": [(lexer.has("number") ? {type: "number"} : number)], "postprocess": number.float},

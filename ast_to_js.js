@@ -37,14 +37,18 @@ module.exports = function parse (statements, tmp) {
                 result += 'debugger;';
                 break;
             case 'var_assign':
-                result += `${statement.use_let ? 'let ' : statement.use_const ? 'const ' : ''}${parse([value])};`;
+                result += `${statement.use_let ? 'let ' : statement.use_const ? 'const ' : ''}${parse(value)};`;
                 break;
             case 'var_assign_group':
                 if (!!value.value) value = value.value;
                 for (let i = 0; i < value.length; i++) {
-                    r.push(`${parse([value[i]])}`);
+                    r.push(`${parse(value[i])}`);
                 }
-                result += `${r.join()}`;
+                if (statement.identifier) {
+                    result += `${parse(statement.identifier)} = ${r.join()}`
+                }
+                else 
+                    result += `${r.join()}`;
                 break;
             case 'var_reassign':
                 result += `${parse(statement.identifier)} = ${parse([value])}`;
@@ -52,11 +56,56 @@ module.exports = function parse (statements, tmp) {
             case 'array':
                 result += '[';
                 for (let i = 0; i < value.length; i++) {
-                    result += parse([value[i]]);
+                    result += parse(value[i]);
                     if (i !== value.length -1)
                         result += ',';
                 }
                 result += ']';
+                break;
+            case 'convert':
+                if (typeof statement.convert_type.value == 'string') {
+                    result += `globalThis.BS.convert(${parse(value)}, "${statement.convert_type.value}")`
+                    break;
+                }
+                // result += `globalThis.BS.convert(${parse(value)}, ["Array"${parse(statement.convert_type)}])`
+                result += `(() => {
+                    let r = globalThis.BS.convert(${parse(value)}, "Array");
+                    ${parse(statement.convert_type)};
+                    return r
+                })()`;
+                    
+                // result += `for (let i = 0; i < r.length; i++) {
+                //         r[i] = globalThis.BS.convert(r[i], "${statement.convert_type.value.value}")
+                //     }`
+                break;
+            case 'array_of_type':
+                var r = [];
+                var tm = value;
+                // while (true) {
+                //     if (value.type == 'keyword') break;
+                //     if (value.type == 'identifier') break;
+                //     r.push(`"${parse(value)}"`);
+                //     // if (tm) tm = tm.value;
+                //     else break;
+                // }
+                // r.push(`"${value.value}"`);
+                // result += `, ${r.join(', ')}`;
+                // break;
+                if (statement.value.type == 'array_of_type') {
+                    result += `for (let i = 0; i < r.length; i++) {
+                        r[i] = globalThis.BS.convert(r[i], "Array");
+                        ${r}
+                    }`
+                    break;
+                }
+                result += `for (let i = 0; i < r.length; i++) {
+                    r[i] = globalThis.BS.convert(r[i], "${value.value}");
+                }`
+                // result += `(() => {
+                //     let r = globalThis.BS.convert(${parse(value)}, "Array");
+                //     ${parse(statement.convert_type)};
+                //     return r
+                // })()`;
                 break;
             case 'number':
             case 'bigInt':
@@ -222,6 +271,8 @@ module.exports = function parse (statements, tmp) {
             case 'function_call':
                 if (statement.identifier) {
                     result += statement.identifier;
+                } else if (statement.from) {
+                    result += `${parse(statement.from)}.`
                 }
                 if (typeof value === "object") {
                     result += '\n'+parse(value);

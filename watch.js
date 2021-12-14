@@ -70,12 +70,13 @@ function watch (space = 4) {
                     } catch (err) {
                         globalThis.require = () => undefined;
                     }
-                    // finally {
-                    //     globalThis.require = () => undefined;
-                    // }
                     //(async function () {
-                        ${built_in}\n${content}
+                        ${built_in}
+                        ${content}
                     //})();\n`)
+                    // beautify(`
+                    //     ${content}
+                    // \n`)
                 );
                 // ----- new end
                 return ast;
