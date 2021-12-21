@@ -1,28 +1,20 @@
 
 const beautify = require('js-beautify').js;
 const fs = require('fs');
+fs.rmdirSync('./build', { recursive: true });
 const BS = require('./lib/compiler');
-// const watch = require('./src/watch/watch');
-// watch.call(this, './test');
 let lastChange = 0;
 let lastFile = '';
 let writeFile = (path, fileName, content) => {
     let date = Date.now();
     let ast = '';
     try {
-        ast = JSON.stringify(content, null, 4)//.replace(/^\\#([A-Za-z0-9]{3}|[A-Za-z0-9]{6})$/g, '#')
+        ast = JSON.stringify(content, null, 4)
         // console.clear();
-        console.log('[File System]: Writing to: '+fileName+'.js')
-        // writing as ast file
-        // fs.writeFileSync(
-        //     `${fileName}.ast`,
-        //     ast
-        // );
-        // ----- new
-        let parse = require('./lib/compiler/ast_to_js')
+        console.log('[File System]: Writing to: '+fileName+'.js');
+        let parse = require('./lib/compiler/ast_to_js');
         var content = parse(JSON.parse(ast));
         let built_in = fs.readFileSync('./lib/compiler/built_in.js', { recursive: true , encoding: 'utf-8'});
-        // fs.rmdirSync('./build', { recursive: true });
         // fs.mkdirSync('./build/');
         let p = fileName.split('\\').slice(0, -1);
         if (!fs.existsSync(p.join('/'))) {
@@ -64,7 +56,7 @@ fs.watch("./src/", { recursive: true }, function(event, path) {
     lastChange = Date.now();
     lastFile = path;
 
-    console.log(path, 'is', event);
+    console.log(path, 'has', event + 'ed');
     console.clear()
     let fileName = path.substr(0, path.length-('.bs'.length));
     try {

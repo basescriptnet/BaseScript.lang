@@ -1,9 +1,25 @@
-function g (Int a, Int b) {
-    return sqrt(a ** 2 + b ** 2)
+function c (Int a, Int b) {
+    return sqrt(a**2 + b**2)
 }
-LOG g(10, 20)
-<ul#n.hello.world.f/>
-ASSIGN <ul id="hello" n="10" z="20">
-    <li>"Hello"</li>
-</ul> TO a
-document.body.append(a)
+document.body.append(
+    <h1 id="my_title">@text c(3, 4)</h1>.events({
+        click () {
+            console.log('clicked!')
+        }
+    })
+)
+\table = <table/>
+\tmp = false
+for i of range(8) {
+    \tr = <tr/>
+    for j of range(8) {
+        if tmp == false:
+            tr.append(<td.white/>)
+        else
+            tr.append(<td.black/>)
+        tmp = !tmp
+    }
+    tmp = !tmp
+    table.append(tr)
+}
+document.body.append(table)

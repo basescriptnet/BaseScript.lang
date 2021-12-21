@@ -351,17 +351,33 @@ const PI = 3.141592653589793,
 
 // your code below this line!
 
-function g(a, b) {
+function c(a, b) {
     if (!globalThis.BS.types["Int"](a)) throw new TypeError("Argument \"a\" is not type of Int at line 1, col 12.");
     if (!globalThis.BS.types["Int"](b)) throw new TypeError("Argument \"b\" is not type of Int at line 1, col 12.");
     return sqrt(a ** 2 + b ** 2);
-};
-console.log(g(10, 20));
-globalThis.BS.Node("ul", "n", "hello world f", null);
-let a = globalThis.BS.Node("ul", null, null, {
-    id: "hello",
-    n: "10",
-    z: "20",
-}, [globalThis.BS.Node("li", null, null, null, ["Hello"])]);
-document.body.append(a);
+}
+document.body.append(globalThis.BS.Node("h1", null, null, {
+    id: "my_title",
+}, [document.createTextNode(c(3, 4))]).events({
+    click() {
+
+        console.log("clicked!");
+    },
+}));
+let table = globalThis.BS.Node("table", null, null, null);
+let tmp = false;
+for (const i of range(8)) {
+    let tr = globalThis.BS.Node("tr", null, null, null);
+    for (const j of range(8)) {
+        if (tmp == false) {
+            tr.append(globalThis.BS.Node("td", null, "white", null));
+        } else {
+            tr.append(globalThis.BS.Node("td", null, "black", null));
+        }
+        tmp = !tmp;
+    }
+    tmp = !tmp;
+    table.append(tr);
+}
+document.body.append(table);
 //})();

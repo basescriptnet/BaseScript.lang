@@ -12,7 +12,7 @@ statement -> blocks {% id %}
 		type: 'SAVE',
 		value: v[2]
 	}) %}
-	| "DELETE" __ "USE" EOL {% v => ({
+	| "DELETE" __ "THAT" EOL {% v => ({
 		type: 'DELETE',
 	}) %}
 	| "delete" __ value EOL {% statement.delete %}
@@ -351,7 +351,7 @@ expression ->
 	| bigInt {% id %}
 	| number {% id %}
 	| "this" {% id %}
-	| "USE" {% v => ({type: 'USE', line: v[0].line, col: v[0].col}) %}
+	| "THAT" {% v => ({type: 'USE', line: v[0].line, col: v[0].col}) %}
 	| html {% id %}
 	| object {% id %}
 	| boolean {% id %}
@@ -393,7 +393,7 @@ left_side_retraction -> function_call {% id %}
 	| bigInt {% id %}
 	| number {% id %}
 	| "this" {% id %}
-	| "USE" {% v => ({type: 'USE', line: v[0].line, col: v[0].col}) %}
+	| "THAT" {% v => ({type: 'USE', line: v[0].line, col: v[0].col}) %}
 	| html {% id %}
 	| boolean {% id %}
 
