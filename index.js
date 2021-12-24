@@ -6,14 +6,13 @@ const BS = require('./lib/compiler');
 let lastChange = 0;
 let lastFile = '';
 let writeFile = (path, fileName, content) => {
-    let date = Date.now();
     let ast = '';
     try {
         ast = JSON.stringify(content, null, 4)
         // console.clear();
         console.log('[File System]: Writing to: '+fileName+'.js');
         let parse = require('./lib/compiler/ast_to_js');
-        var content = parse(JSON.parse(ast));
+        var contentJS = parse(JSON.parse(ast));
         let built_in = fs.readFileSync('./lib/compiler/built_in.js', { recursive: true , encoding: 'utf-8'});
         // fs.mkdirSync('./build/');
         let p = fileName.split('\\').slice(0, -1);
@@ -34,13 +33,14 @@ let writeFile = (path, fileName, content) => {
             }
             //(async function () {
                 ${built_in}
-                ${content}
-            //})();\n`)
+                ${contentJS}
+            //})();`
             // beautify(`
-            //     ${content}
+            //     ${contentJS}
             // \n`)
-        );
-        console.log('Compiled in ' + (Date.now() - date) + 'ms');
+            ));
+        // # sourceMappingURL=${fileName}.bs.map\n` // add later
+        // fs.writeFileSync(fileName+'.bs.map', content)
         // ----- new end
         return ast;
     } catch (err) {
@@ -53,6 +53,7 @@ fs.watch("./src/", { recursive: true }, function(event, path) {
     if (event != 'change') return;
     if (!/\.bs$/i.test(path)) return;
     if (path == lastFile && lastChange + 10 > Date.now()) return;
+    let date = Date.now();
     lastChange = Date.now();
     lastFile = path;
 
@@ -67,6 +68,7 @@ fs.watch("./src/", { recursive: true }, function(event, path) {
         }
         let result = writeFile(path, fileName, content);
         // result !== void 0 && console.log(`[Output]: ${result}`);
+        console.log('Compiled in ' + (Date.now() - date) + 'ms');
     } catch (err) {
         console.warn(new Error('Can\'t compile. Unexpected input.'));
         console.warn(new Error(err.message));
