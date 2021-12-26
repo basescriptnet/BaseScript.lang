@@ -24,19 +24,3 @@ for i of range(8) {
     table.append(tr)
 }
 document.body.append(table)
-
-// switch typeof table {
-//     case 'string':
-//         LOG 1
-//         break
-//     case 'array':
-//         LOG 2
-//         break
-//     default: LOG 10
-// }
-// LOG caseof typeof table {
-//     & 'HTML':
-//     | 'string': 10
-//     default: 100
-// }
-// LOG 1

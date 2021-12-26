@@ -11,6 +11,9 @@
     "watch": "npm-watch",
     "gr": "cls && nearleyc basescript.ne -o basescript.js"
   },
+  "bin": {
+    "bs": "./bin/index.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/basescriptnet/basescript.git"
@@ -34,11 +37,10 @@
     "chokidar": "^3.4.0",
     "js-beautify": "^1.14.0",
     "microtime": "^3.0.0",
-    "minifier": "^0.8.1",
-    "minify": "^8.0.3",
     "moo": "^0.5.1",
     "nearley": "^2.20.1",
-    "npm-watch": "^0.11.0"
+    "npm-watch": "^0.11.0",
+    "yargs": "^17.3.1"
   },
   "devDependencies": {
     "nearley-unparse": "^1.0.1"

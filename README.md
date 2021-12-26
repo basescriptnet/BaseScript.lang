@@ -25,14 +25,14 @@ It welcomes anybody, who desires to try out his own changes on the grammar
 Email: basescriptnet@gmail.com
 
 ## The compilation
-
+At any directory use
 ```sh
-node watch
+bs <file_name> options?
 ```
 
 > To install you can use
 ```sh
-npm install
+npm install -g .
 ```
 
 > Ensure you code and enjoy:)
