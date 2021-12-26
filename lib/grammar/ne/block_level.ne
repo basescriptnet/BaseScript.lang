@@ -28,6 +28,7 @@ statement -> blocks {% id %}
 	| var_assign EOL {% id %}
 	| value_reassign EOL {% statement.value_reassign %}
 	| value EOL {% statement.value %}
+	| switch_multiple EOL {% id %}
 	# | (value {% statement.value %} | value_reassign {% statement.value_reassign %} | var_assign {% id %}) EOL {% id %}
 	| ";" {% id %}
 

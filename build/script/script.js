@@ -239,6 +239,7 @@ globalThis.BS = {
     storage: [],
     // require('./ast_to_js.js')// || function () {console.warn('@eval is not supported yet in browsers.')}
 };
+const BS = globalThis.BS;
 try {
     Element;
 } catch {
@@ -351,12 +352,12 @@ const PI = 3.141592653589793,
 
 // your code below this line!
 
-function c(a, b) {
-    if (!globalThis.BS.types["Int"](a)) throw new TypeError("Argument \"a\" is not type of Int at line 1, col 12.");
-    if (!globalThis.BS.types["Int"](b)) throw new TypeError("Argument \"b\" is not type of Int at line 1, col 12.");
+function c(a = 10.4, b = 20) {
+    if (!BS.types["Int"](a) && a !== null) throw new TypeError("Argument \"a\" is not type of Int at line 1, col 12.");
+    if (!BS.types["Int"](b)) throw new TypeError("Argument \"b\" is not type of Int at line 1, col 12.");
     return sqrt(a ** 2 + b ** 2);
-}
-document.body.append(globalThis.BS.Node("h1", null, null, {
+};
+document.body.append(BS.Node("h1", null, null, {
     id: "my_title",
 }, [document.createTextNode(c(3, 4))]).events({
     click() {
@@ -364,15 +365,16 @@ document.body.append(globalThis.BS.Node("h1", null, null, {
         console.log("clicked!");
     },
 }));
-let table = globalThis.BS.Node("table", null, null, null);
+console.log(Time.now);
+let table = BS.Node("table", null, null, null);
 let tmp = false;
 for (const i of range(8)) {
-    let tr = globalThis.BS.Node("tr", null, null, null);
+    let tr = BS.Node("tr", null, null, null);
     for (const j of range(8)) {
         if (tmp == false) {
-            tr.append(globalThis.BS.Node("td", null, "white", null));
+            tr.append(BS.Node("td", null, "white", null));
         } else {
-            tr.append(globalThis.BS.Node("td", null, "black", null));
+            tr.append(BS.Node("td", null, "black", null));
         }
         tmp = !tmp;
     }

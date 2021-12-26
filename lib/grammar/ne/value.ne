@@ -80,6 +80,7 @@ value ->
 	# |
 	| condition _ "?" _ value (_ ":" _ value):? {% condition.ternary %}
 	# | "(" _ switch _ ")" {% v => v[2] %}
+	| switch {% id %}
 	# | number {% id %}
 	# | string {% id %}
 	# | obj_retract {% id %}
