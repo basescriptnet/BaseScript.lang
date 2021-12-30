@@ -1,9 +1,19 @@
 @lexer lexer
 
-process -> statements {% id %}
+process -> decorated_statements {% id %}
+
+decorated_statements -> _ %decorator EOL statements {% v => ({
+	type: 'decorator',
+	line: v[1].line,
+	col: v[1].col,
+	offset: v[1].offset,
+	decorator: v[1].value,
+	value: v[3],
+}) %}
+	| statements {% id %}
 
 ### statements ###
-statements -> (_ statement {% v => v[1] %}):* _ {% v => v[0] %}
+statements -> (_ statement {% v => v[1] %}):* _ {% id %}
 
 statement -> blocks {% id %}
 	| class_declaration {% id %}

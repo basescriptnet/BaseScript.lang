@@ -30,7 +30,7 @@ if (arg0 == null) {
     process.exit();
 }
 let dir = path_applied;
-if (arg0 != '.') {
+if (arg0 != './') {
     dir = path_join(path_applied, arg0)
 }
 let watch = yargs.argv.watch;

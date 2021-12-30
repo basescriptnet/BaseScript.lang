@@ -1,6 +1,6 @@
 const path_applied = process.cwd();
 const fs = require('fs');
-fs.rmdirSync(`${path_applied}/build`, { recursive: true });
+// fs.rmdirSync(`${path_applied}/build`, { recursive: true });
 const utils = require('./bin/utils');
 let lastChange = 0;
 let lastFile = '';
@@ -12,7 +12,6 @@ fs.watch(path_applied, { recursive: true }, function(event, path) {
     lastChange = Date.now();
     lastFile = path;
 
-    console.log(path, 'has', event + 'ed');
+    console.log(path, 'has', 'changed');
     utils.parse(path)
 });
-// console.log(parse('\\a = 10'));
