@@ -1,6 +1,5 @@
 # arrays
-array -> array _ "[" _ number _ ":" ":":? _ number _ "]" {% array.slice %}
-	| "[" _ "]" {% array.empty %}
+array -> "[" _ "]" {% array.empty %}
 	| "[" _ value (_ "," _ value):* (_ ","):? _ "]" {% array.extract %}
 	| "[" _ value _ "through" _ value _ "]" {% array.loop %}
 

@@ -1,11 +1,13 @@
 # expressions
 expression -> 
+	debugging {% id %}
+	| value _ "[" (_ value) _ ":" (_ value):? _ "]" {% array.slice %}
 	# | "(" _ expression _ ")" _ arguments_with_types {% v => ({
 	# 	type: 'expression_with_parenthesis',
 	# 	value: v[2],
 	# 	arguments: v[6]
 	# }) %}
-	expression _ ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ expression {% v => ({
+	| expression _ ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ expression {% v => ({
 		type: 'expression',
 		value: [v[0], assign(v[2][0], {value: v[2][0].value+'='}), v[4]]
 	}) %}
@@ -35,7 +37,6 @@ expression ->
 	| object {% id %}
 	| boolean {% id %}
 	| convert {% id %}
-	| debugging {% id %}
 
 value -> 
 	"(" _ value _ ")" {% v => ({
@@ -43,10 +44,6 @@ value ->
 		value: v[2]
 	}) %}
 	# | 
-	| "typeof" __ value {% v => ({
-		type: 'typeof',
-		value: v[2]
-	}) %}
 	| value _ "[" _ value _ "]" (_ arguments):? {% v => {
 	//debugger
 		return {
@@ -58,6 +55,10 @@ value ->
 		}
 	} %}
 	| expression {% id %}
+	| "typeof" __ value {% v => ({
+		type: 'typeof',
+		value: v[2]
+	}) %}
 	# | value _ arguments {% v => {
 	# 	debugger
 	# 	return ({

@@ -63,6 +63,18 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
             output = output.reverse()
         return output;
     },
+    slice (value, start, end, line, col) {
+        if (!Array.isArray(value) && typeof value != 'string') {
+            throw new TypeError(`Array or string was expected at line ${line}, col ${col}`);
+        }
+        if (typeof start != 'number') {
+            throw new TypeError(`Number was expected at line ${line}, col ${col}`)
+        }
+        if (end === null) {
+            return value.slice(start)
+        }
+        return value.slice(start, end);
+    },
     ast: (function () {
         let r = globalThis.require('./index.js');
         if (r) return r;
@@ -336,14 +348,7 @@ const PI = 3.141592653589793,
 // your code below this line
 
 //(async function () {
-function printHello() {
-    var arguments = Array.from(arguments);
-    (() => {
-        let el = document.createTextNode("Hello world!");
-        document.body.append(el);
-    })();
-}
-printHello();
-let x000000 = 10;
-console.log(BS.through(0, x000000, 6, 5));
+let num = 10;
+let arr = BS.through(0, num, 6, 8);
+console.log(BS.slice(arr, 5, num - 3, undefined, undefined));
                 //})();

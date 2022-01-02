@@ -1,6 +1,7 @@
-function printHello {
-    WRITE 'Hello world!'
-}
-printHello()
-\x000000 = 10
-LOG [0 through x000000]
+// function printHello {
+//     WRITE 'Hello world!'
+// }
+// printHello()
+\num = 10
+\arr = [0 through num]
+LOG arr[5:num - 3]
