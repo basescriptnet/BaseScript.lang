@@ -5,3 +5,4 @@
 \num = 10
 \arr = [0 through num]
 LOG arr[5:num - 3]
+LOG 'Hello world!'[-4:-1]

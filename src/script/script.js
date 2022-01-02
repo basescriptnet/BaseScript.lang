@@ -73,7 +73,8 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
         if (end === null) {
             return value.slice(start)
         }
-        return value.slice(start, end);
+        if (end > start)
+            return value.slice(start, end);
     },
     ast: (function () {
         let r = globalThis.require('./index.js');
@@ -244,6 +245,7 @@ try {
     Element;
 } catch {
     globalThis.Element = {prototype: {}};
+    Element = globalThis.Element;
 }
 Element.prototype._append = Element.prototype.append;
 Element.prototype.append = function (children) {
@@ -351,4 +353,5 @@ const PI = 3.141592653589793,
 let num = 10;
 let arr = BS.through(0, num, 6, 8);
 console.log(BS.slice(arr, 5, num - 3, undefined, undefined));
+console.log(BS.slice("Hello world!", -4, -1, undefined, undefined));
                 //})();

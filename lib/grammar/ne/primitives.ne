@@ -48,13 +48,18 @@ boolean -> (%boolean | "!" _ value) {% boolean %}
 
 # strings
 string -> string_concat {% id %}
-	| string _ "[" _ number _ ":" ":":? _ number _ "]" {% string.slice %}
+	# | string _ "[" _ number _ ":" ":":? _ number _ "]" {% string.slice %}
 	| number "px" {% string.px %}
 
 # numbers
 bigInt -> %number "n" {% number.bigInt %}
 
 number -> %number {% number.float %}
+	| ("+" | "-") _ value {% v => ({
+		type: 'additive',
+		sign: v[0][0].value,
+		value: v[2]
+	}) %}
 
 # objects
 object -> "{" _ "}" {% object.empty %}
