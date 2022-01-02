@@ -38,11 +38,11 @@ let writeFile = (path, fileName, content) => {
             let prepend = `if (!globalThis) {
                 globalThis = window || global || this || {};
             }
-            // try {
-            //     globalThis.require = require;
-            // } catch (err) {
-            //     globalThis.require = () => undefined;
-            // }
+            try {
+                globalThis.require = require;
+            } catch (err) {
+                globalThis.require = () => undefined;
+            }
             `.replace(/\s*\/\/.*/g, '\n').replace(/\s+/g, ' ');
             // console.log(path_join(path_applied, `/${fileName}.js`).replace(/\\/g, '/'))
             fs.writeFileSync(
@@ -50,7 +50,8 @@ let writeFile = (path, fileName, content) => {
                 `${prepend}
                 ${built_in
                     .replace(/\s*\/\/.*/g, ' ')
-                    .replace(/\s+/g, ' ')}`
+                    // .replace(/\s+/g, ' ')}
+                }`
                     +`\n\n// your code below this line\n\n`
                 +`//(async function () {\n`
                     +`${beautify(contentJS)}

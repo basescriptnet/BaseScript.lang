@@ -1,10 +1,13 @@
 # functions
 # function_declaration -> ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") __ identifier _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
 function_declaration -> ("async" __):? ("function") __ identifier _ arguments_with_types statements_block {% functions.declaration %}
+	| ("async" __):? ("function") __ identifier statements_block {% functions.declaration_with_no_args %}
 
-annonymous_function -> "(" _ annonymous_function _ ")" _ arguments {% functions.iife %}
+annonymous_function -> 
 	# | ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
-	| ("async" __):? ("function") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% functions.annonymous %}
+	("async" __):? ("function") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% functions.annonymous %}
+	| ("async" __):? ("function") (__ identifier):? _ "{" (_ statement | _ return):* _ "}" {% functions.annonymous_with_no_args %}
+	| iife {% id %}
 	# | ("async" __):? _ arguments_with_types _ "=>" _ statements_block {% v => {
 	# 	return {
 	# 		type: 'annonymous_function',
@@ -14,10 +17,12 @@ annonymous_function -> "(" _ annonymous_function _ ")" _ arguments {% functions.
 	# 	}
 	# } %}
 
+iife -> "(" _ annonymous_function _ ")" _ arguments {% functions.iife %}
+
 return -> "return" __ value EOL {% returns.value %}
 	# | "return" EOL  {% returns.empty %}
 
-function_call -> callable _ arguments {% v => {
+function_call -> callable [ \t]:* arguments {% v => {
 	return ({
 		type: 'function_call',
 		value: v[0],

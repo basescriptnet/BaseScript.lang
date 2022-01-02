@@ -1,6 +1,6 @@
 {
   "name": "basescript",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A scritpting language for web, that compiles down to JavaScript",
   "main": "index.js",
   "watch": {
@@ -34,7 +34,6 @@
   },
   "homepage": "https://github.com/basescriptnet/basescript#readme",
   "dependencies": {
-    "chokidar": "^3.4.0",
     "js-beautify": "^1.14.0",
     "microtime": "^3.0.0",
     "moo": "^0.5.1",

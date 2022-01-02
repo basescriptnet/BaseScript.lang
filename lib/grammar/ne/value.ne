@@ -13,6 +13,7 @@ expression ->
 		type: 'expression',
 		value: [v[0], v[2][0], v[4]]
 	}) %}
+	| annonymous_function {% id %}
 	| "(" _ expression _ ")" (_ arguments):? {% v => ({
 		type: 'expression_with_parenthesis',
 		value: v[2],
@@ -22,7 +23,6 @@ expression ->
 	| convert {% id %}
 	| array_interactions {% id %}
 	| regexp {% id %}
-	| annonymous_function {% id %}
 	| function_call {% id %}
 	| identifier {% id %}
 	| array {% id %}
