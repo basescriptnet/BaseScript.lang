@@ -2,7 +2,7 @@
 array -> array _ "[" _ number _ ":" ":":? _ number _ "]" {% array.slice %}
 	| "[" _ "]" {% array.empty %}
 	| "[" _ value (_ "," _ value):* (_ ","):? _ "]" {% array.extract %}
-	| "[" _ number ".." number _ "]" {% array.loop %}
+	| "[" _ value _ "through" _ value _ "]" {% array.loop %}
 
 array_interactions -> ("PUSH" | "UNSHIFT") _ value _ "INTO" _ value {% v => ({
 		type: 'array_interactions',

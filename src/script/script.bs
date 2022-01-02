@@ -2,6 +2,5 @@ function printHello {
     WRITE 'Hello world!'
 }
 printHello()
-(function {
-
-})()
+\x000000 = 10
+LOG [0 through x000000]
