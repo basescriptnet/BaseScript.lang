@@ -63,18 +63,26 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
             output = output.reverse()
         return output;
     },
-    slice (value, start, end, line, col) {
+    slice (value, start, end, step = 1, line, col) {
         if (!Array.isArray(value) && typeof value != 'string') {
             throw new TypeError(`Array or string was expected at line ${line}, col ${col}`);
         }
         if (typeof start != 'number') {
             throw new TypeError(`Number was expected at line ${line}, col ${col}`)
         }
-        if (end === null) {
+        if (end === null && step === null) {
             return value.slice(start)
         }
-        if (end > start)
-            return value.slice(start, end);
+        step = step|0;
+        if (step >= 0) step = 1;
+        else step = -1;   
+        let result = value.slice(start, end);
+        if (step === -1) {
+            if (typeof value === 'string')
+                return Array.from(result).reverse().join('');
+            return result.reverse();
+        }
+        return result;
     },
     ast: (function () {
         let r = globalThis.require('./index.js');
@@ -350,8 +358,5 @@ const PI = 3.141592653589793,
 // your code below this line
 
 //(async function () {
-let num = 10;
-let arr = BS.through(0, num, 6, 8);
-console.log(BS.slice(arr, 5, num - 3, undefined, undefined));
-console.log(BS.slice("Hello world!", -4, -1, undefined, undefined));
+console.log(BS.slice("hello world!", -7, -1, -1, undefined, undefined));
                 //})();

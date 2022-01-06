@@ -2,7 +2,9 @@
 //     WRITE 'Hello world!'
 // }
 // printHello()
-\num = 10
-\arr = [0 through num]
-LOG arr[5:num - 3]
-LOG 'Hello world!'[-4:-1]
+// \num = 10
+// \arr = [0 through num]
+// LOG arr[5:num - 3]
+// LOG 'Hello world'[-2:0]
+// LOG 'Hello world!'[-4:-1]
+LOG "hello world!"[-7:-1:-1]

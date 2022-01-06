@@ -1,7 +1,7 @@
 # expressions
 expression -> 
 	debugging {% id %}
-	| value _ "[" (_ value) _ ":" (_ value):? _ "]" {% array.slice %}
+	| value _ "[" (_ value) _ ":" (_ value):? (_ ":" _ value):? _ "]" {% array.slice %}
 	# | "(" _ expression _ ")" _ arguments_with_types {% v => ({
 	# 	type: 'expression_with_parenthesis',
 	# 	value: v[2],
