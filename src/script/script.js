@@ -63,6 +63,10 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
             output = output.reverse()
         return output;
     },
+    delete (value, index) {   
+        Array.prototype.splice.call(value, index, 1);
+        return value;
+    },
     slice (value, start, end, step = 1, line, col) {
         if (!Array.isArray(value) && typeof value != 'string') {
             throw new TypeError(`Array or string was expected at line ${line}, col ${col}`);
@@ -358,5 +362,8 @@ const PI = 3.141592653589793,
 // your code below this line
 
 //(async function () {
-console.log(BS.slice("hello world!", -7, -1, -1, undefined, undefined));
+console.log(BS.slice("hello world!", -7, -1, null, undefined, undefined));
+let a = [0, 1, 2];
+BS.delete(a, 1);
+console.log(a);
                 //})();

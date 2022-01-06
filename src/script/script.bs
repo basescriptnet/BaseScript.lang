@@ -7,4 +7,7 @@
 // LOG arr[5:num - 3]
 // LOG 'Hello world'[-2:0]
 // LOG 'Hello world!'[-4:-1]
-LOG "hello world!"[-7:-1:-1]
+LOG "hello world!"[-7:-1]
+\a = [0, 1, 2]
+delete a[1]
+LOG a

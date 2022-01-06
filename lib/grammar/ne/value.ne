@@ -1,6 +1,7 @@
 # expressions
 expression -> 
 	debugging {% id %}
+	| object_retraction {% id %}
 	| value _ "[" (_ value) _ ":" (_ value):? (_ ":" _ value):? _ "]" {% array.slice %}
 	# | "(" _ expression _ ")" _ arguments_with_types {% v => ({
 	# 	type: 'expression_with_parenthesis',
@@ -21,7 +22,6 @@ expression ->
 		value: v[2],
 		arguments: v[5] ? v[5][1] : null
 	}) %}
-	| object_retraction {% id %}
 	| convert {% id %}
 	| array_interactions {% id %}
 	| regexp {% id %}

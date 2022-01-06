@@ -19,8 +19,7 @@ single_retraction -> left_side_retraction _ "." _ right_side_retraction {% v => 
 	from: v[0],
 	value: v[4],
 	//value: v[0].value + '.' + v[4].value
-})
-%}
+}) %}
 # 	| left_side_retraction _ ".." _ right_side_retraction {% v => ({
 # 		type: 'double_dot_retraction',
 # 		from: v[0],
