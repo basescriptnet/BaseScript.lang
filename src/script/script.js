@@ -362,8 +362,12 @@ const PI = 3.141592653589793,
 // your code below this line
 
 //(async function () {
-console.log(BS.slice("hello world!", -7, -1, null, undefined, undefined));
 let a = [0, 1, 2];
-BS.delete(a, 1);
-console.log(a);
+console.log(BS.through(0, -5, 13, 5));
+for (let i = 0; i < 5; i++) {
+    console.log(i);
+}
+for (let i = 0; i <= 5; i++) {
+    console.log(i);
+}
                 //})();

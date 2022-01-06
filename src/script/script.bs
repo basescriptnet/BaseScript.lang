@@ -1,13 +1,8 @@
-// function printHello {
-//     WRITE 'Hello world!'
-// }
-// printHello()
-// \num = 10
-// \arr = [0 through num]
-// LOG arr[5:num - 3]
-// LOG 'Hello world'[-2:0]
-// LOG 'Hello world!'[-4:-1]
-LOG "hello world!"[-7:-1]
-\a = [0, 1, 2]
-delete a[1]
-LOG a
+// doesn't include 5
+for i from 0 till 5 {
+    LOG i
+}
+// includes 5
+for i from 0 through 5 {
+    LOG i
+}

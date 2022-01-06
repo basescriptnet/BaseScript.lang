@@ -15,8 +15,18 @@ for_block -> "for" __ identifier __ ("in" | "of") __ value statements_block {%  
 		value: v[7],
 	});
 } %}
+	| "for" __ identifier __ "from" __ value _ ("through" | "till") _ value statements_block {%  v => {
+	return assign(v[0], {
+		type: 'for_loop',
+		identifier: v[2],
+		from: v[6],
+		through: v[10],
+		include: v[8][0].text == 'till' ? false : true,
+		value: v[11],
+	});
+} %}
 	| "for" __ (var_assign | var_assign_list) _ ";" _ statement_condition _ ";" _ value_reassign statements_block {%  v => {
-	return Object.assign(v[0], {
+	return assign(v[0], {
 		type: 'for_loop',
 		condition: v[6],
 		identifier: v[2][0],
