@@ -280,6 +280,10 @@ Element.prototype.text = function (content) {
     this.textContent = content;
     return this;
 };
+Element.prototype.listen = function (event, callback) {
+    this.addEventListener(event, callback);
+    return this;
+};
 Element.prototype.css = function (obj) {
     for (let i in obj) {
         this.style[i] = obj[i];
@@ -362,12 +366,5 @@ const PI = 3.141592653589793,
 // your code below this line
 
 //(async function () {
-let a = [0, 1, 2];
-console.log(BS.through(0, -5, 13, 5));
-for (let i = 0; i < 5; i++) {
-    console.log(i);
-}
-for (let i = 0; i <= 5; i++) {
-    console.log(i);
-}
+let a = 10 > 20 || 20 ? 10 : null;
                 //})();

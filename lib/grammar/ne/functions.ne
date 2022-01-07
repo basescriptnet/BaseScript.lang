@@ -51,8 +51,8 @@ argument_type -> (identifier | %keyword) "?":? __ {% v => {
 
 argument_identifier_and_value -> argument_type:? identifier (_ "=" _ value):? {% v => ({
 	type: 'argument_identifier_and_value',
-	argument_type: v[0][0],
-	can_be_null: v[0][1],
+	argument_type: v[0] ? v[0][0] : 'none',
+	can_be_null: v[0] ? v[0][1] : false,
 	identifier: v[1],
 	value: v[2] ? v[2][3] : undefined
 }) %}

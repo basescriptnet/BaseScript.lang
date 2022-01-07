@@ -45,6 +45,7 @@ myNull -> "null" {% Null %}
 
 # booleans
 boolean -> (%boolean | "!" _ value) {% boolean %}
+	# | condition {% condition.value %}
 
 # strings
 string -> string_concat {% id %}

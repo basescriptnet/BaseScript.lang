@@ -1,8 +1,12 @@
+\a = 10 > 20 or 20 ? 10
 // doesn't include 5
-for i from 0 till 5 {
-    LOG i
-}
-// includes 5
-for i from 0 through 5 {
-    LOG i
-}
+// for i from 0 till 5 {
+//     LOG i
+// }
+// // includes 5
+// document.body.listen('click', function (e) {
+//     for i from 0 through 5 {
+//         LOG i
+//     }
+//     LOG 10
+// })
