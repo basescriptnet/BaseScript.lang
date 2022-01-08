@@ -1,6 +1,6 @@
 {
   "name": "basescript",
-  "version": "1.0.81",
+  "version": "1.0.82",
   "description": "A scritpting language for web, that compiles down to JavaScript",
   "main": "index.js",
   "watch": {

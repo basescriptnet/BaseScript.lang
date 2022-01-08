@@ -49,6 +49,12 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
         }
         return obj;
     },
+    textNode (value) {
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null || value === void 0) {
+            return value;
+        } 
+        return document.createTextNode(value);
+    },
     through (value0, value1, line, col) {
         if (typeof value0 != 'number' || typeof value1 != 'number') {
             throw new TypeError('Number is expected on the line ${statement.line}, col ${statement.col}.');
@@ -371,14 +377,23 @@ const PI = 3.141592653589793,
         get year () {
             return new Date().getFullYear()
         },
+    },
+    sizeof = function sizeof (object) {
+        if (object === void 0 || object === null) {
+            throw new TypeError('Cannot convert undefined or null to object');
+        }
+        if (object instanceof Set || object instanceof Map)
+            return object.size;
+        return Object.keys(object).length;
     };
 
 
 // your code below this line
 
 //(async function () {
-let a = BS.deepFreeze(10 > 20 || 20 ? 10 : null);
-const a = BS.deepFreeze({
-    "hello": "world",
-});
+let number = BS.deepFreeze(10);
+let ul = BS.deepFreeze(BS.Node("ul", null, null, {
+    id: BS.textNode(number),
+}, ["hello", BS.textNode(number), "world!"]));
+document.body.append(ul);
                 //})();

@@ -2,6 +2,7 @@
 html -> opening_tag (_ html_content):* _ closing_tag {% html.with_content %}
 	| "<" identifier ("#" identifier):? ("." identifier):* "/" ">" {% html.self_closing_tag %}
 	| "@text" __ value {% html.value_to_string %}
+	| "{{" _ value _ "}}" {% html.value_to_string %}
 
 # html
 opening_tag -> "<" identifier (__ attrubutes {% v => v[1] %}):? _ ">" {% html.opening_tag %}
