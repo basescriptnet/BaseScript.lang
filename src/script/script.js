@@ -250,6 +250,17 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
             } catch (err) {continue}
         }
     },
+    deepFreeze (object) { 
+        const propNames = Object.getOwnPropertyNames(object); 
+        for (const name of propNames) {
+            const value = object[name];
+
+            if (value && typeof value === "object") {
+                deepFreeze(value);
+            }
+        }
+        return Object.freeze(object);
+    },
     storage: [], 
 };
 const BS = globalThis.BS;
@@ -366,8 +377,8 @@ const PI = 3.141592653589793,
 // your code below this line
 
 //(async function () {
-let a = Object.freeze(10 > 20 || 20 ? 10 : null);
-const a = Object.freeze({
+let a = BS.deepFreeze(10 > 20 || 20 ? 10 : null);
+const a = BS.deepFreeze({
     "hello": "world",
 });
                 //})();
