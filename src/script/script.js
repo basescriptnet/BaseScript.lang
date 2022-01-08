@@ -366,5 +366,8 @@ const PI = 3.141592653589793,
 // your code below this line
 
 //(async function () {
-let a = 10 > 20 || 20 ? 10 : null;
+let a = Object.freeze(10 > 20 || 20 ? 10 : null);
+const a = Object.freeze({
+    "hello": "world",
+});
                 //})();
