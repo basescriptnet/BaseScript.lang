@@ -11,6 +11,7 @@ let writeFile = (path, fileName, content) => {
     try {
         ast = JSON.parse(JSON.stringify(content, null, 4))
         // console.clear();
+        // later on for php files
         if (ast && ast.type && ast.type === 'decorator' && ast.decorator === '@php') {
             console.log('[File System]: Writing to: '+fileName+'.php');
             let ast_to_php = require('../lib/compiler/ast_to_php');
@@ -25,9 +26,12 @@ let writeFile = (path, fileName, content) => {
                 // fs.writeFileSync(php, 'index.php')
             // })
         } else {
+            // for js files
             console.log('[File System]: Writing to: '+fileName+'.js');
             let ast_to_js = require('../lib/compiler/ast_to_js');
             var contentJS = ast_to_js(ast);
+            //contentJS = contentJS.slice(0, contentJS.length-6)
+            contentJS += '\n';
             let built_in = fs.readFileSync(`${__dirname}/../lib/compiler/built_in.js`, { encoding: 'utf-8'});
             // fs.mkdirSync('./build/');
             // let p = fileName.split('\\').slice(0, -1);
@@ -53,9 +57,7 @@ let writeFile = (path, fileName, content) => {
                     // .replace(/\s+/g, ' ')}
                 }`
                     +`\n\n// your code below this line\n\n`
-                +`//(async function () {\n`
-                    +`${beautify(contentJS)}
-                //})();`
+                    +`${beautify(contentJS)}`
                 // beautify(`
                 //     ${contentJS}
                 // \n`)
@@ -79,7 +81,7 @@ module.exports = {
         try {
             let content = BS(`${path_applied}/${path}`);
             if (content === void 0) {
-                console.log(']')
+                //console.log(']')
                 return;
             }
             let result = writeFile(path, fileName, content);
@@ -89,6 +91,6 @@ module.exports = {
             console.warn(new Error('Can\'t compile. Unexpected input.'));
             console.warn(new Error(err.message));
         }
-        console.log(']')
+        //console.log(']')
     }
 }

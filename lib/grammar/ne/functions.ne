@@ -3,7 +3,7 @@
 function_declaration -> ("async" __):? ("function") __ identifier _ arguments_with_types statements_block {% functions.declaration %}
 	| ("async" __):? ("function") __ identifier statements_block {% functions.declaration_with_no_args %}
 
-annonymous_function -> 
+annonymous_function ->
 	# | ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
 	("async" __):? ("function") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% functions.annonymous %}
 	| ("async" __):? ("function") (__ identifier):? _ "{" (_ statement | _ return):* _ "}" {% functions.annonymous_with_no_args %}
@@ -22,7 +22,7 @@ iife -> "(" _ annonymous_function _ ")" _ arguments {% functions.iife %}
 return -> "return" __ value EOL {% returns.value %}
 	# | "return" EOL  {% returns.empty %}
 
-function_call -> callable [ \t]:* arguments {% v => {
+function_call -> prefixExp _ arguments {% v => {
 	return ({
 		type: 'function_call',
 		value: v[0],
@@ -31,8 +31,9 @@ function_call -> callable [ \t]:* arguments {% v => {
 	})
 } %}
 
-callable -> function_call {% id %}
-	| identifier {% id %}
+#callable -> function_call {% id %}
+#	| identifier {% id %}
+#    | value {% id %}
 
 arguments -> "(" _ ")" {% args.empty %}
 	| "(" _ value (_ "," _ value):* (_ ","):? _ ")" {% args.extract %}

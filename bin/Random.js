@@ -286,10 +286,6 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
         }
         return Object.freeze(object);
     },
-    last(number) { 
-        if (number > 0) return number - 1
-        return 0
-    },
     storage: [], 
 };
 const BS = globalThis.BS;
@@ -335,7 +331,10 @@ Element.prototype.events = function (obj) {
         this.addEventListener(i, obj[i]);
     }
     return this;
-};    
+};
+Array.prototype.last = function () {
+    return this[this.length - 1];
+};
 function list (amount, callback) {
     let array = [];
     for (let i = 0; i < amount; i++) {
@@ -422,5 +421,15 @@ const PI = 3.141592653589793,
 
 // your code below this line
 
-let a, b, c = 1;
-a = true - false ? a + 5 : null;
+//(async function () {
+random = function(min = 0, max = 1) {
+    var arguments = Array.from(arguments || []);
+    if (!BS.types["Int"](min) && min !== null) throw new TypeError("Argument \"min\" is not type of Int at line 1, col 19.");
+    if (!BS.types["Int"](max) && max !== null) throw new TypeError("Argument \"max\" is not type of Int at line 1, col 19.");
+    return Math.floor(Math.random() * (max - min) + min);
+};
+random.string = function(length) {
+    var arguments = Array.from(arguments || []);
+    return "";
+};
+                //})();

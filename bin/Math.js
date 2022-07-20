@@ -286,10 +286,6 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
         }
         return Object.freeze(object);
     },
-    last(number) { 
-        if (number > 0) return number - 1
-        return 0
-    },
     storage: [], 
 };
 const BS = globalThis.BS;
@@ -335,7 +331,10 @@ Element.prototype.events = function (obj) {
         this.addEventListener(i, obj[i]);
     }
     return this;
-};    
+};
+Array.prototype.last = function () {
+    return this[this.length - 1];
+};
 function list (amount, callback) {
     let array = [];
     for (let i = 0; i < amount; i++) {
@@ -422,5 +421,5 @@ const PI = 3.141592653589793,
 
 // your code below this line
 
-let a, b, c = 1;
-a = true - false ? a + 5 : null;
+const sin = BS.deepFreeze(Math.sin.bind(Math)),
+    cos = BS.deepFreeze(Math.cos.bind(Math));

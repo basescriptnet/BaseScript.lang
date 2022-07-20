@@ -1,14 +1,10 @@
 # expressions
-expression -> 
-	debugging {% id %}
-	| object_retraction {% id %}
-	| value _ "[" (_ value) _ ":" (_ value):? (_ ":" _ value):? _ "]" {% array.slice %}
-	# | "(" _ expression _ ")" _ arguments_with_types {% v => ({
-	# 	type: 'expression_with_parenthesis',
-	# 	value: v[2],
-	# 	arguments: v[6]
-	# }) %}
-	| expression _ ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ expression {% v => ({
+expression ->
+    #object_retraction {% id %}
+    # ! removed for now
+	#| value _ "[" (_ value) _ ":" (_ value):? (_ ":" _ value):? _ "]" {% array.slice %}
+	#|
+    expression _ ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ expression {% v => ({
 		type: 'expression',
 		value: [v[0], assign(v[2][0], {value: v[2][0].value+'='}), v[4]]
 	}) %}
@@ -16,49 +12,78 @@ expression ->
 		type: 'expression',
 		value: [v[0], v[2][0], v[4]]
 	}) %}
+    | prefixExp {% id %}
 	| annonymous_function {% id %}
-	| "(" _ expression _ ")" (_ arguments):? {% v => ({
-		type: 'expression_with_parenthesis',
-		value: v[2],
-		arguments: v[5] ? v[5][1] : null
-	}) %}
-	| convert {% id %}
-	| array_interactions {% id %}
+    # ! removed for now
+	#| "(" _ expression _ ")" (_ arguments):? {% v => ({
+	#	type: 'expression_with_parenthesis',
+	#	value: v[2],
+	#	arguments: v[5] ? v[5][1] : null
+	#}) %}
+	#| "typeof" __ (left_side_retraction | object_retraction | expression) {% v => ({
+	#	type: 'typeof',
+	#	value: v[2][0]
+	#}) %}
+    # ! removed for now
+	#| "typeof" _ "(" _ (object_retraction | left_side_retraction | expression) _ ")" {% v => ({
+	#	type: 'typeof',
+	#	value: v[4][0]
+	#}) %}
+    #| "sizeof" _ "(" _ (object_retraction | left_side_retraction | expression) _ ")" {% v => ({
+	#	type: 'sizeof',
+	#	value: v[4][0]
+	#}) %}
+    # ! removed for now
+	#| array_interactions {% id %}
 	| regexp {% id %}
-	| function_call {% id %}
-	| identifier {% id %}
+    # ! seems unnecessary, exists at Var/prefix
+	#| function_call {% id %}
+	#| identifier {% id %}
 	| array {% id %}
 	| string {% id %}
 	| bigInt {% id %}
 	| number {% id %}
-	| "this" {% id %}
-	| "THAT" {% v => ({type: 'USE', line: v[0].line, col: v[0].col}) %}
-	| html {% id %}
+    # ! no need, exists in prefix
+    #| allowed_keywords {% id %}
+    # ! removed for now
+	#| "THAT" {% v => ({type: 'USE', line: v[0].line, col: v[0].col}) %}
+    # ! removed for now
+	#| html {% id %}
 	| object {% id %}
 	| boolean {% id %}
-	| convert {% id %}
+    # ! removed for now
+	#| convert {% id %}
 
-value -> 
-	"(" _ value _ ")" {% v => ({
-		type: 'expression_with_parenthesis',
-		value: v[2]
-	}) %}
-	# | 
-	| value _ "[" _ value _ "]" (_ arguments):? {% v => {
-	//debugger
-		return {
-			type: 'item_retraction',
-			arguments: v[7] ? v[7][1] : null,
-			from: v[0],
-			value: v[4]
-			//identifier: v[0].value
-		}
-	} %}
-	| expression {% id %}
-	| "typeof" __ value {% v => ({
-		type: 'typeof',
-		value: v[2]
-	}) %}
+value ->
+	#"(" _ value _ ")" {% v => ({
+	#	type: 'expression_with_parenthesis',
+	#	value: v[2]
+	#}) %}
+	# |
+    # ! removed for now, works in Var
+	#value _ "[" _ "]" (_ arguments):? {% v => {
+	#	return {
+	#		type: 'item_retraction_last',
+	#		arguments: v[5] ? v[5][1] : null,
+	#		from: v[0],
+	#		value: null
+	#		//identifier: v[0].value
+	#	}
+	#} %}
+    # ! moved to retraction.ne
+	#| value _ "[" _ value _ "]" (_ arguments):? {% v => {
+	#	return {
+	#		type: 'item_retraction',
+	#		arguments: v[7] ? v[7][1] : null,
+	#		from: v[0],
+	#		value: v[4]
+	#		//identifier: v[0].value
+	#	}
+	#} %}
+    #|
+	expression {% id %}
+    | condition _ "?" _ value (_ ":" _ value):? {% condition.ternary %}
+	| value _ "if" _ condition (_ "else" _ value):? {% condition.ternary_with_if %}
 	# | value _ arguments {% v => {
 	# 	debugger
 	# 	return ({
@@ -72,14 +97,13 @@ value ->
 			value: v[2]
 		})
 	} %}
-	| "@text" __ value {% html.value_to_string %}
+	#| "@text" __ value {% html.value_to_string %}
 	| value __ "instanceof" __ value {% v => ({
 		type: 'instanceof',
 		left: v[0],
 		value: v[4]
 	}) %}
 	# |
-	| condition _ "?" _ value (_ ":" _ value):? {% condition.ternary %}
 	| condition_as_value {% id %}
 	# | "(" _ switch _ ")" {% v => v[2] %}
 	| switch {% id %}
@@ -93,6 +117,16 @@ value ->
 	# | identifier {% id %}
 	# | boolean {% id %}
 
-prefixExp -> identifier {% id %}
+prefixExp -> Var {% id %}
 	| function_call {% id %}
-	| "this" {% id %}
+    | parenthesized {% id %}
+    | allowed_keywords {% id %}
+    | "+" _ prefixExp {% v => ({
+        type: 'number',
+        value: v[2]
+    }) %}
+
+parenthesized -> "(" _ value _ ")" {% v => ({
+    type: 'expression_with_parenthesis',
+    value: v[2]
+}) %}

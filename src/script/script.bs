@@ -1,5 +1,2 @@
-\number = 10
-\ul = <ul id={{number}}>
-    "hello" {{ number }} "world!"
-</ul>
-document.body.append(ul)
+let a, b, c = 1
+a = a + 5 if true - false

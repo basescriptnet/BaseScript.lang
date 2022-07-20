@@ -2,42 +2,66 @@
 
 process -> decorated_statements {% id %}
 
-decorated_statements -> _ %decorator EOL statements {% v => ({
+includes -> "#include" _ "<" identifier ">" EOL {% v => ({
+	type: 'built_in_include',
+	value: v[3].value
+}) %}
+
+decorated_statements -> _ %decorator EOL includes:* statements {% v => ({
 	type: 'decorator',
 	line: v[1].line,
 	col: v[1].col,
 	offset: v[1].offset,
 	decorator: v[1].value,
-	value: v[3],
+	includes: v[3],
+	value: v[4],
 }) %}
-	| statements {% id %}
+	| includes:* statements {% v => ({
+		type: 'decorator',
+		includes: v[0],
+		value: v[1],
+	}) %}
 
 ### statements ###
-statements -> (_ statement {% v => v[1] %}):* _ {% id %}
+# statements -> (_ statement {% v => v[1] %}):* _ {% id %}
+statements -> (_ statement):* _ {% v => {
+	let result = []
+	// let removeComments = text => text.replace(/\/\/.*\n?/, '');
+	for (let i = 0, indent = 0; i < v[0].length; i++) {
+		/*if (i == 0) indent = (v[0][i][0].text)
+		if (indent !== (v[0][i][0].text)) {
+			throw new Error('Invalid indentation.')
+		}*/
+		result.push(v[0][i][1])
+	}
+	return result
+} %}
 
 statement -> blocks {% id %}
+	#| debugging {% id %} # //! needs test
 	| class_declaration {% id %}
 	| with {% id %}
 	| "debugger" EOL {% statement.debugger %}
-	| "SAVE" __ value EOL {% v => ({
-		type: 'SAVE',
-		value: v[2]
-	}) %}
-	| "DELETE" __ "THAT" EOL {% v => ({
-		type: 'DELETE',
-	}) %}
+	#| "SAVE" __ value EOL {% v => ({
+	#	type: 'SAVE',
+	#	value: v[2]
+	#}) %}
+	#| "DELETE" __ "THAT" EOL {% v => ({
+	#	type: 'DELETE',
+	#}) %}
 	| "delete" __ value EOL {% statement.delete %}
 	| return {% id %}
 	| "throw" __ value EOL {% statement.throw %}
 	| ("break" | "continue") EOL {% statement.break_continue %}
-	| "echo" __ value EOL {% statement.echo %}
-	| %eval __ value EOL {% statement.eval %}
-	| "@import" __ value EOL {% statement.import %}
-	| "@include" __ string EOL {% statement.include %}
-	# | value _ "=" _ value {% v => %}
+	#| "echo" __ value EOL {% statement.echo %}
+	#| %eval __ value EOL {% statement.eval %}
+	#| "@import" __ value EOL {% statement.import %}
+	#| "@include" __ string EOL {% statement.include %}
 	| var_assign EOL {% id %}
 	| value_reassign EOL {% statement.value_reassign %}
 	| value EOL {% statement.value %}
+    #| Exp EOL {% id %}
+    # ! needs to be moved to values
 	| switch_multiple EOL {% id %}
 	# | (value {% statement.value %} | value_reassign {% statement.value_reassign %} | var_assign {% id %}) EOL {% id %}
 	| ";" {% id %}

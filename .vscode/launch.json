@@ -2,19 +2,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "pwa-node",
+            "type": "node",
             "request": "launch",
             "name": "Launch Program",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\watch.js"
+            "program": "${workspaceFolder}\\index.js"
         },
         {
             "type": "node-terminal",
             "name": "Run Script: watch",
             "request": "launch",
-            "command": "npm run watch",
+            "command": "node index.js",
             "cwd": "${workspaceFolder}"
         }
     ]

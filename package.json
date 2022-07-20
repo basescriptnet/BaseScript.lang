@@ -1,47 +1,49 @@
 {
-  "name": "basescript",
-  "version": "1.0.82",
-  "description": "A scritpting language for web, that compiles down to JavaScript",
-  "main": "index.js",
-  "watch": {
-    "gr": "basescript.ne"
-  },
-  "scripts": {
-    "test": "test",
-    "watch": "npm-watch",
-    "gr": "cls && nearleyc basescript.ne -o basescript.js"
-  },
-  "bin": {
-    "bs": "./bin/index.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/basescriptnet/basescript.git"
-  },
-  "keywords": [
-    "JS",
-    "JavaScript",
-    "web",
-    "dev",
-    "html",
-    "typed",
-    "superset"
-  ],
-  "author": "basescript.net",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/basescriptnet/basescript/issues"
-  },
-  "homepage": "https://github.com/basescriptnet/basescript#readme",
-  "dependencies": {
-    "js-beautify": "^1.14.0",
-    "microtime": "^3.0.0",
-    "moo": "^0.5.1",
-    "nearley": "^2.20.1",
-    "npm-watch": "^0.11.0",
-    "yargs": "^17.3.1"
-  },
-  "devDependencies": {
-    "nearley-unparse": "^1.0.1"
-  }
+    "name": "basescript",
+    "version": "0.1.00",
+    "description": "A scritpting language powered with Node.js and Nearley, that compiles down to JavaScript, and has the possibility for even more!",
+    "main": "index.js",
+    "watch": {
+        "gr": "basescript.ne"
+    },
+    "scripts": {
+        "test": "test",
+        "watch": "npm-watch",
+        "gr": "cls && nearleyc basescript.ne -o basescript.js"
+    },
+    "bin": {
+        "bs": "./bin/index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/basescriptnet/basescript.git"
+    },
+    "keywords": [
+        "JS",
+        "JavaScript",
+        "web",
+        "dev",
+        "html",
+        "typed",
+        "superset",
+        "BaseScript",
+        "Node.js"
+    ],
+    "author": "basescript.net",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/basescriptnet/basescript/issues"
+    },
+    "homepage": "https://github.com/basescriptnet/basescript#readme",
+    "dependencies": {
+        "js-beautify": "^1.14.0",
+        "microtime": "^3.0.0",
+        "moo": "^0.5.1",
+        "nearley": "^2.20.1",
+        "npm-watch": "^0.11.0",
+        "yargs": "^17.3.1"
+    },
+    "devDependencies": {
+        "nearley-unparse": "^1.0.1"
+    }
 }

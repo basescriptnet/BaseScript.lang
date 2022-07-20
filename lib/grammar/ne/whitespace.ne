@@ -8,10 +8,10 @@
 # # mandatory whitespace
 # __ -> comment:* %space {% v => ' ' %}
 
-_ -> %space {% v => '' %}
+_ -> %space {% id %}
 	| null {% v => '' %}
 # mandatory whitespace
-__ -> %space {% v => ' ' %}
+__ -> %space {% id %}
 
 # wschar -> [ \t\n\v\f] {% id %}
 # s -> [ \t] | null
@@ -24,8 +24,11 @@ __ -> %space {% v => ' ' %}
 # 	# | %comment
 # 	| null
 # End of line
-EOL -> %space {% v => 'EOL' %}
+# ? Works really well, but needs more tests. First 2 lines
+# ? replaced from %space to this
+EOL -> [\n]:+ {% v => 'EOL' %}
+    | [ \t]:* "/" "/" [^\n]:* [\n]:*  {% v => 'EOL' %}
 	# | WS_NO_LINE_BREAKS [\n] WS_WITH_LINE_BREAKS
-	| _ ";" {% v => v[1] %}
+	| [ \t]:* ";" {% v => v[1] %}
 
 ### END whitespace ###

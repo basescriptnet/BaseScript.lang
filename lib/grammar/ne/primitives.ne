@@ -1,5 +1,27 @@
+atom -> number {% id %}
+    | string {% id %}
+    | myNull {% id %}
+    | "true" {% id %}
+    | "false" {% id %}
+    | parenthesized {% id %}
+    | prefixExp {% id %}
+    # ! function definition is missing
+
 # base line
-identifier -> %identifier {% v => v[0] %}
+identifier -> %identifier {% id %}
+
+nameList -> identifier {% id %}
+    | nameList _ "," _ identifier {% v => ({
+			type: 'name_list',
+			value: v[0],
+            addition: v[4]
+    }) %}
+
+allowed_keywords ->
+    "Infinity" {% id %}
+	| "this" {% id %}
+    | "globalThis" {% id %}
+    | "NaN" {% id %}
 
 convert -> value __ "as" __ convert_type {% v => {
 		return {
@@ -9,16 +31,17 @@ convert -> value __ "as" __ convert_type {% v => {
 		}
 	} %}
 
-convert_type -> ("List" | "JSON" | "String" | "Number" | "Boolean" | "Object" | "Float" | "Int") {% v => v[0][0] %}
-	| "Array" "[" convert_type "]" {% v => {
-		return {
-			type: 'array_of_type',
-			value: v[2],
-			line: v[0].line,
-			col: v[0].col
-		}
-	} %}
-	| "Array" {% id %}
+# ! removed for now
+#convert_type -> ("List" | "JSON" | "String" | "Number" | "Boolean" | "Object" | "Float" | "Int") {% v => v[0][0] %}
+#	| "Array" "[" convert_type "]" {% v => {
+#		return {
+#			type: 'array_of_type',
+#			value: v[2],
+#			line: v[0].line,
+#			col: v[0].col
+#		}
+#	} %}
+#	| "Array" {% id %}
 
 	# | %keywords __ {% id %}
 # typed_argument -> identifier identifier
@@ -56,9 +79,13 @@ string -> string_concat {% id %}
 bigInt -> %number "n" {% number.bigInt %}
 
 number -> %number {% number.float %}
-	| ("+" | "-") _ value {% v => ({
+	| ("-") _ value {% v => ({
 		type: 'additive',
 		sign: v[0][0].value,
+		value: v[2]
+	}) %}
+    | "sizeof" __ prefixExp {% v => ({
+		type: 'sizeof',
 		value: v[2]
 	}) %}
 

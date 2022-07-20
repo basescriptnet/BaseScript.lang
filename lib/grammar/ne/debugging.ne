@@ -1,15 +1,15 @@
-debugging -> "LOG" _ value {% v => ({
+debugging -> "LOG" _ "(" _ value _ ")" {% v => ({
 	type: 'debugging',
 	method: 'log',
-	value: v[2]
+	value: v[5]
 }) %}
-| "ERROR" _ value {% v => ({
+| "ERROR" _ "(" _ value _ ")" {% v => ({
 	type: 'debugging',
 	method: 'error',
-	value: v[2]
+	value: v[5]
 }) %}
-| "WRITE" _ value {% v => ({
+| "WRITE" _ "(" _ value _ ")" {% v => ({
 	type: 'debugging',
 	method: 'write',
-	value: v[2]
+	value: v[5]
 }) %}

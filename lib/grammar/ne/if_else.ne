@@ -6,7 +6,7 @@ if_block -> "if" statement_condition statements_block {% v => {
 		value: v[2],
 	});
 } %}
-	| if_block 
+	| if_block
 	#(_ elif_block):*
 	_ else_block {% v => {
 	return {
@@ -49,6 +49,6 @@ else_block -> "else" __ statement {% v => {
 	| "else" _ "{" statements "}" {% v => {
 	return Object.assign(v[0], {
 		type: 'else',
-		value: v[2],
+		value: v[3],
 	});
 } %}
