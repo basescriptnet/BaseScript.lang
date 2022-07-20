@@ -1,13 +1,13 @@
 Var -> identifier {% id %}
     # ! needs more tests, though works
-	| prefixExp _ "[" _ "]" {% v => ({
+	| prefixExp _nbsp "[" _ "]" {% v => ({
         type: 'item_retraction_last',
         //arguments: v[7] ? v[7][1] : null,
         from: v[0],
         //value: v[4]
         //identifier: v[0].value
 	}) %}
-	| prefixExp _ "[" _ value _ "]" {% v => ({
+	| prefixExp _nbsp "[" _ value _ "]" {% v => ({
         type: 'item_retraction',
         //arguments: v[7] ? v[7][1] : null,
         from: v[0],

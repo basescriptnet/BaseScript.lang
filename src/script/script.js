@@ -424,3 +424,4 @@ const PI = 3.141592653589793,
 
 let a, b, c = 1;
 a = true - false ? a + 5 : null;
+["hello"].f().n[BS.last(["hello"].f().n.length)];

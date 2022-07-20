@@ -1,5 +1,5 @@
 @lexer lexer
-
+#process -> (_ includes:*) statements {% id %}
 process -> decorated_statements {% id %}
 
 includes -> "#include" _ "<" identifier ">" EOL {% v => ({

@@ -22,7 +22,8 @@ iife -> "(" _ annonymous_function _ ")" _ arguments {% functions.iife %}
 return -> "return" __ value EOL {% returns.value %}
 	# | "return" EOL  {% returns.empty %}
 
-function_call -> prefixExp _ arguments {% v => {
+function_call -> prefixExp _nbsp arguments {% v => {
+    if (v[0].type == 'string') throw new Error('String is not collable')
 	return ({
 		type: 'function_call',
 		value: v[0],

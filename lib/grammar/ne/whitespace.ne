@@ -31,4 +31,6 @@ EOL -> [\n]:+ {% v => 'EOL' %}
 	# | WS_NO_LINE_BREAKS [\n] WS_WITH_LINE_BREAKS
 	| [ \t]:* ";" {% v => v[1] %}
 
+_nbsp -> [ \t]:* {% v => '' %}
+
 ### END whitespace ###

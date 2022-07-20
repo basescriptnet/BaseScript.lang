@@ -35,22 +35,15 @@ expression ->
 	#}) %}
     # ! removed for now
 	#| array_interactions {% id %}
-	| regexp {% id %}
     # ! seems unnecessary, exists at Var/prefix
 	#| function_call {% id %}
 	#| identifier {% id %}
-	| array {% id %}
-	| string {% id %}
-	| bigInt {% id %}
-	| number {% id %}
     # ! no need, exists in prefix
     #| allowed_keywords {% id %}
     # ! removed for now
 	#| "THAT" {% v => ({type: 'USE', line: v[0].line, col: v[0].col}) %}
     # ! removed for now
 	#| html {% id %}
-	| object {% id %}
-	| boolean {% id %}
     # ! removed for now
 	#| convert {% id %}
 
@@ -121,6 +114,13 @@ prefixExp -> Var {% id %}
 	| function_call {% id %}
     | parenthesized {% id %}
     | allowed_keywords {% id %}
+	| regexp {% id %}
+	| array {% id %}
+	| string {% id %}
+	| bigInt {% id %}
+	| number {% id %}
+	| object {% id %}
+	| boolean {% id %}
     | "+" _ prefixExp {% v => ({
         type: 'number',
         value: v[2]
