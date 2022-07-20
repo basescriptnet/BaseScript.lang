@@ -8,7 +8,7 @@ It is very identical to JavaScript, and almost any valid JS code is also a valid
 3. For, while, if, try, catch, finally:
     After the statement, you can put ":" sign to state, that you want to get a single statement in case if the condition is valid. For example: try: a(); // a is not defined/not a function
 4. Try/catch/finally:
-    Unlike JavaScript, BaseScript does not require argument for the catch block, and neither requires the catch block itself. 
+    Unlike JavaScript, BaseScript does not require argument for the catch block, and neither requires the catch block itself.
 5. For loops:
     Now for in and for of statements do not require let or const keywords. And there is a range function for the for of loop, which returns a generator like object with iterable values, that iterates through the number from accepted argument.
 6. HTML:
@@ -18,7 +18,7 @@ It is very identical to JavaScript, and almost any valid JS code is also a valid
 
 ## This project is open source
 
-It welcomes anybody, who desires to try out his own changes on the grammar 
+It welcomes anybody, who desires to try out his own changes on the grammar
 
 ## How to contact the creators
 
@@ -26,14 +26,18 @@ Email: basescriptnet@gmail.com
 Telegram: @basescript
 
 ## The compilation
-At any directory use
+> At any directory use
 ```sh
 bs <file_name> options?
 ```
-
-> To install you can use
+> For help use
 ```sh
-npm install -g .
+bs -help
+```
+
+> To install globally after downloading, you can use
+```sh
+npm install -g ./
 ```
 
 > Ensure you code and enjoy:)
