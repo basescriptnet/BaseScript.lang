@@ -23,8 +23,6 @@ expression ->
     # ! removed for now
 	#| "THAT" {% v => ({type: 'USE', line: v[0].line, col: v[0].col}) %}
     # ! removed for now
-	#| html {% id %}
-    # ! removed for now
 	#| convert {% id %}
 
 value ->
@@ -96,6 +94,7 @@ prefixExp -> Var {% id %}
     | condition _ "?" _ value (_ ":" _ value):? {% condition.ternary %}
 	| value _ "if" _ condition (_ "else" _ value):? {% condition.ternary_with_if %}
 	| annonymous_function {% id %}
+	| html {% id %}
 
 parenthesized -> "(" _ value _ ")" {% v => ({
     type: 'expression_with_parenthesis',

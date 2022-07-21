@@ -51,7 +51,7 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
     },
     valueToDOM (value) {
         if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null || value === void 0) {
-            return value + '';
+            return document.createTextNode(value + '');
         }
         if (BS.types['HTML'](value)) { 
             return value;
@@ -447,5 +447,11 @@ const PI = 3.141592653589793,
 
 // your code below this line
 
-console.log(BS.getType(BS.sizeof(window.array) + 5 - 5 + 5 - 1 - 5 + 5 - 7));
-console.log(BS.getType(BS.sizeof(window.array)) + 5 - 5 + 5 - 1);
+let n = "!";
+(() => {
+    document.body.append(BS.Node("div", null, null, {
+        class: "js",
+    }, [BS.Node("h1", null, null, null, ["hello", BS.Node("a", null, null, {
+        href: "#",
+    }, ["   your", BS.valueToDOM(n)])]), BS.Node("br", null, null, null), BS.Node("h2", null, null, null, ["world"])]));
+})();

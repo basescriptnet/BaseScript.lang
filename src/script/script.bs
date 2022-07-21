@@ -1,2 +1,7 @@
-LOG typeof(sizeof(window.array) + 5 - 5 + 5 - 1 - 5 + 5 -7) // 0
-LOG typeof sizeof(window.array) + 5 - 5 + 5 - 1
+\n = '!'
+WRITE
+<div class="js">
+    <h1>"hello" <a href="#">"   your" {{ n }}</a></h1>
+    <br/>
+    <h2>"world"</h2>
+</div>
