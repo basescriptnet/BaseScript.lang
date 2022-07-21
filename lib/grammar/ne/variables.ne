@@ -1,5 +1,5 @@
 # value assignment
-value_reassign -> value _ "=" _ (switch | value) {% v => {
+value_reassign -> prefixExp _ "=" _ (value) {% v => {
 	return {
 		type: 'var_reassign',
 		identifier: v[0],
@@ -39,7 +39,7 @@ var_assign -> ("let" __ | "const" __ | "\\") var_assign_list {% vars.assign %}
 
 var_assign_list -> var_reassign (_ "," _ var_reassign):* {% vars.var_assign_list %}
 
-var_reassign -> nameList _ "=" _ (switch | value) {% v => {
+var_reassign -> nameList _ "=" _ (value) {% v => {
 	return {
 		type: 'var_reassign',
 		identifier: v[0],
@@ -49,6 +49,16 @@ var_reassign -> nameList _ "=" _ (switch | value) {% v => {
 		offset: v[0].offset
 	}
 } %}
+    | nameList {% v => {
+        return {
+            type: 'var_reassign',
+            identifier: v[0],
+            line: v[0].line,
+            col: v[0].col,
+            //value: v[0][0],
+            offset: v[0].offset
+        }
+    } %}
 	| "SET" _ identifier _ "TO" _ (switch | value) {% v => {
 	return {
 		type: 'var_reassign',

@@ -55,8 +55,8 @@ key -> string {% id %}
 	| %keyword {% id %}
 
 # strings
-string_concat -> string_concat __ %string {% string_concat %}
-	| %string {% id %}
+string_concat -> %string {% id %}
+    #| string_concat _ "+" _ %string {% string_concat %}
 
 # regexp
 regexp_flags -> [gmi] {% regexp.flag %}

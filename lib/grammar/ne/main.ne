@@ -38,7 +38,7 @@ statements -> (_ statement):* _ {% v => {
 } %}
 
 statement -> blocks {% id %}
-	#| debugging {% id %} # //! needs test
+	| debugging {% id %} # //! needs test
 	| class_declaration {% id %}
 	| with {% id %}
 	| "debugger" EOL {% statement.debugger %}

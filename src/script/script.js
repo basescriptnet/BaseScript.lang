@@ -293,6 +293,31 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
     storage: [], 
 };
 const BS = globalThis.BS;
+
+const TypedArray = Reflect.getPrototypeOf(Int8Array);
+for (const C of [Array, String, TypedArray]) {
+    Object.defineProperty(C.prototype, "at",
+        {
+            value: function at(n) { 
+                n = Math.trunc(n) || 0; 
+                if (n < 0) n += this.length; 
+                if (n < 0 || n >= this.length) return undefined; 
+                return this[n];
+            },
+            writable: true,
+            enumerable: false,
+            configurable: true
+        });
+    Object.defineProperty(C.prototype, "last",
+        {
+            value: function last() {
+                return this[this.length-1];
+            },
+            writable: true,
+            enumerable: false,
+            configurable: true
+        });
+}
 try {
     Element;
 } catch {
@@ -422,6 +447,5 @@ const PI = 3.141592653589793,
 
 // your code below this line
 
-let a, b, c = 1;
-a = true - false ? a + 5 : null;
-["hello"].f().n[BS.last(["hello"].f().n.length)];
+console.log(BS.slice("hello", 0, 5, -1, undefined, undefined));
+true ? v == 1 : null ? 1 : null;

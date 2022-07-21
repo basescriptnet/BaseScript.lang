@@ -1,15 +1,17 @@
-debugging -> "LOG" _ "(" _ value _ ")" {% v => ({
+debugging -> ("LOG" | "print") debugging_body {% v => ({
 	type: 'debugging',
 	method: 'log',
-	value: v[5]
+	value: v[1]
 }) %}
-| "ERROR" _ "(" _ value _ ")" {% v => ({
+| "ERROR" debugging_body {% v => ({
 	type: 'debugging',
 	method: 'error',
-	value: v[5]
+	value: v[1]
 }) %}
-| "WRITE" _ "(" _ value _ ")" {% v => ({
+| "WRITE" debugging_body {% v => ({
 	type: 'debugging',
 	method: 'write',
-	value: v[5]
+	value: v[1]
 }) %}
+debugging_body -> __ value {% v => v[1] %}
+    | _ "(" _ value _ ")" {% v => v[3] %}

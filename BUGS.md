@@ -6,7 +6,7 @@
 5. typeof and sizeof (and maybe some more) return the value + ";"
     without the actual need of line termiantion and leave the code
     half broken
-6. Same issue with any variable name + any value
+6. ✅ Same issue with any variable name + any value
 7. regular for loop doesn't work at all, error unexpected "{"
 8. HTML objects with more than 1 child Elements will throw a
     closing parenthesis error
@@ -17,4 +17,6 @@
 12. Compiler takes too long to handle lines containing:
     LOG (sizeof(window.array) + 5 - 5 + 5 - 1 - 5 + 5 -7) // 0
     LOG (sizeof(window.array) + 5 - 5 + 5 - 1)
-13. Condition comparision works not well with numbers +-
+13. ✅ Condition comparision works not well with numbers +-
+14. ✅ String concatination issue when passed to the next line
+15. ✅ Division causes error if there is a comment on the line

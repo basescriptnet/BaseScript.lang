@@ -50,13 +50,14 @@ ExpPow ->
     Atom {% id %}
 	| Atom _ "^" _ ExpPow
 
-comparision_operators -> "is greater than" {% v => assign(v[0], {type: 'comparision_operator', value: '>' }) %}
-	| "is greater or equal to" {% v => assign(v[0], {type: 'comparision_operator', value: '>=' }) %}
-	| "is smaller than" {% v => assign(v[0], {type: 'comparision_operator', value: '<' }) %}
-	| "is smaller or equal to" {% v => assign(v[0], {type: 'comparision_operator', value: '<=' }) %}
-	| "is equal to" {% v => assign(v[0], {type: 'comparision_operator', value: '==' }) %}
-	| "is not equal to" {% v => assign(v[0], {type: 'comparision_operator', value: '!=' }) %}
-	| "is not" {% v => assign(v[0], {type: 'comparision_operator', value: '!==' }) %}
+comparision_operators ->
+    #"is greater than" {% v => assign(v[0], {type: 'comparision_operator', value: '>' }) %}
+	#| "is greater or equal to" {% v => assign(v[0], {type: 'comparision_operator', value: '>=' }) %}
+	#| "is smaller than" {% v => assign(v[0], {type: 'comparision_operator', value: '<' }) %}
+	#| "is smaller or equal to" {% v => assign(v[0], {type: 'comparision_operator', value: '<=' }) %}
+	#| "is equal to" {% v => assign(v[0], {type: 'comparision_operator', value: '==' }) %}
+	#| "is not equal to" {% v => assign(v[0], {type: 'comparision_operator', value: '!=' }) %}
+	"is not" {% v => assign(v[0], {type: 'comparision_operator', value: '!==' }) %}
 	| "is" {% v => assign(v[0], {type: 'comparision_operator', value: '===' }) %}
 	| "===" {% v => assign(v[0], {type: 'comparision_operator', value: '===' }) %}
 	| "!==" {% v => assign(v[0], {type: 'comparision_operator', value: '!==' }) %}

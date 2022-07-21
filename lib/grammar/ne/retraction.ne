@@ -14,10 +14,10 @@ Var -> identifier {% id %}
         value: v[4]
         //identifier: v[0].value
 	}) %}
-	| prefixExp _ "." _ identifier {% v => ({
+	| prefixExp _ "." _ (%keyword | identifier) {% v => ({
         type: 'dot_retraction_v2',
         from: v[0],
-        value: v[4],
+        value: v[4][0],
     }) %}
 
 # ! removed all for now, code above already replaces this

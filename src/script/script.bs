@@ -1,4 +1,7 @@
-let a, b, c = 1
-a = a + 5 if true - false
-//['hello'].length
-['hello'].f().n[]
+//\a = 5 if arr.length > 4 else arr.length
+////a = true ? 5 : false ? 5
+//Symbol(1)
+//\b
+//let num, num1 = 1, num2
+print 'hello'[0:5:-1]
+true ? v == 1 ? 1

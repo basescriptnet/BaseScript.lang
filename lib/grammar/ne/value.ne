@@ -2,9 +2,9 @@
 expression ->
     #object_retraction {% id %}
     # ! removed for now
-	#| value _ "[" (_ value) _ ":" (_ value):? (_ ":" _ value):? _ "]" {% array.slice %}
+	prefixExp _ "[" (_ value) _ ":" (_ value):? (_ ":" _ value):? _ "]" {% array.slice %}
 	#|
-    expression _ ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ expression {% v => ({
+    | expression _ ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ expression {% v => ({
 		type: 'expression',
 		value: [v[0], assign(v[2][0], {value: v[2][0].value+'='}), v[4]]
 	}) %}
@@ -75,8 +75,6 @@ value ->
 	#} %}
     #|
 	expression {% id %}
-    | condition _ "?" _ value (_ ":" _ value):? {% condition.ternary %}
-	| value _ "if" _ condition (_ "else" _ value):? {% condition.ternary_with_if %}
 	# | value _ arguments {% v => {
 	# 	debugger
 	# 	return ({
@@ -84,14 +82,14 @@ value ->
 	# 	value: v[0],
 	# 	arguments: v[2]
 	# })} %}
-	| ("new" | "await" | "yield") __ value {% v => {
+	| ("new" | "await" | "yield") __ prefixExp {% v => {
 		return assign(v[0][0], {
 			type: v[0][0].text,
 			value: v[2]
 		})
 	} %}
 	#| "@text" __ value {% html.value_to_string %}
-	| value __ "instanceof" __ value {% v => ({
+	| prefixExp __ "instanceof" __ prefixExp {% v => ({
 		type: 'instanceof',
 		left: v[0],
 		value: v[4]
@@ -99,7 +97,7 @@ value ->
 	# |
 	| condition_as_value {% id %}
 	# | "(" _ switch _ ")" {% v => v[2] %}
-	| switch {% id %}
+	| switch_multiple {% id %}
 	# | number {% id %}
 	# | string {% id %}
 	# | obj_retract {% id %}
@@ -114,7 +112,6 @@ prefixExp -> Var {% id %}
 	| function_call {% id %}
     | parenthesized {% id %}
     | allowed_keywords {% id %}
-	| regexp {% id %}
 	| array {% id %}
 	| string {% id %}
 	| bigInt {% id %}
@@ -125,6 +122,9 @@ prefixExp -> Var {% id %}
         type: 'number',
         value: v[2]
     }) %}
+	| regexp {% id %}
+    | condition _ "?" _ value (_ ":" _ value):? {% condition.ternary %}
+	| value _ "if" _ condition (_ "else" _ value):? {% condition.ternary_with_if %}
 
 parenthesized -> "(" _ value _ ")" {% v => ({
     type: 'expression_with_parenthesis',
