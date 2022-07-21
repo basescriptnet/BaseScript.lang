@@ -14,9 +14,10 @@
 10. ✅ Array.prototype.last appears during the while loop
     Solution, use Array.prototype.at(-1) instead
 11. ✅ Fixed the top one with partial changes in syntax, array[] returns the last element of the array, but now only works with dot notation: array[].toString(). array[] will throw an error.
-12. Compiler takes too long to handle lines containing:
+12. ✅ Compiler takes too long to handle lines containing:
     LOG (sizeof(window.array) + 5 - 5 + 5 - 1 - 5 + 5 -7) // 0
     LOG (sizeof(window.array) + 5 - 5 + 5 - 1)
+    Solution: replacing exp "+" exp by exp "+" prefixExp
 13. ✅ Condition comparision works not well with numbers +-
 14. ✅ String concatination issue when passed to the next line
 15. ✅ Division causes error if there is a comment on the line

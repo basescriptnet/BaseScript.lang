@@ -2,44 +2,24 @@
 expression ->
     #object_retraction {% id %}
     # ! removed for now
-	prefixExp _ "[" (_ value) _ ":" (_ value):? (_ ":" _ value):? _ "]" {% array.slice %}
 	#|
-    | expression _ ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ expression {% v => ({
+    expression _ ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ prefixExp {% v => ({
 		type: 'expression',
 		value: [v[0], assign(v[2][0], {value: v[2][0].value+'='}), v[4]]
 	}) %}
-	| expression _ ("**" | "*" | "+" | "-" | "/" | "%") _ expression {% v => ({
+	| expression _ ("**" | "*" | "+" | "-" | "/" | "%") _ prefixExp {% v => ({
 		type: 'expression',
 		value: [v[0], v[2][0], v[4]]
 	}) %}
     | prefixExp {% id %}
-	| annonymous_function {% id %}
     # ! removed for now
 	#| "(" _ expression _ ")" (_ arguments):? {% v => ({
 	#	type: 'expression_with_parenthesis',
 	#	value: v[2],
 	#	arguments: v[5] ? v[5][1] : null
 	#}) %}
-	#| "typeof" __ (left_side_retraction | object_retraction | expression) {% v => ({
-	#	type: 'typeof',
-	#	value: v[2][0]
-	#}) %}
-    # ! removed for now
-	#| "typeof" _ "(" _ (object_retraction | left_side_retraction | expression) _ ")" {% v => ({
-	#	type: 'typeof',
-	#	value: v[4][0]
-	#}) %}
-    #| "sizeof" _ "(" _ (object_retraction | left_side_retraction | expression) _ ")" {% v => ({
-	#	type: 'sizeof',
-	#	value: v[4][0]
-	#}) %}
     # ! removed for now
 	#| array_interactions {% id %}
-    # ! seems unnecessary, exists at Var/prefix
-	#| function_call {% id %}
-	#| identifier {% id %}
-    # ! no need, exists in prefix
-    #| allowed_keywords {% id %}
     # ! removed for now
 	#| "THAT" {% v => ({type: 'USE', line: v[0].line, col: v[0].col}) %}
     # ! removed for now
@@ -48,11 +28,6 @@ expression ->
 	#| convert {% id %}
 
 value ->
-	#"(" _ value _ ")" {% v => ({
-	#	type: 'expression_with_parenthesis',
-	#	value: v[2]
-	#}) %}
-	# |
     # ! removed for now, works in Var
 	#value _ "[" _ "]" (_ arguments):? {% v => {
 	#	return {
@@ -98,15 +73,10 @@ value ->
 	| condition_as_value {% id %}
 	# | "(" _ switch _ ")" {% v => v[2] %}
 	| switch_multiple {% id %}
-	# | number {% id %}
-	# | string {% id %}
 	# | obj_retract {% id %}
 	# | ("this" | identifier | html | object | number | function_call) _ "." _ ("this" | identifier | html | object | number | function_call) {% v => v %}
 	| myNull {% id %}
-	# | function_call {% id %}
 	# | annonymous_function {% id %}
-	# | identifier {% id %}
-	# | boolean {% id %}
 
 prefixExp -> Var {% id %}
 	| function_call {% id %}
@@ -125,6 +95,7 @@ prefixExp -> Var {% id %}
 	| regexp {% id %}
     | condition _ "?" _ value (_ ":" _ value):? {% condition.ternary %}
 	| value _ "if" _ condition (_ "else" _ value):? {% condition.ternary_with_if %}
+	| annonymous_function {% id %}
 
 parenthesized -> "(" _ value _ ")" {% v => ({
     type: 'expression_with_parenthesis',

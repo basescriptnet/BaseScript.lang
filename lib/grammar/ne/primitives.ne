@@ -74,6 +74,14 @@ boolean -> (%boolean | "!" _ value) {% boolean %}
 string -> string_concat {% id %}
 	# | string _ "[" _ number _ ":" ":":? _ number _ "]" {% string.slice %}
 	| number "px" {% string.px %}
+    | "typeof" __ prefixExp {% v => ({
+		type: 'typeof',
+		value: v[2]
+	}) %}
+	| "typeof" _ "(" _ value _ ")" {% v => ({
+		type: 'typeof',
+		value: v[4]
+	}) %}
 
 # numbers
 bigInt -> %number "n" {% number.bigInt %}
@@ -87,6 +95,10 @@ number -> %number {% number.float %}
     | "sizeof" __ prefixExp {% v => ({
 		type: 'sizeof',
 		value: v[2]
+	}) %}
+    | "sizeof" _ "(" _ value _ ")" {% v => ({
+		type: 'sizeof',
+		value: v[4]
 	}) %}
 
 # objects

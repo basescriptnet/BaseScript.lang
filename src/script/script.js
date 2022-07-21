@@ -447,5 +447,5 @@ const PI = 3.141592653589793,
 
 // your code below this line
 
-console.log(BS.slice("hello", 0, 5, -1, undefined, undefined));
-true ? v == 1 : null ? 1 : null;
+console.log(BS.getType(BS.sizeof(window.array) + 5 - 5 + 5 - 1 - 5 + 5 - 7));
+console.log(BS.getType(BS.sizeof(window.array)) + 5 - 5 + 5 - 1);

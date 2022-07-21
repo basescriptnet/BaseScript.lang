@@ -7,6 +7,7 @@ Var -> identifier {% id %}
         //value: v[4]
         //identifier: v[0].value
 	}) %}
+	| prefixExp _ "[" (_ value) _ ":" (_ value):? (_ ":" _ value):? _ "]" {% array.slice %}
 	| prefixExp _nbsp "[" _ value _ "]" {% v => ({
         type: 'item_retraction',
         //arguments: v[7] ? v[7][1] : null,
