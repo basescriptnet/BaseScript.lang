@@ -84,7 +84,8 @@ string -> string_concat {% id %}
 	}) %}
 
 # numbers
-bigInt -> %number "n" {% number.bigInt %}
+# ! is not tested
+bigInt -> %bigInt {% number.bigInt %}
 
 number -> %number {% number.float %}
 	| ("-") _ value {% v => ({
