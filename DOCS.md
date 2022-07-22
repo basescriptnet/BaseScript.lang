@@ -1,4 +1,6 @@
+
 # Variables
+
 > Variable declaration
 ```sh
 let identifier = value
@@ -7,6 +9,7 @@ let num, num1 = 1, num2
 ```
 
 #### ***Note: any value becomes immutable***
+
 > Const declaration
 ```sh
 const identifier = value
@@ -24,6 +27,7 @@ identifier = value
 Object.doSomething = value
 ```
 # Arrays
+
 > Array creation
 ```sh
 new Array(length?)
@@ -53,6 +57,7 @@ array[] = value
 ```
 
 # Objects
+
 > Object creation
 ```sh
 new Object() # not recomended
@@ -71,6 +76,7 @@ value instanceof value2
 ```
 
 # Strings
+
 > String creation
 ```sh
 new String() # not recomended
@@ -104,6 +110,7 @@ typeof(value)
 ```
 
 # Ternar operator
+
 > Regular JS way
 ```sh
 isNaN(value) ? 1 : 0
@@ -125,6 +132,7 @@ true if isNaN(value) else false
 ```
 
 # Numbers
+
 > Declaration
 ```sh
 # All followings are examples
@@ -144,6 +152,7 @@ sizeof(value)
 ```
 
 # BigInt
+
 > BigInts are threated as numbers, and return type of Int
 ```sh
 1000n
@@ -153,7 +162,9 @@ sizeof(value)
 ```
 
 # LOG, print, WRITE and ERROR keywords
+
 #### ***Note: optional parenthesis are accepted***
+
 > print and LOG
 ```sh
 # they do the same thing
@@ -177,7 +188,16 @@ ERROR "Something went wrong"
 # console.error("Something went wrong")
 ```
 
+# Conditions
+
+> If statement without else
+```sh
+num > 0
+num > 0 and num < 5 or num == undefined
+```
+
 # if else statements
+
 > If statement without else
 ```sh
 if num < 0:
@@ -204,6 +224,7 @@ else print "It's cold!"
 ```
 
 # Debugger
+
 > Starting the debugger
 ```sh
 if num < 0 {
@@ -212,6 +233,7 @@ if num < 0 {
 ```
 
 # try|catch|finally statement
+
 > try without catch and finally
 ```sh
 try: isWorking(1)

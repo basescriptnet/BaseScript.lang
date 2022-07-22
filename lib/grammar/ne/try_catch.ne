@@ -33,7 +33,7 @@ catch -> "catch" __ identifier statements_block {% v => {
     | "catch" _ "(" _ identifier _ ")" statements_block {% v => {
 	return {
 		type: 'catch',
-		value: v[3],
+		value: v[7],
 		identifier: v[4].value,
 
 	}
