@@ -91,8 +91,7 @@ prefixExp -> Var {% id %}
         value: v[2]
     }) %}
 	| regexp {% id %}
-    | condition _ "?" _ value (_ ":" _ value):? {% condition.ternary %}
-	| value _ "if" _ condition (_ "else" _ value):? {% condition.ternary_with_if %}
+    | ternary {% id %}
 	| annonymous_function {% id %}
 	| html {% id %}
 

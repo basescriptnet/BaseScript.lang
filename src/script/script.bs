@@ -1,7 +1,10 @@
-\n = '!'
-WRITE
-<div class="js">
-    <h1>"hello" <a href="#">"   your" {{ n }}</a></h1>
-    <br/>
-    <h2>"world"</h2>
-</div>
+
+\a = 10
+function hello {
+    \a = 100
+    function world {
+        @global a
+    }
+    return world()
+}
+print hello()

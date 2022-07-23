@@ -53,8 +53,16 @@ let writeFile = (path, fileName, content) => {
                 `${path_join(path_applied, `/${fileName}.js`).replace(/\\/g, '/')}`,
                 `${prepend}
                 ${built_in
-                    .replace(/\s*\/\/.*/g, ' ')
-                    // .replace(/\s+/g, ' ')}
+                    .replace(/;\s+(if|else\s|for|while|do|return(\s)|try|catch)\s*/g, ';$1$2')
+                    .replace(/else\s+if/g, 'else if')
+                    .replace(/[ \t]*\/\/[^\n]*/g, ' ')
+                    .replace(/\n+/g, '\n')
+                    .replace(/[ \t]+/g, ' ')
+                    .replace(/\{\s+/g, '{')
+                    .replace(/\s+\}/g, '}')
+                    .replace(/,\s+/g, ', ')
+                    .replace(/(?:\s*)(==?=?|<=?|>=?|!==?|\|\||&&)(?:\s*)/g, '$1')
+                    //.replace(/(if|else|for|while)\s+{/g, 'else{')}
                 }`
                     +`\n\n// your code below this line\n\n`
                     +`${beautify(contentJS)}`

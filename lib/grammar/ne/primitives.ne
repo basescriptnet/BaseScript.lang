@@ -22,6 +22,9 @@ allowed_keywords ->
 	| "this" {% id %}
     | "globalThis" {% id %}
     | "NaN" {% id %}
+    | "true" {% id %}
+    | "false" {% id %}
+    | "_" {% id %}
 
 convert -> value __ "as" __ convert_type {% v => {
 		return {
@@ -47,7 +50,7 @@ convert -> value __ "as" __ convert_type {% v => {
 # typed_argument -> identifier identifier
 ### primitives' essentials ###
 # objects
-pair -> ("async" __):? key _ arguments_with_types _ statements_block {% object.es6_key_value %}
+pair -> ("async" __):? key _ arguments_with_types statements_block {% object.es6_key_value %}
 	| key _ ":" _ value {% v => [v[0], v[4]] %}
 
 key -> string {% id %}

@@ -52,3 +52,6 @@ else_block -> "else" __ statement {% v => {
 		value: v[3],
 	});
 } %}
+
+ternary -> condition _ "?" _ value (_ ":" _ value):? {% condition.ternary %}
+	| value _nbsp "if" _ condition (_ "else" _ value):? {% condition.ternary_with_if %}

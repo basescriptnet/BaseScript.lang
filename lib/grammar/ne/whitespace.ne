@@ -29,7 +29,7 @@ __ -> %space {% id %}
 EOL -> [\n]:+ {% v => 'EOL' %}
     | [ \t]:* "/" "/" [^\n]:* [\n]:*  {% v => 'EOL' %}
 	# | WS_NO_LINE_BREAKS [\n] WS_WITH_LINE_BREAKS
-	| [ \t]:* ";" [ \t]:* "/" "/" [^\n]:* [\n]:* {% v => v[1] %}
+	| [ \t]:* ";" [ \t]:* ("/" "/" [^\n]:* [\n]:*):? {% v => v[1] %}
 
 # Not breaking space
 _nbsp -> [ \t]:* {% v => '' %}

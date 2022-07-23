@@ -4,7 +4,8 @@ function_declaration -> ("async" __):? ("function") __ identifier _ arguments_wi
 	| ("async" __):? ("function") __ identifier statements_block {% functions.declaration_with_no_args %}
 
 annonymous_function ->
-	# | ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
+    # | ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
+	# ! must be fixed: replace { statements | return }  by statements_block
 	("async" __):? ("function") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% functions.annonymous %}
 	| ("async" __):? ("function") (__ identifier):? _ "{" (_ statement | _ return):* _ "}" {% functions.annonymous_with_no_args %}
 	| iife {% id %}
@@ -32,10 +33,7 @@ function_call -> prefixExp _nbsp arguments {% v => {
 	})
 } %}
 
-#callable -> function_call {% id %}
-#	| identifier {% id %}
-#    | value {% id %}
-
+# arguments
 arguments -> "(" _ ")" {% args.empty %}
 	| "(" _ value (_ "," _ value):* (_ ","):? _ ")" {% args.extract %}
 

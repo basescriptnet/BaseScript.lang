@@ -1,4 +1,7 @@
 @lexer lexer
+# ! builtin nearley include statement really
+# ! works not the way expected
+#@include  "./lib/grammar/ne/functions.ne"
 #process -> (_ includes:*) statements {% id %}
 process -> decorated_statements {% id %}
 
@@ -24,21 +27,27 @@ decorated_statements -> _ %decorator EOL includes:* statements {% v => ({
 
 ### statements ###
 # statements -> (_ statement {% v => v[1] %}):* _ {% id %}
-statements -> (_ statement):* _ {% v => {
+statements -> (_ global EOL {% v => v[1] %}):* (_ statement):* _ {% v => {
 	let result = []
+    if (v[0] && v[0].length) {
+        //debugger
+        for (let i = 0; i < v[0].length; i++) {
+            result.push(v[0][i])
+        }
+    }
 	// let removeComments = text => text.replace(/\/\/.*\n?/, '');
-	for (let i = 0, indent = 0; i < v[0].length; i++) {
+	for (let i = 0, indent = 0; i < v[1].length; i++) {
 		/*if (i == 0) indent = (v[0][i][0].text)
 		if (indent !== (v[0][i][0].text)) {
 			throw new Error('Invalid indentation.')
 		}*/
-		result.push(v[0][i][1])
+		result.push(v[1][i][1])
 	}
 	return result
 } %}
 
 statement -> blocks {% id %}
-	| debugging {% id %} # //! needs test
+	| debugging {% id %} # ! needs test
 	| class_declaration {% id %}
 	| with {% id %}
 	| "debugger" EOL {% statement.debugger %}
@@ -98,5 +107,15 @@ type_declaration -> "type" __ identifier _ arguments_with_types statements_block
 with -> "with" __ value statements_block  {% v => assign(v[0], {
 	type: 'with',
 	obj: v[2],
+	value: v[3]
+}) %}
+    | "with" _ "(" _ value _ ")" statements_block  {% v => assign(v[0], {
+	type: 'with',
+	obj: v[4],
+	value: v[7]
+}) %}
+
+global -> "@" "global" __ identifier {% v => ({
+    type: 'global',
 	value: v[3]
 }) %}
