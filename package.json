@@ -20,14 +20,17 @@
     },
     "keywords": [
         "JS",
-        "JavaScript",
-        "web",
-        "dev",
+        "javascript",
         "html",
         "typed",
         "superset",
-        "BaseScript",
-        "Node.js"
+        "basescript",
+        "Node.js",
+        "language",
+        "compiler",
+        "compile",
+        "typescript",
+        "less code"
     ],
     "author": "basescript.net",
     "license": "ISC",
