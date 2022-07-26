@@ -1,6 +1,6 @@
 {
     "name": "basescript",
-    "version": "0.1.11",
+    "version": "0.1.12",
     "description": "A scritpting language powered with Node.js and Nearley, that compiles down to JavaScript, and has the possibility for even more!",
     "main": "index.js",
     "watch": {
@@ -20,14 +20,17 @@
     },
     "keywords": [
         "JS",
-        "JavaScript",
-        "web",
-        "dev",
+        "javascript",
         "html",
         "typed",
         "superset",
-        "BaseScript",
-        "Node.js"
+        "basescript",
+        "Node.js",
+        "language",
+        "compiler",
+        "compile",
+        "typescript",
+        "less code"
     ],
     "author": "basescript.net",
     "license": "ISC",

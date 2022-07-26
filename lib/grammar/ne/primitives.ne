@@ -10,13 +10,6 @@ atom -> number {% id %}
 # base line
 identifier -> %identifier {% id %}
 
-nameList -> identifier {% id %}
-    | nameList _ "," _ identifier {% v => ({
-			type: 'name_list',
-			value: v[0],
-            addition: v[4]
-    }) %}
-
 allowed_keywords ->
     "Infinity" {% id %}
 	| "this" {% id %}

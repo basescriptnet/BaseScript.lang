@@ -130,16 +130,3 @@ const PI=3.141592653589793, E=2.718281828459045, log=(...args)=>console.log(...a
 
 // your code below this line
 
-var a = 10;
-
-function hello() {
-    var arguments = Array.from(arguments || []);
-    let a = 100;
-
-    function world() {
-        var arguments = Array.from(arguments || []);
-        let a = window.a;
-    }
-    return world();
-}
-console.log(hello());

@@ -37,28 +37,24 @@ var_assign -> ("let" __ | "const" __ | "\\") var_assign_list {% vars.assign %}
 	}
 } %}
 
-var_assign_list -> var_reassign (_ "," _ var_reassign):* {% vars.var_assign_list %}
+var_assign_list -> var_reassign (_ "," _ var_reassign {% v => v[3] %}):* {% vars.var_assign_list %}
 
-var_reassign -> nameList _ "=" _ (value) {% v => {
+var_reassign -> identifier _ "=" _ value {% v => {
 	return {
 		type: 'var_reassign',
 		identifier: v[0],
 		line: v[0].line,
 		col: v[0].col,
-		value: v[4][0],
+		value: v[4],
 		offset: v[0].offset
 	}
 } %}
-    | nameList {% v => {
-        return {
-            type: 'var_reassign',
-            identifier: v[0],
+    | identifier {% v => ({
+			type: 'identifier',
+			value: v[0],
             line: v[0].line,
             col: v[0].col,
-            //value: v[0][0],
-            offset: v[0].offset
-        }
-    } %}
+    }) %}
 	| "SET" _ identifier _ "TO" _ (switch | value) {% v => {
 	return {
 		type: 'var_reassign',

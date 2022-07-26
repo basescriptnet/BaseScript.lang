@@ -22,8 +22,10 @@ It welcomes anybody, who desires to try out his own changes on the grammar
 
 ## How to contact the creators
 
-Email: basescriptnet@gmail.com
-Telegram: @basescript
+Email: basescriptnet@gmail.com<br>
+Telegram: @basescript<br>
+Website: [BaseScript.net](https://basescript.net/)<br>
+GitHub: [BaseScript.lang](https://github.com/basescriptnet/BaseScript.lang)
 
 ## The compilation
 > At any directory use
