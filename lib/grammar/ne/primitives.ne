@@ -18,6 +18,11 @@ allowed_keywords ->
     | "true" {% id %}
     | "false" {% id %}
     | "_" {% id %}
+    | "Boolean" {% id %}
+    | "Object" {% id %}
+    | "Array" {% id %}
+    | "String" {% id %}
+    | "Number" {% id %}
 
 convert -> value __ "as" __ convert_type {% v => {
     return {
@@ -72,11 +77,15 @@ string -> string_concat {% id %}
 	| number "px" {% string.px %}
     | "typeof" __ prefixExp {% v => ({
 		type: 'typeof',
-		value: v[2]
+		value: v[2],
+        line: v[0].line,
+        col: v[0].col
 	}) %}
 	| "typeof" _ "(" _ value _ ")" {% v => ({
 		type: 'typeof',
-		value: v[4]
+		value: v[4],
+        line: v[0].line,
+        col: v[0].col
 	}) %}
 
 # numbers
@@ -87,15 +96,21 @@ number -> %number {% number.float %}
 	| ("-") _ value {% v => ({
 		type: 'additive',
 		sign: v[0][0].value,
-		value: v[2]
+		value: v[2],
+        line: v[0].line,
+        col: v[0].col
 	}) %}
     | "sizeof" __ prefixExp {% v => ({
 		type: 'sizeof',
-		value: v[2]
+		value: v[2],
+        line: v[0].line,
+        col: v[0].col
 	}) %}
     | "sizeof" _ "(" _ value _ ")" {% v => ({
 		type: 'sizeof',
-		value: v[4]
+		value: v[4],
+        line: v[0].line,
+        col: v[0].col
 	}) %}
 
 # objects

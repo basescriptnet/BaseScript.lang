@@ -40,19 +40,23 @@ arguments -> "(" _ ")" {% args.empty %}
 arguments_with_types -> "(" _ ")" {% args.empty_arguments_with_types %}
 	| "(" _ argument_identifier_and_value (_ "," _ argument_identifier_and_value):* (_ ","):? _ ")" {% args.arguments_with_types %}
 
-argument_type -> (identifier | %keyword) "?":? __ {% v => {
-	v[0] = v[0][0]
-	let n = v[0].value[0];
-	if (n.toUpperCase() != n) {
-		throw new SyntaxError(`Argument type must be capitalized at line ${v[0].line}, col ${v[0].col}.`);
-	}
-	return [v[0], v[1]];
-} %}
-
-argument_identifier_and_value -> argument_type:? identifier (_ "=" _ value):? {% v => ({
+argument_identifier_and_value -> argument_type identifier (_ "=" _ value):? {% v => ({
 	type: 'argument_identifier_and_value',
 	argument_type: v[0] ? v[0][0] : 'none',
 	can_be_null: v[0] ? v[0][1] : false,
 	identifier: v[1],
 	value: v[2] ? v[2][3] : undefined
 }) %}
+
+argument_type -> ((%keyword | identifier) "?":? __):? {% v => {
+    if (!v[0]) return;
+	v[0] = v[0][0];
+    if (v[0] && v[0] instanceof Array) {
+        v[0] = v[0][0]
+    }
+	let n = v[0].value[0];
+	if (n.toUpperCase() != n) {
+		throw new SyntaxError(`Argument type must be capitalized at line ${v[0].line}, col ${v[0].col}.`);
+    }
+	return [v[0], v[1]];
+} %}

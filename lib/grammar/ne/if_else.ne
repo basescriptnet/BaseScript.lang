@@ -54,10 +54,10 @@ else_block -> "else" __ statement {% v => {
 		value: [v[2]],
 	});
 } %}
-	| "else" _ "{" statements "}" {% v => {
+	| "else" statements_block {% v => {
 	return Object.assign(v[0], {
 		type: 'else',
-		value: v[3],
+		value: v[1],
 	});
 } %}
 

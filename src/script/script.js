@@ -125,6 +125,7 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
         if (r) return r;
         return function () {console.warn('@import is not supported yet in browsers.')};
     })(),
+    customTypes: {},
     types: {
         Array (value) {
             return Array.isArray(value);
@@ -143,6 +144,9 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
         },
         Number (value) {
             return typeof value === 'number' && !Number.isNaN(value);
+        },
+        BigInt(value) {
+            return typeof value === 'bigint';
         },
         NaN (value) {
             return Number.isNaN(value);
@@ -165,6 +169,19 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
         Object (value) {
             return typeof value === 'object' && value !== null;
         },
+    },
+    checkArgType(type, value, line, col) {
+        if (type in this.customTypes) {
+            let r = BS.customTypes[type];
+            if (r && r(value))
+                return true;
+        }
+        if (type in this.types) {
+            let r = BS.types[type];
+            if (r && r(value))
+                return true;
+        }
+        throw new TypeError(`Argument "${value}" is not type of "${type}" at line ${line}, col ${col}.`);
     },
     convert(value, type, outerType) {
         let t = this.getType(value);
@@ -295,6 +312,7 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
         for (let i in this.types) {
             try {
                 if (this.types[i](value)) return i;
+                //if (this.curstomTypes[i](value)) return i;
             } catch (err) {continue}
         }
     },
@@ -335,7 +353,7 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
     storage: [],
     // require('./ast_to_js.js')// || function () {console.warn('@eval is not supported yet in browsers.')}
 };
-const BS = globalThis.BS.deepFreeze(globalThis.BS);
+const BS = globalThis.BS;
 
 const TypedArray = Reflect.getPrototypeOf(Int8Array);
 for (const C of [Array, String, TypedArray]) {
@@ -499,14 +517,9 @@ const PI = 3.141592653589793,
 
 // your code below this line
 
-switch (1) {
-    case 4:
-        log("hello");
-        break;
-    case 5:
-        log("h");
-        break;
-    case 5:
-        log("h");
-        break;
+var a = 10;
+if (10 > 4 && 10 > 5 && 10 > 90) {
+    console.log("Bigger");
+} else {
+    console.log("Smaller or equal");
 }

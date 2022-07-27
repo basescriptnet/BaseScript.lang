@@ -40,6 +40,19 @@ condition _ comparision_operators _ _value {% v => {
         col: v[0].col,
     }
 } %}
+| condition _ comparision_operators _ arguments {% (v, l, value) => {
+    if (v[4].length < 2) return reject;
+    return {
+        type: 'condition_destructive',
+        left: v[0],
+        right: v[4],
+        value: v[2].value,
+        line: v[0].line,
+        lineBreaks: v[0].lineBreaks,
+        offset: v[0].offset,
+        col: v[0].col,
+    }
+} %}
     | _value _ "in" _ _value {% v => {
 		return {
 			type: 'in',

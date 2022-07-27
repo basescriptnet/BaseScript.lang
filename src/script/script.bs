@@ -1,8 +1,7 @@
-switch 1 {
-    case 4:
-        log('hello');
-        break;
-    case 5: log('h');break;
-    case 5: log('h');break;
-    default: 1;
+\a = 10
+// outputs 'Smaller or equal'
+if 10 > (4, 5, 90) {
+    print 'Bigger'
+} else {
+    print 'Smaller or equal'
 }
