@@ -20,7 +20,7 @@ expression ->
     # ! removed for now
 	#| "THAT" {% v => ({type: 'USE', line: v[0].line, col: v[0].col}) %}
     # ! removed for now
-	#| convert {% id %}
+	| convert {% id %}
 
 value -> condition {% id %}
     #| _value {% id %}
@@ -41,7 +41,7 @@ _value ->
 	# |
 	#| condition {% id %}
 	# | "(" _ switch _ ")" {% v => v[2] %}
-	| switch_multiple {% id %}
+	#| switch_multiple {% id %}
 	# | obj_retract {% id %}
 	# | ("this" | identifier | html | object | number | function_call) _ "." _ ("this" | identifier | html | object | number | function_call) {% v => v %}
 	| myNull {% id %}

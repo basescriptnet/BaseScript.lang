@@ -20,24 +20,24 @@ allowed_keywords ->
     | "_" {% id %}
 
 convert -> value __ "as" __ convert_type {% v => {
-		return {
-			type: 'convert',
-			value: v[0],
-			convert_type: v[4]
-		}
-	} %}
+    return {
+        type: 'convert',
+        value: v[0],
+        convert_type: v[4]
+    }
+} %}
 
-# ! removed for now
-#convert_type -> ("List" | "JSON" | "String" | "Number" | "Boolean" | "Object" | "Float" | "Int") {% v => v[0][0] %}
-#	| "Array" "[" convert_type "]" {% v => {
-#		return {
-#			type: 'array_of_type',
-#			value: v[2],
-#			line: v[0].line,
-#			col: v[0].col
-#		}
-#	} %}
-#	| "Array" {% id %}
+convert_type -> ("JSON" | "String" | "Number" | "Boolean" | "Object" | "Float" | "Int") {% v => v[0][0] %}
+    # ! removed for now
+	#| "Array" "[" convert_type "]" {% v => {
+	#	return {
+	#		type: 'array_of_type',
+	#		value: v[2],
+	#		line: v[0].line,
+	#		col: v[0].col
+	#	}
+	#} %}
+	#| "Array" {% id %}
 
 	# | %keywords __ {% id %}
 # typed_argument -> identifier identifier

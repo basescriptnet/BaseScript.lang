@@ -1,0 +1,8 @@
+switch 1 {
+    case 4:
+        log('hello');
+        break;
+    case 5: log('h');break;
+    case 5: log('h');break;
+    default: 1;
+}

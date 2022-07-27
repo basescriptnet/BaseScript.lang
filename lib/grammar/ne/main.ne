@@ -3,7 +3,7 @@
 # ! works not the way expected
 #@include  "./lib/grammar/ne/functions.ne"
 #process -> (_ includes:*) statements {% id %}
-process -> decorated_statements _ {% id %}
+process -> decorated_statements (_ | EOL) {% id %}
 
 includes -> "#include" _ "<" identifier ">" EOL {% v => ({
 	type: 'built_in_include',
@@ -82,7 +82,6 @@ statement -> blocks {% id %}
 	| value {% statement.value %}
     #| Exp EOL {% id %}
     # ! needs to be moved to values
-	| switch_multiple {% id %}
 	# | (value {% statement.value %} | value_reassign {% statement.value_reassign %} | var_assign {% id %}) EOL {% id %}
 	#| ";" {% id %}
 
@@ -92,6 +91,8 @@ blocks -> function_declaration {% id %}
 	| while_block {% id %}
 	| for_block {% id %}
 	| try_catch_finally {% id %}
+	| switch_multiple {% id %}
+    #| "switch" __ value
 
 statements_block -> _ "{" statements _ (";" _):? "}" {% v => v[2] %}
 	| _ "BEGIN" __ statements _ (";" _):? "END" {% v => v[3] %}

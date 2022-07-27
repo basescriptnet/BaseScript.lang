@@ -27,10 +27,10 @@ __ -> %space {% id %}
 # ? Works really well, but needs more tests. First 2 lines
 # ? replaced from %space to this
 EOL -> [\n]:+ {% v => 'EOL' %}
-	| [ \t]:* ";" [ \t]:* ("/" "/" [^\n]:* [\n]:*):? {% v => v[1] %}
-    | [ \t]:* "/" "/" [^\n]:* [\n]:*  {% v => 'EOL' %}
+	| _nbsp ";" ( _nbsp "/" "/" [^\n]:* [\n]:*):? {% v => v[1] %}
+    | _nbsp "/" "/" [^\n]:* [\n]:*  {% v => 'EOL' %}
 	# | WS_NO_LINE_BREAKS [\n] WS_WITH_LINE_BREAKS
-    #| [ \t]:* EOL_statement_terminator:+ {% v => 'EOL' %}
+    #| _nbsp EOL_statement_terminator:+ {% v => 'EOL' %}
 
 #EOL_statement_terminator -> [^\w\d\+\-\*\/%\.]:+
 # Not breaking space

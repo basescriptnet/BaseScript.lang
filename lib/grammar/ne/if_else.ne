@@ -6,6 +6,14 @@ if_block -> "if" statement_condition statements_block {% v => {
 		value: v[2],
 	});
 } %}
+    | "unless" statement_condition statements_block {% v => {
+	return Object.assign(v[0], {
+		type: 'if',
+		condition: v[1],
+		value: v[2],
+        unless: true
+	});
+} %}
 	| if_block
 	#(_ elif_block):*
 	_ else_block {% v => {
