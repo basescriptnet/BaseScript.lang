@@ -24,18 +24,21 @@ YouTube: [BaseScript Channel](https://www.youtube.com/channel/UCmNoL3N13lRHbcGYT
  - [Ternar operator](#ternar-operator)
  - [Numbers](#numbers)
  - [BigInts](#bigInts)
- - [LOG, print, WRITE and ERROR keywords](#log-print-WRITE-and-ERROR-keywords)
+ - [LOG, print, WRITE and ERROR keywords](#log-print-write-and-error-keywords)
  - [Conditions](#conditions)
  - [if else statements](#if-else-statements)
  - [Debugger](#debugger)
  - [try|catch|finally statement](#try-catch-finally-statement)
+ - [Switch cases](#switch-cases)
 
 ## Getting started
+
 > At any directory use
 
 ```sh
 bs <file_name> options?
 ```
+
 > For help use
 
 ```sh
@@ -131,7 +134,7 @@ object.x
 object['x']
 ```
 
-> The *instanceof* operator returns a class (object)
+> The *instanceof* operator returns a boolean, if value is instance of value2
 
 ```javascript
 value instanceof value2
@@ -226,7 +229,7 @@ sizeof(value)
 
 ## BigInt
 
-> BigInts are threated as numbers, and return type of Int
+> BigInts are threated as numbers, but return typeof BigInt
 
 ```javascript
 1000n
@@ -267,6 +270,30 @@ ERROR "Something went wrong"
 
 ## Conditions
 
+> Comparision operators
+
+```javascript
+==, !=, ===, !==, >, <, >=, <=, is, is not
+// is transforms into ===
+// is not transforms into !==
+```
+
+> Multivalue comparision
+
+```javascript
+// Note: list of values always must be righthand
+name == ('John', 'Danny', 'Charlie')
+// automatically transforms into
+name == 'John' || name == 'Danny' || name == 'Charlie'
+
+random > (some_number, other_number, 20)
+// same as
+random > some_number && random > other_number && random > 20
+// basically said, you have a callback result for your expression
+// whatever the first two arguments are,
+// it needs to be at least more, than 20
+```
+
 > If statement without else
 
 ```javascript
@@ -301,6 +328,17 @@ if (num < 0) {
 if temperature > 25:
     print "It's hot!"
 else print "It's cold!"
+```
+
+> **Unless** statement
+
+```javascript
+unless isAdmin:
+    print "You don't have access."
+// same as
+if (!isAdmin) {
+    console.log("You don't have access");
+}
 ```
 
 ## Debugger

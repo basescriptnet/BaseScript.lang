@@ -5,16 +5,16 @@ comparision_operators ->
 	#| "is smaller or equal to" {% v => assign(v[0], {type: 'comparision_operator', value: '<=' }) %}
 	#| "is equal to" {% v => assign(v[0], {type: 'comparision_operator', value: '==' }) %}
 	#| "is not equal to" {% v => assign(v[0], {type: 'comparision_operator', value: '!=' }) %}
-	"is" _ "not" {% v => assign(v[0], {type: 'comparision_operator', value: '!==' }) %}
-	| "is" {% v => assign(v[0], {type: 'comparision_operator', value: '===' }) %}
-	| "===" {% v => assign(v[0], {type: 'comparision_operator', value: '===' }) %}
-	| "!==" {% v => assign(v[0], {type: 'comparision_operator', value: '!==' }) %}
-	| "==" {% v => assign(v[0], {type: 'comparision_operator', value: '==' }) %}
-	| "!=" {% v => assign(v[0], {type: 'comparision_operator', value: '!=' }) %}
-	| ">=" {% v => assign(v[0], {type: 'comparision_operator', value: '>=' }) %}
-	| "<=" {% v => assign(v[0], {type: 'comparision_operator', value: '<=' }) %}
-	| "<" {% v => assign(v[0], {type: 'comparision_operator', value:  '<' }) %}
-	| ">" {% v => assign(v[0], {type: 'comparision_operator', value:  '>' }) %}
+	"is" _ "not" __ {% v => assign(v[0], {type: 'comparision_operator', value: '!==' }) %}
+	| "is" __ {% v => assign(v[0], {type: 'comparision_operator', value: '===' }) %}
+	| "===" _ {% v => assign(v[0], {type: 'comparision_operator', value: '===' }) %}
+	| "!==" _ {% v => assign(v[0], {type: 'comparision_operator', value: '!==' }) %}
+	| "==" _ {% v => assign(v[0], {type: 'comparision_operator', value: '==' }) %}
+	| "!=" _ {% v => assign(v[0], {type: 'comparision_operator', value: '!=' }) %}
+	| ">=" _ {% v => assign(v[0], {type: 'comparision_operator', value: '>=' }) %}
+	| "<=" _ {% v => assign(v[0], {type: 'comparision_operator', value: '<=' }) %}
+	| "<" _ {% v => assign(v[0], {type: 'comparision_operator', value:  '<' }) %}
+	| ">" _ {% v => assign(v[0], {type: 'comparision_operator', value:  '>' }) %}
 
 condition -> condition __ ("and" | "or" | "&&" | "||") __ _value {% v => {
 	return {
@@ -28,11 +28,11 @@ condition -> condition __ ("and" | "or" | "&&" | "||") __ _value {% v => {
 	}
 } %}
 |
-condition _ comparision_operators _ _value {% v => {
+condition _ comparision_operators _value {% v => {
     return {
         type: 'condition',
         left: v[0],
-        right: v[4],
+        right: v[3],
         value: v[2].value,
         line: v[0].line,
         lineBreaks: v[0].lineBreaks,

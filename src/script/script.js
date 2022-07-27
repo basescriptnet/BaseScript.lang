@@ -163,7 +163,8 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
         Boolean (value) {
             return typeof value === 'boolean';
         },
-        HTML (value) {
+        HTML(value) {
+            if (!document && !window) return false;
             return Element && value instanceof Element;
         },
         Object (value) {
