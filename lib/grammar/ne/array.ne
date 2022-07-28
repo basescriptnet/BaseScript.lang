@@ -3,7 +3,7 @@ array -> "[" _ "]" {% array.empty %}
 	| "[" _ value (_ "," _ value):* (_ ","):? _ "]" {% array.extract %}
 	| "[" _ value _ "through" _ value _ "]" {% array.loop %}
 
-array_interactions -> ("PUSH" | "UNSHIFT") _ value _ "INTO" _ value {% v => ({
+array_interactions -> ("PUSH" | "UNSHIFT") _ value _ "INTO" _ prefixExp {% v => ({
 		type: 'array_interactions',
 		method: v[0][0],
 		into: v[6],

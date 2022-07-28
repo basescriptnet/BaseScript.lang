@@ -15,14 +15,12 @@ allowed_keywords ->
 	| "this" {% id %}
     | "globalThis" {% id %}
     | "NaN" {% id %}
-    #| "true" {% id %}
-    #| "false" {% id %}
-    | "_" {% id %}
     | "Boolean" {% id %}
     | "Object" {% id %}
     | "Array" {% id %}
     | "String" {% id %}
     | "Number" {% id %}
+    | "JSON" {% id %}
 
 convert -> value __ "as" __ convert_type {% v => {
     return {

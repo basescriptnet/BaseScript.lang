@@ -546,8 +546,3 @@ const PI = 3.141592653589793,
 
 // your code below this line
 
-var a = 10;
-if (10 == 44 || 10 == 2 || 10 == 5) {
-    console.log(4);
-}
-console.log(a);

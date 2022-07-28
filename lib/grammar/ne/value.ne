@@ -16,6 +16,7 @@ expression ->
 	#	arguments: v[5] ? v[5][1] : null
 	#}) %}
     # ! removed for now
+    # ? BUG: spread operator works out of array|argument context
 	#| array_interactions {% id %}
     # ! removed for now
 	#| "THAT" {% v => ({type: 'USE', line: v[0].line, col: v[0].col}) %}

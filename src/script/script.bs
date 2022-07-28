@@ -1,5 +1,0 @@
-let a = 10
-if 10 == (44, 2, 5) {
-    print 4
-}
-print a
