@@ -40,12 +40,12 @@ condition _ comparision_operators _value {% v => {
         col: v[0].col,
     }
 } %}
-| condition _ comparision_operators _ arguments {% (v, l, value) => {
-    if (v[4].length < 2) return reject;
+| condition _ comparision_operators arguments {% (v, l, reject) => {
+    if (v[3].value.length < 2) return reject;
     return {
         type: 'condition_destructive',
         left: v[0],
-        right: v[4],
+        right: v[3],
         value: v[2].value,
         line: v[0].line,
         lineBreaks: v[0].lineBreaks,

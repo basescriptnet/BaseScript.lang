@@ -1,5 +1,33 @@
 if (!globalThis) { globalThis = window || global || this || {}; } try { globalThis.require = require; } catch (err) { globalThis.require = () => undefined; } 
-                globalThis.BS = {
+                class Variable {
+    constructor(name, type, value) {
+        this.name = name;
+        this.type = type;
+        this.value = value;
+    }
+    set valueOf(value) {
+        if (this.type == 'let' || this.type == '\\') return this.value;
+        if (BS.getType(value) != this.type) {
+            throw new TypeError(`Assignment of a different type to variable "${this.name}" rather than "${this.type}" is prohibited.`)
+        }
+        this.value = value;
+    }
+    get valueOf () {
+        return this.value;
+    }
+}
+globalThis.BS = {
+    var(name, type, value) {
+        if (BS.getType(value) !== type) throw new TypeError(`Variable "${name}" is required to be "${type}", got "${BS.getType(value)}" instead.`)
+        return new Variable(name, type, value);
+    },
+    setValue(name, oldValue, value) {
+        if (oldValue instanceof Variable) {
+            oldValue.valueOf = value;
+            return oldValue;
+        }
+        return value;
+    },
     Node (tagName, id, className, attributes, children) {
         let el = document.createElement(tagName);
         id && (el.id = id);
@@ -519,8 +547,7 @@ const PI = 3.141592653589793,
 // your code below this line
 
 var a = 10;
-if (10 > 4 && 10 > 5 && 10 > 90) {
-    console.log("Bigger");
-} else {
-    console.log("Smaller or equal");
+if (10 == 44 || 10 == 2 || 10 == 5) {
+    console.log(4);
 }
+console.log(a);

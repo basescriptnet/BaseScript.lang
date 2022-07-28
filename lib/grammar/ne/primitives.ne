@@ -15,8 +15,8 @@ allowed_keywords ->
 	| "this" {% id %}
     | "globalThis" {% id %}
     | "NaN" {% id %}
-    | "true" {% id %}
-    | "false" {% id %}
+    #| "true" {% id %}
+    #| "false" {% id %}
     | "_" {% id %}
     | "Boolean" {% id %}
     | "Object" {% id %}

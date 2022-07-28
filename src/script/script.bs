@@ -1,7 +1,5 @@
-\a = 10
-// outputs 'Smaller or equal'
-if 10 > (4, 5, 90) {
-    print 'Bigger'
-} else {
-    print 'Smaller or equal'
+let a = 10
+if 10 == (44, 2, 5) {
+    print 4
 }
+print a

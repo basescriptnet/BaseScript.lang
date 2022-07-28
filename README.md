@@ -23,12 +23,12 @@ YouTube: [BaseScript Channel](https://www.youtube.com/channel/UCmNoL3N13lRHbcGYT
  - [Strings](#strings)
  - [Ternar operator](#ternar-operator)
  - [Numbers](#numbers)
- - [BigInts](#bigInts)
+ - [BigInts](#bigint)
  - [LOG, print, WRITE and ERROR keywords](#log-print-write-and-error-keywords)
  - [Conditions](#conditions)
  - [if else statements](#if-else-statements)
  - [Debugger](#debugger)
- - [try|catch|finally statement](#try-catch-finally-statement)
+ - [try|catch|finally statement](#trycatchfinally-statement)
  - [Switch cases](#switch-cases)
 
 ## Getting started

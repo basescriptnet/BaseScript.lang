@@ -3,7 +3,9 @@
 # ! works not the way expected
 #@include  "./lib/grammar/ne/functions.ne"
 #process -> (_ includes:*) statements {% id %}
-process -> decorated_statements (_ | EOL) {% id %}
+process -> decorated_statements _ (";" _):? {% (v, l, reject) => {
+    return v[0];
+} %}
 
 includes -> "#include" _ "<" identifier ">" EOL {% v => ({
 	type: 'built_in_include',
@@ -35,6 +37,8 @@ decorated_statements -> _ %decorator EOL includes:* statements {% v => ({
 # statements -> (_ statement {% v => v[1] %}):* _ {% id %}
 statements -> (_ global EOL {% v => v[1] %}):* (_ statement EOL):* (_ statement):? {% (v, l, reject) => {
 	let result = []
+    // debugger
+    // if (!v[0]?.length && !v[1]?.length && !v[2]) return reject
     if (v[0] && v[0].length) {
         if (!v[1].length && !v[2]) {
             //debugger
