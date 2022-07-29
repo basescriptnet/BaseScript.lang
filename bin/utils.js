@@ -27,6 +27,7 @@ let writeFile = (path, fileName, content) => {
             // })
         } else {
             // for js files
+            if (!fileName) return
             console.log('[File System]: Writing to: '+fileName+'.js');
             let ast_to_js = require('../lib/compiler/ast_to_js');
             var contentJS = ast_to_js(ast);
@@ -50,7 +51,8 @@ let writeFile = (path, fileName, content) => {
             `.replace(/\s*\/\/.*/g, '\n').replace(/\s+/g, ' ');
             // console.log(path_join(path_applied, `/${fileName}.js`).replace(/\\/g, '/'))
             fs.writeFileSync(
-                `${path_join(path_applied, `/${fileName}.js`).replace(/\\/g, '/')}`,
+                `${(`${fileName}.js`).replace(/\\/g, '/')}`,
+                //`${path_join(path_applied, `/${fileName}.js`).replace(/\\/g, '/')}`,
                 `${prepend}
                 ${built_in
                     //.replace(/;\s+(if|else\s|for|while|do|return(\s)|try|catch)\s*/g, ';$1$2')
@@ -81,12 +83,37 @@ let writeFile = (path, fileName, content) => {
 };
 
 module.exports = {
-    parse (path) {
+    parse (dir, arg0 = '', path, watch = false) {
         console.clear()
         let date = Date.now();
-        let fileName = path.substr(0, path.length-('.bs'.length));
+        //console.log(path_applied)
+        if (!watch) {
+            //path = path_join(dir, arg0)
+            path = dir
+            if (!/\.bs$/i.test(path)) {
+                console.error(new Error('Provided file doesn\'t have .bs extension'));
+                process.exit()
+            }
+        } else {
+            path = path_join(dir, path)
+            //console.log(path)
+        }
+        let fileName = path.substr(0, path.length - ('.bs'.length));
+        //console.dir(fs.promises)
+        //console.log(fs.existsSync(`${path}`))
+        //console.log(`${path_applied}${watch ? '/' + path : ''}`)
+        //process.exit()
         try {
-            let content = BS(`${path_applied}/${path}`);
+            let content = '';
+            if (!watch && fs.existsSync(`${path}`)) {
+                content = BS(`${path}`);
+            } else {
+                if (!fs.existsSync(`${path}`))
+                    path = `${path_applied}${watch ? '\\' + path : ''}`;
+                //console.log(path)
+                //process.exit()
+                content = BS(path);
+            }
             if (content === void 0) {
                 //console.log(']')
                 return;

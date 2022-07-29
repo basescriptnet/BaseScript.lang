@@ -5,18 +5,18 @@ function_declaration -> ("async" __):? ("function") __ identifier _ arguments_wi
 
 annonymous_function ->
     # | ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
-	# ! must be fixed: replace { statements | return }  by statements_block
 	("async" __):? ("function") (__ identifier):? _ arguments_with_types statements_block {% functions.annonymous %}
 	| ("async" __):? ("function") (__ identifier):? statements_block {% functions.annonymous_with_no_args %}
+    # ! returns multiple results if assigned or if has pre-spacing
+    #| ("async" __):? _ arguments_with_types _ "=>" statements_block {% v => {
+    #    return {
+    #        type: 'annonymous_function',
+    #        value: v[5],
+    #        arguments: v[2],
+    #        async: v[0] ? true : false
+    #    }
+    #} %}
 	| iife {% id %}
-	# | ("async" __):? _ arguments_with_types _ "=>" _ statements_block {% v => {
-	# 	return {
-	# 		type: 'annonymous_function',
-	# 		value: v[6],
-	# 		arguments: v[2],
-	# 		async: v[0] ? true : false
-	# 	}
-	# } %}
 
 iife -> "(" _ annonymous_function _ ")" _ arguments {% functions.iife %}
 

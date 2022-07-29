@@ -12,14 +12,14 @@ const options = yargs
     alias: "watch",
     describe: "Watch directory.",
     type: "boolean",
-    demandOption: false 
+    demandOption: false
 })
 .help(true)
 .argv;
 // if no file name is provided
 let lastChange = 0;
 let lastFile = '';
-const arg0 = yargs.argv._[0];
+let arg0 = yargs.argv._[0];
 if (arg0 == null) {
     // utils.showHelp();
     console.log(usage);
@@ -31,10 +31,14 @@ if (arg0 == null) {
 }
 let dir = path_applied;
 if (arg0 != './') {
+    if (/^\.\//.test(arg0)) {
+        arg0 = arg0.slice(1)
+    }
     dir = path_join(path_applied, arg0)
 }
 let watch = yargs.argv.watch;
 if (!fs.existsSync(dir)) {
+    console.error(new Error('Provided location doesn\'t exist'))
     process.exit()
     // fs.mkdirSync(`${path_applied}/${p.join('/')}`, {recursive: true})
 }
@@ -45,10 +49,10 @@ if (watch) {
         if (path == lastFile && lastChange + 10 > Date.now()) return;
         lastChange = Date.now();
         lastFile = path;
-    
-        console.log(path, 'has', event + 'ed');
-        utils.parse(path)
+
+        console.log(path, 'has changed');
+        utils.parse(dir, arg0, path, true)
     });
 } else {
-    utils.parse(arg0)
+    utils.parse(dir, arg0, '')
 }
