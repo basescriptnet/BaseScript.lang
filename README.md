@@ -33,6 +33,12 @@ YouTube: [BaseScript Channel](https://www.youtube.com/channel/UCmNoL3N13lRHbcGYT
 
 ## Getting started
 
+> Install via npm
+
+```sh
+npm i basescript.js -g
+```
+
 > At any directory use
 
 ```sh
@@ -421,6 +427,15 @@ while isTrue {
 // or
 while (isTrue):
     print true
+```
+
+## strict mode
+
+> Declaration
+
+```javascript
+'use strict'
+// learn more at https://www.w3schools.com/js/js_strict.asp
 ```
 
 ## Even more is coming soon!

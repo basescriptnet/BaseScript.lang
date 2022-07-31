@@ -22,7 +22,8 @@ allowed_keywords ->
     | "Number" {% id %}
     | "JSON" {% id %}
 
-convert -> value __ "as" __ convert_type {% v => {
+convert -> prefixExp __ "as" __ convert_type {% (v, l, reject) => {
+    //if (v[0] && !v[6] || !v[0] && v[6]) return reject
     return {
         type: 'convert',
         value: v[0],
@@ -30,7 +31,7 @@ convert -> value __ "as" __ convert_type {% v => {
     }
 } %}
 
-convert_type -> ("JSON" | "String" | "Number" | "Boolean" | "Object" | "Float" | "Int") {% v => v[0][0] %}
+convert_type -> ("JSON" | "String" | "Number" | "Boolean" | "Object" | "Float" | "Int" | "Array") {% v => v[0][0] %}
     # ! removed for now
 	#| "Array" "[" convert_type "]" {% v => {
 	#	return {
@@ -73,12 +74,14 @@ boolean -> (%boolean | "!" _ value) {% boolean %}
 string -> string_concat {% id %}
 	# | string _ "[" _ number _ ":" ":":? _ number _ "]" {% string.slice %}
 	| number "px" {% string.px %}
-    | "typeof" __ prefixExp {% v => ({
-		type: 'typeof',
-		value: v[2],
-        line: v[0].line,
-        col: v[0].col
-	}) %}
+    #| "typeof" __ prefixExp {% v => {
+    #    return {
+    #        type: 'typeof',
+    #        value: v[2],
+    #        line: v[0].line,
+    #        col: v[0].col
+    #    }
+	#} %}
 	| "typeof" _ "(" _ value _ ")" {% v => ({
 		type: 'typeof',
 		value: v[4],
@@ -98,12 +101,12 @@ number -> %number {% number.float %}
         line: v[0].line,
         col: v[0].col
 	}) %}
-    | "sizeof" __ prefixExp {% v => ({
-		type: 'sizeof',
-		value: v[2],
-        line: v[0].line,
-        col: v[0].col
-	}) %}
+    #| "sizeof" __ prefixExp {% v => ({
+	#	type: 'sizeof',
+	#	value: v[2],
+    #    line: v[0].line,
+    #    col: v[0].col
+	#}) %}
     | "sizeof" _ "(" _ value _ ")" {% v => ({
 		type: 'sizeof',
 		value: v[4],

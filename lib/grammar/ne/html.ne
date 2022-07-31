@@ -1,5 +1,5 @@
 # html
-html -> "{" "{" _ value _ "}" "}" {% html.value_to_string %}
+html -> "#" "{" _ value _ "}" {% html.value_to_string %}
     | opening_tag (_ html_content {% v => v[1] %}):* _ closing_tag {% html.with_content %}
 	| "<" identifier ("#" identifier):? ("." identifier):* "/" ">" {% html.self_closing_tag %}
 	#| "@text" __ value {% html.value_to_string %}
@@ -17,7 +17,7 @@ html_content -> html_string {% v => ({
         value: v[0],
         additions: v[1]
     }) %}
-	| _ html {% v => v[1] %}
+	| html {% v => v[0] %}
 
 html_string -> string {% v => {
 	// debugger

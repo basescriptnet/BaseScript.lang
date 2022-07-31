@@ -34,8 +34,22 @@ EOL -> [\n]:+ {% v => 'EOL' %}
 
 #EOL_statement_terminator -> [^\w\d\+\-\*\/%\.]:+
 # Not breaking space
-_nbsp -> [ \t]:* {% v => '' %}
+_nbsp -> ([ ] | [\t]):* {% (v, l, reject) => {
+    if (v[0].length) {
+        if (/\n/g.test(v[0][0])) {
+            return reject
+        }
+    }
+    return {type: 'nbsp', value: ''}
+} %}
 
-__nbsp -> [ \t]:+ {% v => '' %}
+__nbsp -> ([ ] | [\t]):+ {% (v, l, reject) => {
+    if (v[0].length) {
+        if (/\n/g.test(v[0][0])) {
+            return reject
+        }
+    }
+    return {type: 'nbsp', value: ' '}
+} %}
 
 ### END whitespace ###

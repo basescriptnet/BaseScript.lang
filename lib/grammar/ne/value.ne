@@ -50,6 +50,7 @@ _value ->
 	# | annonymous_function {% id %}
 
 prefixExp -> Var {% id %}
+	| regexp {% id %}
 	| function_call {% id %}
     | parenthesized {% id %}
     | allowed_keywords {% id %}
@@ -59,15 +60,17 @@ prefixExp -> Var {% id %}
 	| number {% id %}
 	| object {% id %}
 	| boolean {% id %}
-    | "+" _ prefixExp {% v => ({
-        type: 'number',
-        value: v[2]
-    }) %}
-	| regexp {% id %}
+    #| "+" _ prefixExp {% v => ({
+    #    type: 'number',
+    #    value: v[2]
+    #}) %}
 	| annonymous_function {% id %}
 	| html {% id %}
 
-parenthesized -> "(" _ value _ ")" {% v => ({
-    type: 'expression_with_parenthesis',
-    value: v[2]
-}) %}
+parenthesized -> "(" _ value _ ")" {% (v, l, reject) => {
+    //if (v[2].type == 'convert') return reject;
+    return {
+        type: 'expression_with_parenthesis',
+        value: v[2]
+    }
+} %}

@@ -1,4 +1,8 @@
-print 1
-print 2
-print 3
-print 4
+let div = <div>
+    <ul>#{
+        [1 through 5].map(
+            def (i):=> <li>#{i}</li>
+        )
+    }</ul>
+</div>
+WRITE div
