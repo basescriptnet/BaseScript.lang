@@ -1,2 +1,1 @@
-\a = def:=> def:=>[]
-print a()()
+let a = 10

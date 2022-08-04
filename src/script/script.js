@@ -450,13 +450,4 @@ const PI = 3.141592653589793,
 
 // your code below this line
 
-var a = (function() {
-
-    const args = Array.from(arguments || []);
-    return (function() {
-
-        const args = Array.from(arguments || []);
-        return [];
-    });
-});
-console.log(a()());
+var a = 10;

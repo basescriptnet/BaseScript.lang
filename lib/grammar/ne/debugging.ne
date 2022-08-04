@@ -14,4 +14,7 @@ debugging -> ("LOG" | "print") debugging_body {% v => ({
 	value: v[1]
 }) %}
 debugging_body -> __ value {% v => v[1] %}
-    | _ "(" _ value _ ")" {% v => v[3] %}
+    | _nbsp arguments {% v => ({
+        type: 'arguments',
+        value: v[1]
+    }) %}
