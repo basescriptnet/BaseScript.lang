@@ -24,12 +24,16 @@ YouTube: [BaseScript Channel](https://www.youtube.com/channel/UCmNoL3N13lRHbcGYT
  - [Ternar operator](#ternar-operator)
  - [Numbers](#numbers)
  - [BigInts](#bigint)
+ - [Statement block scope](#Statement-block-scope)
  - [LOG, print, WRITE and ERROR keywords](#log-print-write-and-error-keywords)
  - [Conditions](#conditions)
  - [if else statements](#if-else-statements)
+ - [Functions](#functions)
+ - [Custom types](#custom-types)
  - [Debugger](#debugger)
  - [try|catch|finally statement](#trycatchfinally-statement)
  - [Switch cases](#switch-cases)
+ - [Strict mode](#strict-mode)
 
 ## Getting started
 
@@ -244,6 +248,23 @@ sizeof(value)
 // floating point numbers are not allowed
 ```
 
+## Statement block scope
+
+> Example with if block
+
+```javascript
+if value {
+    ...statements
+}
+if value BEGIN
+    ...statements
+END
+if value do
+    statement
+if value:
+    statement
+```
+
 ## LOG, print, WRITE and ERROR keywords
 
 #### ***Note: optional parenthesis are accepted***
@@ -346,6 +367,70 @@ if (!isAdmin) {
     console.log("You don't have access");
 }
 ```
+## Functions
+
+> Declaration
+
+```javascript
+function a () {
+    // ...statements
+    return value
+}
+// if no arguments are carried,
+// no parenthesis are required
+function a {
+    // ...statements
+    return value
+}
+// same as
+def a () {
+    // ...statements
+    return value
+}
+// or
+def a {
+    // ...statements
+    return value
+}
+```
+
+> Shortcut for return
+
+```javascript
+return value
+// same as
+=> value
+function add(a, b):=> a + b
+```
+
+> Typed arguments and args constant
+
+### NOTE: every function contains **args** constant, which is an array representation of **arguments** object
+
+```javascript
+// this ensures that a and b are integers
+// anything else will throw an error
+function add(Int a, Int b) {
+    return a + b
+}
+// only strings are allowed
+function say(String text) {
+    WRITE text
+}
+```
+
+## Custom types
+
+> Declaration
+
+```javascript
+type NotEmptyArray (Array value) {
+    if value.length !== 0: => true
+}
+```
+
+> Notes: type name must start with uppercase letter<br>
+> Exactly one argument is required
 
 ## Debugger
 

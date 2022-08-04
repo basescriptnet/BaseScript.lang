@@ -1,13 +1,19 @@
 # expressions
 expression ->
-    expression _ ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ prefixExp {% v => ({
-		type: 'expression',
-		value: [v[0], assign(v[2][0], {value: v[2][0].value+'='}), v[4]]
-	}) %}
-	| expression _ ("**" | "*" | "+" | "-" | "/" | "%") _ prefixExp {% v => ({
-		type: 'expression',
-		value: [v[0], v[2][0], v[4]]
-	}) %}
+    expression _nbsp ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ prefixExp {% (v, l, reject) => {
+        //if (v[0].type == 'annonymous_function') return reject;
+        return ({
+            type: 'expression',
+            value: [v[0], assign(v[2][0], {value: v[2][0].value+'='}), v[4]]
+        })
+    } %}
+	| expression _nbsp ("**" | "*" | "+" | "-" | "/" | "%") _ prefixExp {% (v, l, reject) => {
+        if (v[0].type == 'annonymous_function') return reject;
+        return ({
+            type: 'expression',
+            value: [v[0], v[2][0], v[4]]
+        })
+    } %}
     | prefixExp {% id %}
     # ! removed for now
 	#| "(" _ expression _ ")" (_ arguments):? {% v => ({
@@ -20,7 +26,6 @@ expression ->
 	#| array_interactions {% id %}
     # ! removed for now
 	#| "THAT" {% v => ({type: 'USE', line: v[0].line, col: v[0].col}) %}
-    # ! removed for now
 	| convert {% id %}
 
 value -> condition {% id %}
@@ -49,10 +54,11 @@ _value ->
     | ternary {% id %}
 	# | annonymous_function {% id %}
 
-prefixExp -> Var {% id %}
-	| regexp {% id %}
+prefixExp -> parenthesized {% id %}
+    | Var {% id %}
+	| annonymous_function {% id %}
 	| function_call {% id %}
-    | parenthesized {% id %}
+	| regexp {% id %}
     | allowed_keywords {% id %}
 	| array {% id %}
 	| string {% id %}
@@ -64,8 +70,12 @@ prefixExp -> Var {% id %}
     #    type: 'number',
     #    value: v[2]
     #}) %}
-	| annonymous_function {% id %}
-	| html {% id %}
+	| html {% (v, l, reject) => {
+        if (!HTML_ALLOWED) {
+            throw new ReferenceError('HTML syntax is not imported. Use #include <HTML> first.')
+        }
+        return v[0];
+    } %}
 
 parenthesized -> "(" _ value _ ")" {% (v, l, reject) => {
     //if (v[2].type == 'convert') return reject;

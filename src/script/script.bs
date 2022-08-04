@@ -1,8 +1,2 @@
-let div = <div>
-    <ul>#{
-        [1 through 5].map(
-            def (i):=> <li>#{i}</li>
-        )
-    }</ul>
-</div>
-WRITE div
+\a = def:=> def:=>[]
+print a()()

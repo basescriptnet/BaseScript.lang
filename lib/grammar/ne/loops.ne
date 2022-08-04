@@ -44,9 +44,9 @@ for_block -> "for" _ "(" _ identifier __ ("in" | "of") __ value _ ")" statements
 		value: v[15],
 	});
 } %}
-# ! This doesn't work properly
-# ? Throws an error on "{" sing
-#	| "for" __ (var_assign | var_assign_list) _ ";" _ statement_condition _ ";" _ value_reassign statements_block {%  v => {
+# ! This doesn't work properly, but I decided not to work on it
+# ? #fixed, used to throw error -> Throws an error on "{" sing
+#	| "for" __ (var_assign | var_assign_list) _ ";" _ statement_condition _ ";" _ for_loop_changes statements_block {%  v => {
 #	return assign(v[0], {
 #		type: 'for_loop',
 #		condition: v[6],
@@ -64,3 +64,6 @@ for_block -> "for" _ "(" _ identifier __ ("in" | "of") __ value _ ")" statements
 #		value: v[16],
 #	});
 #} %}
+
+for_loop_changes -> value_reassign {% statement.value_reassign %}
+	| value {% statement.value %}

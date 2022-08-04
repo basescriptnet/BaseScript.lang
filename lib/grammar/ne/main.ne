@@ -7,22 +7,25 @@ process -> decorated_statements _ (";" _):? {% (v, l, reject) => {
     return v[0];
 } %}
 
-includes -> "#include" _ "<" identifier ">" EOL {% v => ({
-	type: 'built_in_include',
-	value: v[3].value,
-    line: v[0].line,
-    col: v[0].col
-}) %}
+includes -> _ "#include" _ "<" (identifier | keyword) ">" {% v => {
+    if (v[4][0].value == 'HTML') HTML_ALLOWED = true;
+    return {
+        type: 'built_in_include',
+        value: v[4][0].value,
+        line: v[1].line,
+        col: v[1].col
+    }
+} %}
 
 # ? removed _ at the end. Works fine
-decorated_statements -> _ %decorator EOL includes:* statements {% v => ({
+decorated_statements -> _ %decorator includes:* statements {% v => ({
 	type: 'decorator',
 	line: v[1].line,
 	col: v[1].col,
 	offset: v[1].offset,
 	decorator: v[1].value,
-	includes: v[3],
-	value: v[4],
+	includes: v[2],
+	value: v[3],
 }) %}
 	| includes:* statements {% v => ({
 		type: 'decorator',
@@ -83,15 +86,11 @@ statement -> blocks {% id %}
 	| ("break" | "continue") {% statement.break_continue %}
 	#| "echo" __ value EOL {% statement.echo %}
 	#| %eval __ value EOL {% statement.eval %}
-	#| "@import" __ value EOL {% statement.import %}
+	#| "import" __ value {% statement.import %}
 	#| "@include" __ string EOL {% statement.include %}
 	| var_assign {% id %}
 	| value_reassign {% statement.value_reassign %}
 	| value {% statement.value %}
-    #| Exp EOL {% id %}
-    # ! needs to be moved to values
-	# | (value {% statement.value %} | value_reassign {% statement.value_reassign %} | var_assign {% id %}) EOL {% id %}
-	#| ";" {% id %}
 
 blocks ->
 	if_block {% id %}

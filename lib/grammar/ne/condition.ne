@@ -30,7 +30,7 @@ condition -> condition __ ("and" | "or" | "&&" | "||") __ _value {% v => {
 |
 condition _ comparision_operators _value {% v => {
     return {
-        type: 'condition',
+        type: 'value',
         left: v[0],
         right: v[3],
         value: v[2].value,
