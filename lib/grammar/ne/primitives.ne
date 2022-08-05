@@ -67,7 +67,7 @@ regexp_flags -> [gmi] {% regexp.flag %}
 myNull -> "null" {% Null %}
 
 # booleans
-boolean -> (%boolean | "!" _ value) {% boolean %}
+boolean -> (%boolean) {% boolean %}
 	# | condition {% condition.value %}
 
 # strings

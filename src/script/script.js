@@ -450,4 +450,5 @@ const PI = 3.141592653589793,
 
 // your code below this line
 
-var a = 10;
+a = 10;
+local.get("a").f();

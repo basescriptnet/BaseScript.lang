@@ -32,6 +32,9 @@ value -> condition {% id %}
     #| _value {% id %}
 _value ->
 	expression {% id %}
+    | "!" _ prefixExp {% v => {
+        return {type: 'boolean_reversed', value: v[2] }
+    } %}
 	| ("new" | "await" | "yield") __ prefixExp {% v => {
 		return assign(v[0][0], {
 			type: v[0][0].text,

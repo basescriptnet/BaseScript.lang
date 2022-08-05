@@ -15,11 +15,14 @@ Var -> identifier {% id %}
         value: v[4]
         //identifier: v[0].value
 	}) %}
-	| prefixExp _ "." _ (%keyword | identifier) {% v => ({
-        type: 'dot_retraction_v2',
-        from: v[0],
-        value: v[4][0],
-    }) %}
+	| prefixExp _ "." _ (%keyword | identifier) {% (v, l, reject) => {
+        if (v[0].type == 'annonymous_function') return reject
+        return {
+            type: 'dot_retraction_v2',
+            from: v[0],
+            value: v[4][0],
+        }
+    } %}
 
 # ! removed all for now, code above already replaces this
 #object_retraction -> single_retraction (_ "." _ right_side_retraction {% v => v[3] %}):+ {% v => ({

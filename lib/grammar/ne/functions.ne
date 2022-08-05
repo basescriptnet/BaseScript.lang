@@ -20,11 +20,12 @@ annonymous_function ->
 
 #iife -> "(" _ annonymous_function _ ")" _ arguments {% functions.iife %}
 
-return -> "return" __ value {% returns.value %}
+return -> "return" __nbsp value {% returns.value %}
     | "return" {% returns.empty %}
-    | "=>" _ value {% returns.value %}
+    | "=>" _nbsp value {% returns.value %}
 
-function_call -> prefixExp _nbsp arguments {% v => {
+function_call -> prefixExp _nbsp arguments {% (v, l, reject) => {
+    if (v[0].type == 'annonymous_function') return reject
 	return ({
 		type: 'function_call',
 		value: v[0],

@@ -48,14 +48,18 @@ if_block -> "if" statement_condition statements_block {% v => {
 # 	});
 # } %}
 
-else_block -> "else" __ statement {% v => {
-	return Object.assign(v[0], {
+else_block -> "else" __ statement {% (v, l, reject) => {
+    //if (v[2].type == 'if') return reject;
+    if (v[2].type == 'statement_value' && v[2].value.type == 'value' && v[2].value.value.type == 'object') return reject
+    //if (v[2].type == 'value' && v[2].value.type == 'object') debugger
+	return assign(v[0], {
 		type: 'else',
 		value: [v[2]],
 	});
 } %}
 	| "else" statements_block {% v => {
-	return Object.assign(v[0], {
+    //if (v[1].type == 'value' && v[1].value.type == 'object') debugger
+    return assign(v[0], {
 		type: 'else',
 		value: v[1],
 	});
