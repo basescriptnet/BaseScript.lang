@@ -615,11 +615,14 @@ const scope0 = scopes.global();
 // your code below this line
 
 (function() {
-    for (let _i3ffeb34c of scope0.get("range")(0, 10)) {
+    scope0.set("i", 0, true);
+    for (let _i3f54c42d of scope0.get("range")(0, 10)) {
         const scope1 = scopes.new(1, scope0);
-        scope1.set("j", _i3ffeb34c, true);
-        console.log(scope1.get("j"));
-        scope1.scopes.pop();
+        scope1.set("j", _i3f54c42d, true);
+        scope1.set("i", 1, true);
+        console.log(scope1.get("i"));
+        scope0.scopes.pop();
         scopes.scopes.pop();
     }
+    console.log(scope0.get("i"));
 })();

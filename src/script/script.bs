@@ -1,8 +1,11 @@
 // let, const not supported yet
 // scopes.pop()
-
-for j of range(0, 10):
-    print j
+i = 0
+for j of range(0, 10) {
+    let i = 1
+    print i
+}
+print i
 
 //i = 0
 //print i
