@@ -1,20 +1,92 @@
 # expressions
+
+base -> parenthesized {% id %}
+	#| annonymous_function {% id %}
+	#| regexp {% id %}
+    | Var {% id %}
+	| function_call {% id %}
+    | allowed_keywords {% id %}
+	| string {% id %}
+	| bigInt {% id %}
+	| number {% id %}
+	#| array {% id %}
+    | convert {% id %}
+	#| object {% id %}
+	#| boolean {% id %}
+
+sum -> sum _nbsp ("+" | "-") _ product {% v => ({
+    type: 'sum',
+    left: v[0],
+    right: v[4],
+    operator: v[2][0].value,
+    value: (function (v) {
+        if (v[0].type == 'number' && v[4].type == 'number') {
+            if (v[2][0].value == '+') {
+                return v[0].value + v[4].value
+            } else {
+                return v[0].value - v[4].value
+            }
+        } else {
+            return null
+        }
+    })(v)
+}) %}
+    | product {% id %}
+
+product -> product _nbsp ("*" | "/") _ unary {% v => ({
+    type: 'product',
+    left: v[0],
+    right: v[4],
+    operator: v[2][0].value,
+    value: (function (v) {
+        if (v[0].type == 'number' && v[4].type == 'number') {
+            if (v[2][0].value == '*') {
+                return v[0].value * v[4].value
+            } else {
+                return v[0].value / v[4].value
+            }
+        } else {
+            return null
+        }
+    })(v)
+}) %}
+    | unary {% id %}
+
+unary -> "-" _nbsp unary {% v => {
+    return {
+    type: 'number_negative',
+    value: v[2],
+}} %}
+    | pow {% id %}
+
+pow -> pow _nbsp ("**" | "%") _ unary {% v => ({
+    type: 'pow',
+    left: v[0],
+    right: v[4],
+    operator: v[2][0].value,
+    value: (function (v) {
+        if (v[0].type == 'number' && v[4].type == 'number') {
+            if (v[2][0].value == '**') {
+                return v[0].value ** v[4].value
+            } else {
+                return v[0].value % v[4].value
+            }
+        } else {
+            return null
+        }
+    })(v)
+}) %}
+    | base {% id %}
+
 expression ->
-    expression _nbsp ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ prefixExp {% (v, l, reject) => {
-        //if (v[0].type == 'annonymous_function') return reject;
-        return ({
-            type: 'expression',
-            value: [v[0], assign(v[2][0], {value: v[2][0].value+'='}), v[4]]
-        })
-    } %}
-	| expression _nbsp ("**" | "*" | "+" | "-" | "/" | "%") _ prefixExp {% (v, l, reject) => {
-        if (v[0].type == 'annonymous_function') return reject;
-        return ({
-            type: 'expression',
-            value: [v[0], v[2][0], v[4]]
-        })
-    } %}
-    | prefixExp {% id %}
+	#| expression _nbsp ("**" | "*" | "+" | "-" | "/" | "%") _ prefixExp {% (v, l, reject) => {
+    #    if (v[0].type == 'annonymous_function') return reject;
+    #    return ({
+    #        type: 'expression',
+    #        value: [v[0], v[2][0], v[4]]
+    #    })
+    #} %}
+    prefixExp {% id %}
     # ! removed for now
 	#| "(" _ expression _ ")" (_ arguments):? {% v => ({
 	#	type: 'expression_with_parenthesis',
@@ -26,13 +98,13 @@ expression ->
 	#| array_interactions {% id %}
     # ! removed for now
 	#| "THAT" {% v => ({type: 'USE', line: v[0].line, col: v[0].col}) %}
-	| convert {% id %}
 
 value -> condition {% id %}
     #| _value {% id %}
 _value ->
 	expression {% id %}
-    | "!" _ prefixExp {% v => {
+    |
+    "!" _ prefixExp {% v => {
         return {type: 'boolean_reversed', value: v[2] }
     } %}
 	| ("new" | "await" | "yield") __ prefixExp {% v => {
@@ -55,18 +127,28 @@ _value ->
 	# | ("this" | identifier | html | object | number | function_call) _ "." _ ("this" | identifier | html | object | number | function_call) {% v => v %}
 	| myNull {% id %}
     | ternary {% id %}
+    | "private" statements_block {% v => {
+        return {
+            type: 'private',
+            value: v[1],
+            line: v[0].line,
+            col: v[0].col
+        }
+    } %}
 	# | annonymous_function {% id %}
 
-prefixExp -> parenthesized {% id %}
-    | Var {% id %}
+prefixExp ->
+#parenthesized {% id %}
+    sum {% id %}
+    #| Var {% id %}
 	| annonymous_function {% id %}
-	| function_call {% id %}
+	#| function_call {% id %}
 	| regexp {% id %}
-    | allowed_keywords {% id %}
+    #| allowed_keywords {% id %}
 	| array {% id %}
-	| string {% id %}
-	| bigInt {% id %}
-	| number {% id %}
+	#| string {% id %}
+	#| bigInt {% id %}
+	#| number {% id %}
 	| object {% id %}
 	| boolean {% id %}
     #| "+" _ prefixExp {% v => ({

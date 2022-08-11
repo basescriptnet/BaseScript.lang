@@ -1,2 +1,16 @@
-a = 10
-a.f()
+// let, const not supported yet
+// scopes.pop()
+
+for j of range(0, 10):
+    print j
+
+//i = 0
+//print i
+//while i < 10 {
+//    i += 3
+//    print i
+//}
+//i += 5
+//print i
+//i += 5 + 5
+//print i

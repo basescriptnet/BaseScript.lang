@@ -16,15 +16,12 @@ annonymous_function ->
     #        async: v[0] ? true : false
     #    }
     #} %}
-	#| iife {% id %}
-
-#iife -> "(" _ annonymous_function _ ")" _ arguments {% functions.iife %}
 
 return -> "return" __nbsp value {% returns.value %}
     | "return" {% returns.empty %}
     | "=>" _nbsp value {% returns.value %}
 
-function_call -> prefixExp _nbsp arguments {% (v, l, reject) => {
+function_call -> _base _nbsp arguments {% (v, l, reject) => {
     if (v[0].type == 'annonymous_function') return reject
 	return ({
 		type: 'function_call',

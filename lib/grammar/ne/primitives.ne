@@ -49,6 +49,7 @@ convert_type -> ("JSON" | "String" | "Number" | "Boolean" | "Object" | "Float" |
 # objects
 pair -> ("async" __):? key _ arguments_with_types statements_block {% object.es6_key_value %}
 	| key _ ":" _ value {% v => [v[0], v[4]] %}
+    | key {% v => [v[0], v[0]] %}
 
 key -> string {% id %}
 	| identifier {% id %}
@@ -94,13 +95,13 @@ string -> string_concat {% id %}
 bigInt -> %bigInt {% number.bigInt %}
 
 number -> %number {% number.float %}
-	| ("-") _ value {% v => ({
-		type: 'additive',
-		sign: v[0][0].value,
-		value: v[2],
-        line: v[0].line,
-        col: v[0].col
-	}) %}
+	#| ("-") _ value {% v => ({
+	#	type: 'additive',
+	#	sign: v[0][0].value,
+	#	value: v[2],
+    #    line: v[0].line,
+    #    col: v[0].col
+	#}) %}
     #| "sizeof" __ prefixExp {% v => ({
 	#	type: 'sizeof',
 	#	value: v[2],

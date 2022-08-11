@@ -15,3 +15,6 @@ fs.watch(path_applied, { recursive: true }, function(event, path) {
     console.log(path, 'has', 'changed');
     utils.parse(path)
 });
+
+console.log('Watching', path_applied);
+console.log('Press Ctrl+C to exit');

@@ -1,21 +1,27 @@
-Var -> identifier {% id %}
+_base -> base {% id %}
+    | array {% id %}
+	| regexp {% id %}
+    | object {% id %}
+
+Var ->
     # ! needs more tests, though works
-	| prefixExp _nbsp "[" _ "]" {% v => ({
+	_base _nbsp "[" _ "]" {% v => ({
         type: 'item_retraction_last',
         //arguments: v[7] ? v[7][1] : null,
         from: v[0],
         //value: v[4]
         //identifier: v[0].value
 	}) %}
-	| prefixExp _ "[" (_ value) _ ":" (_ value):? (_ ":" _ value):? _ "]" {% array.slice %}
-	| prefixExp _nbsp "[" _ value _ "]" {% v => ({
+	| _base _ "[" (_ value) _ ":" (_ value):? (_ ":" _ value):? _ "]" {% array.slice %}
+	| _base _nbsp "[" _ value _ "]" {% v => ({
         type: 'item_retraction',
         //arguments: v[7] ? v[7][1] : null,
         from: v[0],
         value: v[4]
         //identifier: v[0].value
 	}) %}
-	| prefixExp _ "." _ (%keyword | identifier) {% (v, l, reject) => {
+	|
+    _base _ "." _ (%keyword | identifier) {% (v, l, reject) => {
         if (v[0].type == 'annonymous_function') return reject
         return {
             type: 'dot_retraction_v2',
@@ -23,6 +29,7 @@ Var -> identifier {% id %}
             value: v[4][0],
         }
     } %}
+    | identifier {% id %}
 
 # ! removed all for now, code above already replaces this
 #object_retraction -> single_retraction (_ "." _ right_side_retraction {% v => v[3] %}):+ {% v => ({

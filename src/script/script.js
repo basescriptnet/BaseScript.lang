@@ -1,22 +1,5 @@
 if (!globalThis) { globalThis = window || global || this || {}; } try { globalThis.require = require; } catch (err) { globalThis.require = () => undefined; } 
-                class Variable {
-    constructor(name, type, value) {
-        this.name = name;
-        this.type = type;
-        this.value = value;
-    }
-    set valueOf(value) {
-        if (this.type == 'let' || this.type == '\\') return this.value;
-        if (BS.getType(value) != this.type) {
-            throw new TypeError(`Assignment of a different type to variable "${this.name}" rather than "${this.type}" is prohibited.`)
-        }
-        this.value = value;
-    }
-    get valueOf () {
-        return this.value;
-    }
-}
-globalThis.BS = {
+                globalThis.BS = {
     var(name, type, value) {
         if (BS.getType(value) !== type) throw new TypeError(`Variable "${name}" is required to be "${type}", got "${BS.getType(value)}" instead.`)
         return new Variable(name, type, value);
@@ -139,7 +122,7 @@ globalThis.BS = {
             return typeof value === 'object' && value !== null;
         },
     },
-    checkArgType(type, value, line, col) {
+    checkArgType(type, name, value, line, col) {
         if (type in this.customTypes) {
             let r = BS.customTypes[type];
             if (r && r(value))
@@ -150,7 +133,7 @@ globalThis.BS = {
             if (r && r(value))
                 return true;
         }
-        throw new TypeError(`Argument "${value}" is not type of "${type}" at line ${line}, col ${col}.`);
+        throw new TypeError(`Argument "${name}" is not type of "${type}" at line ${line}, col ${col}.`);
     },
     convert(value, type, outerType) {
         let t = this.getType(value);
@@ -176,7 +159,7 @@ globalThis.BS = {
                     if (t == 'undefined') return 'undefined';
                     else return value.toString();
                 case 'Array':
-                    if (t == 'undefined' || 'null') return []
+                    if (t == 'undefined' || t == 'null') return []
                     if (t == 'html') return Object.values(this.DOMtoJSON(value));
                     if (t == 'object') return Object.values(value);
                     if (t == 'string') {
@@ -321,48 +304,58 @@ globalThis.BS = {
         return 0;
     },
     storage: [],
-    // require('./ast_to_js.js')// || function () {console.warn('@eval is not supported yet in browsers.')}
+    defineProperty(prototype, propertyName, valueCallback, options) {
+        options = options || {
+            writable: true,
+            enumerable: false,
+            configurable: true
+        }
+        options.value = valueCallback;
+        Object.defineProperty(prototype, propertyName, options);
+    },
+    Object(object) {
+        //let o = Object.create(null);
+        //return Object.assign(o, object);
+        return object
+    },
+    Array(array) {
+        if (array instanceof Array === false) array = BS.convert(array, 'Array');
+        let o = Object.create(null);
+        let proto = ['push', 'pop', 'shift', 'unshift', 'slice', 'splice',
+            'join', 'sort', 'map', 'forEach', 'indexOf', 'at', 'includes'];
+        for (let i in proto) {
+            BS.defineProperty(o, proto[i], function () {
+                return Array.prototype[proto[i]].apply(this, arguments);
+            });
+        }
+        array.__proto__ = o;
+        return array;
+    },
+    // require('./ast_to_js.js')//
+    //|| function () { console.warn('@eval is not supported yet in browsers.') }
 };
+
 const BS = globalThis.BS;
 
 const TypedArray = Reflect.getPrototypeOf(Int8Array);
 for (const C of [Array, String, TypedArray]) {
-    Object.defineProperty(C.prototype, "at", {
-        value: function at(n) {
-            // ToInteger() abstract op
-            n = Math.trunc(n) || 0;
-            // Allow negative indexing from the end
-            if (n < 0) n += this.length;
-            // OOB access is guaranteed to return undefined
-            if (n < 0 || n >= this.length) return undefined;
-            // Otherwise, this is just normal property access
-            return this[n];
-        },
-        writable: true,
-        enumerable: false,
-        configurable: true
+    BS.defineProperty(C.prototype, "at", function at(n) {
+        // ToInteger() abstract op
+        n = Math.trunc(n) || 0;
+        // Allow negative indexing from the end
+        if (n < 0) n += this.length;
+        // OOB access is guaranteed to return undefined
+        if (n < 0 || n >= this.length) return undefined;
+        // Otherwise, this is just normal property access
+        return this[n];
     });
-    Object.defineProperty(C.prototype, "last", {
-        value: function last() {
-            return this[this.length-1];
-        },
-        writable: true,
-        enumerable: false,
-        configurable: true
+    BS.defineProperty(C.prototype, "last", function last() {
+        return this[this.length-1];
     });
 }
-Object.defineProperty(String.prototype, "noBreaks", {
-    value: function noBreaks() {
-        return this.replace(/\r\n?/g, '');
-    },
-    writable: true,
-    enumerable: false,
-    configurable: true
+BS.defineProperty(String.prototype, "noBreaks", function noBreaks() {
+    return this.replace(/\r\n?/g, '');
 });
-// ! causes issues in for in loop
-//Array.prototype.last = function () {
-//    return this[this.length - 1];
-//};
 function list (amount, callback) {
     let array = [];
     for (let i = 0; i < amount; i++) {
@@ -375,41 +368,7 @@ function list (amount, callback) {
     }
     return array;
 }
-function range(start, stop, include = false){
-    if (stop === undefined) {
-        stop = start;
-        start = 0;
-    }
-    if (include) {
-        if (start > stop) {
-            stop--;
-        } else {
-            stop++
-        }
-    }
-    let i = start; // start
-    return { // iterator protocol
-        [Symbol.iterator]:() => { // @@iterator
-            return { // object with the next function
-                next () {
-                    while(i !== stop){
-                        let temp = i;
-                        if (start > stop) i--;
-                        else i++;
-                        return {
-                            value: temp,
-                            done: false,
-                        }
-                    }
-                    return {done: true}
-                }
-            }
-        }
-    }
-}
-const PI = 3.141592653589793,
-    E = 2.718281828459045,
-    log = (...args) => console.log(...args),
+const log = (...args) => console.log(...args),
     sqrt = Math.sqrt.bind(Math),
     Time = {
         get now () {
@@ -446,9 +405,221 @@ const PI = 3.141592653589793,
         }
         return Object.keys(object).length;
     };
+function clear_function_value(v) {
+    if (typeof v !== 'function') return v;
+    let r = Object.create(null);
+    r.name = v.name;
+    r.value = v.value.toString()
+    r.type = 'function';
+    return r;
+}
+function get_clear_value(v) {
+    if (typeof v != 'object' || v === null) {
+        return v;
+        //return clear_function_value(v);
+    }
+    let r = Object.create(null);
+    for (let i in v) {
+        if (v[i] instanceof Variable) {
+            if (v[i].name == 'this') continue;
+            //if (typeof v[i].value == 'function') {
+            //    r[`function ${i}`] = clear_function_value(v[i]);
+            //}
+            else r[i] = v[i].value
+        }
+        else if (BS.getType(v[i]) == 'Object') {
+            r[i] = get_clear_value(v[i]);
+        }
+        else {
+            r[i] = v[i]
+        }
+    }
+    return r;
+}
+function get_item(object, property) {
+    if (object === null || object === void 0) {
+        throw new TypeError(`Cannot read properties of "null"`)
+    }
+    let v = object[property];
+    if (v !== void 0) {
+        if (v instanceof Variable) {
+            return v.value;
+        }
+        if (BS.getType(v) == 'Object') {
+            return get_clear_value(v);
+        }
+        return v
+    }
+    return null
+}
+const range = function range(start, stop, include = false) {
+    if (stop === undefined) {
+        stop = start;
+        start = 0;
+    }
+    if (include) {
+        if (start > stop) {
+            stop--;
+        } else {
+            stop++
+        }
+    }
+    let i = start; // start
+    return { // iterator protocol
+        [Symbol.iterator]: () => { // @@iterator
+            return { // object with the next function
+                next() {
+                    while (i !== stop) {
+                        let temp = i;
+                        if (start > stop) i--;
+                        else i++;
+                        return {
+                            value: temp,
+                            done: false,
+                        }
+                    }
+                    return { done: true }
+                }
+            }
+        }
+    }
+};
+const isNaN = function isNaN(number) {
+    return typeof number == 'number' && number !== number;
+}
+class Variable {
+    constructor(name, type, value, constant = false, ignoreError = false) {
+        this.name = name;
+        this.type = type;
+        this.value = value === void 0 ? null : value;
+        this.constant = constant;
+        this.ignoreError = ignoreError
+    }
+    set realValue(value) {
+        if (this.constant && !this.ignoreError) {
+            throw new Error(`Attempt to change value of constant "${this.name}"`)
+        } else if (this.constant) {
+            return this.value;
+        }
+        if (this.type == 'let' || this.type == '\\'
+            //|| this.type === null
+        ) return this.value;
+        if (this.type !== null && BS.getType(value) != this.type) {
+            throw new TypeError(`Assignment of a different type to variable "${this.name}" rather than "${this.type}" is prohibited`)
+        }
+        this.value = value;
+    }
+    get realValue () {
+        return get_clear_value(this.value);
+    }
+}
+
+class Scopes {
+    constructor() {
+        this.scopes = []
+    }
+    new(level, parent = this) {
+        let scope = new Scope(level, parent);
+        parent.scopes.push(scope);
+        return scope
+    }
+    global() {
+        let scope0 = this.new(0);
+        scope0.set('PI', Math.PI, true, true);
+        scope0.set('E', Math.E, true, true);
+        scope0.set('range', range, true, true);
+        scope0.set('this', scope0.variables, true, true, true);
+        scope0.set('Infinity', Infinity, true, true);
+        scope0.set('NaN', NaN, true, true);
+        scope0.set('isNaN', isNaN, true, true);
+        scope0.set('empty', function empty(object) {
+            if (['array', 'string', 'object'].includes(typeof object)) {
+                return Object.keys(object).length == 0;
+            }
+            throw new TypeError(`Unexpected type of argument for "empty" function. "array", "string" or "object" was expected`)
+        }, true, true);
+        scope0.set('round', function round(object) {
+            return Math.round(object)
+        }, true, true);
+        scope0.set('ceil', function ceil(object) {
+            return Math.ceil(object)
+        }, true, true);
+        scope0.set('floor', function floor(object) {
+            return Math.floor(object)
+        }, true, true);
+        //scope0.set('Object', BS.Object.bind(BS, true, true);
+        //scope0.set('Array', BS.Array.bind(BS, true, true);
+        return scope0;
+    }
+}
+
+class Scope {
+    constructor(level, parent) {
+        this.level = level
+        this.variables = {}
+        this.scopes = []
+        this.parent = parent
+    }
+    get(propertyName) {
+        if (this.variables[propertyName] !== void 0) {
+            return this.variables[propertyName].realValue
+        }
+        let level = this.level
+        if (level == 0 || !this.parent) {
+            console.warn(`Variable "${propertyName}" has never been declared. "null" is returned instead.`)
+            return null
+            //throw ReferenceError(`Variable "${propertyName}" has never been declared.`)
+        }
+        return this.parent.get(propertyName);
+    }
+    getScope(propertyName) {
+        if (this.variables[propertyName]) {
+            return this
+        }
+        let level = this.level
+        if (level == 0 || !this.parent) return null
+        return this.parent.getScope(propertyName)
+    }
+    set(propertyName, value, local = false, constant = false, ignoreError = false) {
+        if (local || constant) {
+            let v = this.variables[propertyName]
+            if (!v) {
+                this.variables[propertyName] = new Variable(propertyName, null, value, constant, ignoreError)
+            }
+            else {
+                this.variables[propertyName].realValue = value;
+            }
+            return null;
+        }
+        let scope = this.getScope(propertyName)
+        // not found
+        if (scope == null) {
+            scope = this;
+        }
+        let v = scope.variables[propertyName]
+        if (!v) {
+            scope.variables[propertyName] = new Variable(propertyName, null, value, constant)
+        }
+        else {
+            scope.variables[propertyName].realValue = value;
+        }
+        return null;
+    }
+}
+
+const scopes = new Scopes();
+const scope0 = scopes.global();
+
 
 
 // your code below this line
 
-a = 10;
-local.get("a").f();
+(function() {
+    for (let _i3ffeb34c of scope0.get("range")(0, 10)) {
+        const scope1 = scopes.new(1, scope0);
+        scope1.set("j", _i3ffeb34c, true);
+        console.log(scope1.get("j"));
+        scope1.scopes.pop();
+        scopes.scopes.pop();
+    }
+})();
