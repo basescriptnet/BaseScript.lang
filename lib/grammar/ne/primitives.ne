@@ -27,7 +27,9 @@ convert -> prefixExp __ "as" __ convert_type {% (v, l, reject) => {
     return {
         type: 'convert',
         value: v[0],
-        convert_type: v[4]
+        convert_type: v[4],
+        line: v[0].line,
+        col: v[0].col
     }
 } %}
 
@@ -74,7 +76,7 @@ boolean -> (%boolean) {% boolean %}
 # strings
 string -> string_concat {% id %}
 	# | string _ "[" _ number _ ":" ":":? _ number _ "]" {% string.slice %}
-	| number "px" {% string.px %}
+	#| number "px" {% string.px %}
     #| "typeof" __ prefixExp {% v => {
     #    return {
     #        type: 'typeof',

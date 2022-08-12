@@ -9,6 +9,8 @@ Var ->
         type: 'item_retraction_last',
         //arguments: v[7] ? v[7][1] : null,
         from: v[0],
+        line: v[0].line,
+        col: v[0].col
         //value: v[4]
         //identifier: v[0].value
 	}) %}
@@ -17,7 +19,9 @@ Var ->
         type: 'item_retraction',
         //arguments: v[7] ? v[7][1] : null,
         from: v[0],
-        value: v[4]
+        value: v[4],
+        line: v[0].line,
+        col: v[0].col
         //identifier: v[0].value
 	}) %}
 	|
@@ -27,6 +31,8 @@ Var ->
             type: 'dot_retraction_v2',
             from: v[0],
             value: v[4][0],
+            line: v[0].line,
+            col: v[0].col
         }
     } %}
     | identifier {% id %}

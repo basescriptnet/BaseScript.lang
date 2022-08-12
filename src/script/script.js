@@ -419,6 +419,9 @@ function get_clear_value(v) {
         //return clear_function_value(v);
     }
     let r = Object.create(null);
+    if (BS.getType(v) == 'Array') {
+        r = BS.Array([]);
+    }
     for (let i in v) {
         if (v[i] instanceof Variable) {
             if (v[i].name == 'this') continue;
@@ -436,7 +439,7 @@ function get_clear_value(v) {
     }
     return r;
 }
-function get_item(object, property) {
+function $get(object, property, unclearValue) {
     if (object === null || object === void 0) {
         throw new TypeError(`Cannot read properties of "null"`)
     }
@@ -446,11 +449,41 @@ function get_item(object, property) {
             return v.value;
         }
         if (BS.getType(v) == 'Object') {
+            if (unclearValue) return v;
             return get_clear_value(v);
         }
         return v
     }
     return null
+}
+
+function $delete(object, property, scope) {
+    if (scope) {
+        scope.delete(object);
+        return
+    }
+    if (object === null || object === void 0) {
+        throw new TypeError(`Cannot read or delete properties of "null"`)
+    }
+    let type = BS.getType(object);
+    if (type != 'Array' && type != 'Object') {
+        throw new TypeError(`Attempt to change immutable objects"`)
+    }
+    if (type == 'Array' || type == 'String') {
+        if (isNaN(parseInt(property))) {
+            return object
+        }
+        //if (type == 'String') {
+        //    return object.slice(0, parseInt(property)) + object.slice(parseInt(property) + 1)
+        //}
+        try {
+            object.splice(property, 1);
+        } finally {
+            return object;
+        }
+    }
+    delete object[property];
+    return object
 }
 const range = function range(start, stop, include = false) {
     if (stop === undefined) {
@@ -524,32 +557,32 @@ class Scopes {
         return scope
     }
     global() {
-        let scope0 = this.new(0);
-        scope0.set('PI', Math.PI, true, true);
-        scope0.set('E', Math.E, true, true);
-        scope0.set('range', range, true, true);
-        scope0.set('this', scope0.variables, true, true, true);
-        scope0.set('Infinity', Infinity, true, true);
-        scope0.set('NaN', NaN, true, true);
-        scope0.set('isNaN', isNaN, true, true);
-        scope0.set('empty', function empty(object) {
+        let $0 = this.new(0);
+        $0.set('PI', Math.PI, true, true);
+        $0.set('E', Math.E, true, true);
+        $0.set('range', range, true, true);
+        $0.set('this', $0.variables, true, true, true);
+        $0.set('Infinity', Infinity, true, true);
+        $0.set('NaN', NaN, true, true);
+        $0.set('isNaN', isNaN, true, true);
+        $0.set('empty', function empty(object) {
             if (['array', 'string', 'object'].includes(typeof object)) {
                 return Object.keys(object).length == 0;
             }
             throw new TypeError(`Unexpected type of argument for "empty" function. "array", "string" or "object" was expected`)
         }, true, true);
-        scope0.set('round', function round(object) {
+        $0.set('round', function round(object) {
             return Math.round(object)
         }, true, true);
-        scope0.set('ceil', function ceil(object) {
+        $0.set('ceil', function ceil(object) {
             return Math.ceil(object)
         }, true, true);
-        scope0.set('floor', function floor(object) {
+        $0.set('floor', function floor(object) {
             return Math.floor(object)
         }, true, true);
-        //scope0.set('Object', BS.Object.bind(BS, true, true);
-        //scope0.set('Array', BS.Array.bind(BS, true, true);
-        return scope0;
+        //$0.set('Object', BS.Object.bind(BS, true, true);
+        //$0.set('Array', BS.Array.bind(BS, true, true);
+        return $0;
     }
 }
 
@@ -560,8 +593,9 @@ class Scope {
         this.scopes = []
         this.parent = parent
     }
-    get(propertyName) {
+    get(propertyName, unclearValue) {
         if (this.variables[propertyName] !== void 0) {
+            if (unclearValue) return this.variables[propertyName].value;
             return this.variables[propertyName].realValue
         }
         let level = this.level
@@ -605,24 +639,44 @@ class Scope {
         }
         return null;
     }
+    delete(propertyName) {
+        if (typeof propertyName != 'string') {
+            for (let i in this.variables) {
+                if (this.variables[i].value == propertyName) {
+                    delete this.variables[i]
+                    return true;
+                }
+            }
+        }
+        if (this.variables[propertyName]) {
+            delete this.variables[propertyName]
+            return true;
+        }
+        let level = this.level
+        if (level == 0 || !this.parent) return false
+        return this.parent.delete(propertyName)
+    }
 }
 
 const scopes = new Scopes();
-const scope0 = scopes.global();
+const $0 = scopes.global();
 
 
 
 // your code below this line
 
 (function() {
-    scope0.set("i", 0, true);
-    for (let _i3f54c42d of scope0.get("range")(0, 10)) {
-        const scope1 = scopes.new(1, scope0);
-        scope1.set("j", _i3f54c42d, true);
-        scope1.set("i", 1, true);
-        console.log(scope1.get("i"));
-        scope0.scopes.pop();
-        scopes.scopes.pop();
-    }
-    console.log(scope0.get("i"));
+    $0.set("obj", BS.Object({
+        a: BS.Object({
+            c: 10,
+            d: BS.Object({
+                e: 20,
+                f: BS.Array([0, 1, 2]),
+                g: "hello",
+            }),
+        }),
+        b: 20,
+    }));
+    $delete($0.get("obj", 1), null, $0);
+    console.log($0.get("obj"));
 })();

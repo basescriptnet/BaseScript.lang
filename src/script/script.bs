@@ -1,11 +1,26 @@
-// let, const not supported yet
-// scopes.pop()
-i = 0
-for j of range(0, 10) {
-    let i = 1
-    print i
+//i = 0
+//i = 1
+//for j of range(0, 10) {
+//    let i = 1
+//    print j
+//}
+obj = {
+    a: {
+        c: 10,
+        d: {
+            e: 20,
+            f: [0, 1, 2],
+            g: 'hello'
+        }
+    },
+    b: 20
 }
-print i
+//arr = [0, 1, 2, 3]
+//delete arr[2]
+//delete(obj.a.d, '0')
+free(obj)
+//print arr
+print obj
 
 //i = 0
 //print i

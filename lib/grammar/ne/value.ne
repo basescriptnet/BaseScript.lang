@@ -29,7 +29,9 @@ sum -> sum _nbsp ("+" | "-") _ product {% v => ({
         } else {
             return null
         }
-    })(v)
+    })(v),
+    line: v[0].line,
+    col: v[0].col
 }) %}
     | product {% id %}
 
@@ -48,7 +50,9 @@ product -> product _nbsp ("*" | "/") _ unary {% v => ({
         } else {
             return null
         }
-    })(v)
+    })(v),
+    line: v[0].line,
+    col: v[0].col
 }) %}
     | unary {% id %}
 
@@ -56,6 +60,8 @@ unary -> "-" _nbsp unary {% v => {
     return {
     type: 'number_negative',
     value: v[2],
+    line: v[0].line,
+    col: v[0].col
 }} %}
     | pow {% id %}
 
@@ -74,7 +80,9 @@ pow -> pow _nbsp ("**" | "%") _ unary {% v => ({
         } else {
             return null
         }
-    })(v)
+    })(v),
+    line: v[0].line,
+    col: v[0].col
 }) %}
     | base {% id %}
 
@@ -105,7 +113,12 @@ _value ->
 	expression {% id %}
     |
     "!" _ prefixExp {% v => {
-        return {type: 'boolean_reversed', value: v[2] }
+        return {
+            type: 'boolean_reversed',
+            value: v[2],
+            line: v[0].line,
+            col: v[0].col
+        }
     } %}
 	| ("new" | "await" | "yield") __ prefixExp {% v => {
 		return assign(v[0][0], {
@@ -117,7 +130,9 @@ _value ->
 	| prefixExp __ "instanceof" __ prefixExp {% v => ({
 		type: 'instanceof',
 		left: v[0],
-		value: v[4]
+		value: v[4],
+        line: v[0].line,
+        col: v[0].col
 	}) %}
 	# |
 	#| condition {% id %}
@@ -166,6 +181,8 @@ parenthesized -> "(" _ value _ ")" {% (v, l, reject) => {
     //if (v[2].type == 'convert') return reject;
     return {
         type: 'expression_with_parenthesis',
-        value: v[2]
+        value: v[2],
+        line: v[0].line,
+        col: v[0].col
     }
 } %}

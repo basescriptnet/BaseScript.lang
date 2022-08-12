@@ -34,7 +34,9 @@ var_assign -> ("let" __ | "const" __ | "\\") var_assign_list {% vars.assign %}
 		value: {
 			type: 'var_assign_group',
 			identifier: v[6],
-			value: [v[2][0]]
+			value: [v[2][0]],
+            line: v[2][0].line,
+            col: v[2][0].col
 		},
 		offset: v[0].offset
 	}

@@ -80,7 +80,9 @@ statement -> blocks {% id %}
 	#| "DELETE" __ "THAT" EOL {% v => ({
 	#	type: 'DELETE',
 	#}) %}
-	| "delete" __ value {% statement.delete %}
+	#| "delete" __ value {% statement.delete %}
+    | "delete" arguments {% statement.delete %}
+    | "free" arguments {% statement.free %}
 	| return {% id %}
 	| "throw" __ value {% statement.throw %}
 	| ("break" | "continue") {% statement.break_continue %}
