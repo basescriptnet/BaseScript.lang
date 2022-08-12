@@ -83,6 +83,7 @@ statement -> blocks {% id %}
 	#| "delete" __ value {% statement.delete %}
     | "delete" arguments {% statement.delete %}
     | "free" arguments {% statement.free %}
+    #| "sleep" arguments {% statement.sleep %}
 	| return {% id %}
 	| "throw" __ value {% statement.throw %}
 	| ("break" | "continue") {% statement.break_continue %}

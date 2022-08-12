@@ -456,12 +456,17 @@ function $get(object, property, unclearValue) {
     }
     return null
 }
-
-function $delete(object, property, scope) {
+function $free(object, scope) {
     if (scope) {
+        if (!object) {
+            throw new TypeError(`Attempt to delete non-existing variable`)
+        }
         scope.delete(object);
         return
     }
+}
+
+function $delete(object, property) {
     if (object === null || object === void 0) {
         throw new TypeError(`Cannot read or delete properties of "null"`)
     }
@@ -667,16 +672,18 @@ const $0 = scopes.global();
 
 (function() {
     $0.set("obj", BS.Object({
-        a: BS.Object({
-            c: 10,
-            d: BS.Object({
-                e: 20,
-                f: BS.Array([0, 1, 2]),
-                g: "hello",
-            }),
-        }),
-        b: 20,
+        a: 10,
     }));
-    $delete($0.get("obj", 1), null, $0);
+    console.log($0.get("obj"));
+    for (let _i2b428dcb of $0.get("range")(0, 10)) {
+        const $1 = scopes.new(1, $0);
+        $1.set("i", _i2b428dcb, true);
+        console.log($1.get("i"));
+        $0.scopes.pop();
+        scopes.scopes.pop();
+    }
+    $delete($0.get("obj", 1), "a");
+    console.log($0.get("obj"));
+    $free($0.get("obj", 1), $0);
     console.log($0.get("obj"));
 })();

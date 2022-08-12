@@ -5,7 +5,7 @@ const BS = require('../lib/compiler');
 const beautify = require('js-beautify').js;
 const path_applied = process.cwd();
 
-let writeFile = (path, fileName, content) => {
+let writeFile = (path, fileName, content, builtins = false) => {
     // TODO change the line below
     let ast = '';
     try {
@@ -32,24 +32,27 @@ let writeFile = (path, fileName, content) => {
             var contentJS = ast_to_js(ast);
             //contentJS = contentJS.slice(0, contentJS.length-6)
             contentJS += '\n';
-            let built_in = fs.readFileSync(`${__dirname}/../lib/compiler/built_in/js/built_in.js`, { encoding: 'utf-8' });
-            built_in += fs.readFileSync(`${__dirname}/../lib/compiler/built_in/js/scope.js`, { encoding: 'utf-8'});
-
+            let built_in = '';
+            let prepend = '';
+            if (builtins) {
+                built_in = fs.readFileSync(`${__dirname}/../lib/compiler/built_in/js/built_in.js`, { encoding: 'utf-8'});
+                built_in += fs.readFileSync(`${__dirname}/../lib/compiler/built_in/js/scope.js`, { encoding: 'utf-8' });
+                prepend = `if (!globalThis) {
+                    globalThis = window || global || this || {};
+                }
+                try {
+                    globalThis.require = require;
+                } catch (err) {
+                    globalThis.require = () => undefined;
+                }
+                `.replace(/\s*\/\/.*/g, '\n').replace(/\s+/g, ' ');
+            }
             // fs.mkdirSync('./build/');
             // let p = fileName.split('\\').slice(0, -1);
             // console.log(p.join('/'))
             // if (!fs.existsSync(p.join('/'))) {
             //     fs.mkdirSync(`${path_applied}/${p.join('/')}`, {recursive: true})
             // }
-            let prepend = `if (!globalThis) {
-                globalThis = window || global || this || {};
-            }
-            try {
-                globalThis.require = require;
-            } catch (err) {
-                globalThis.require = () => undefined;
-            }
-            `.replace(/\s*\/\/.*/g, '\n').replace(/\s+/g, ' ');
             // console.log(path_join(path_applied, `/${fileName}.js`).replace(/\\/g, '/'))
             fs.writeFileSync(
                 `${(`${fileName}.js`).replace(/\\/g, '/')}`,
@@ -113,7 +116,7 @@ module.exports = {
                 //console.log(']')
                 return;
             }
-            writeFile(path, fileName, content);
+            writeFile(path, fileName, content, true);
             console.log('Compiled in ' + (Date.now() - date) + 'ms');
         } catch (err) {
             console.warn(new Error('Can\'t compile. Unexpected input.'));
