@@ -1,11 +1,2 @@
-obj = {
-    a: 10
-}
-print obj
-for i of range(0, 10) {
-    print i
-}
-delete(obj, 'a')
-print obj
-free(obj)
-print obj
+function add(Int a = 0, b = 4):=> a+b
+

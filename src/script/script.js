@@ -490,6 +490,14 @@ function $delete(object, property) {
     delete object[property];
     return object
 }
+function $return(localScope, globalScope, value) {
+    $clearScope(localScope, globalScope);
+    return value;
+}
+function $clearScope(localScope, globalScope) {
+    localScope.scopes.pop();
+    globalScope.scopes.pop();
+}
 const range = function range(start, stop, include = false) {
     if (stop === undefined) {
         stop = start;
@@ -671,19 +679,15 @@ const $0 = scopes.global();
 // your code below this line
 
 (function() {
-    $0.set("obj", BS.Object({
-        a: 10,
-    }));
-    console.log($0.get("obj"));
-    for (let _i2b428dcb of $0.get("range")(0, 10)) {
+    $0.set("add", function add(a = 0, b = 4) {
         const $1 = scopes.new(1, $0);
-        $1.set("i", _i2b428dcb, true);
-        console.log($1.get("i"));
-        $0.scopes.pop();
-        scopes.scopes.pop();
-    }
-    $delete($0.get("obj", 1), "a");
-    console.log($0.get("obj"));
-    $free($0.get("obj", 1), $0);
-    console.log($0.get("obj"));
+        $1.set("this", $1.variables, true, true, true);
+        BS.checkArgType("Int", "a", 0, 1, 13);
+        $1.set("a", a);
+        $1.set("b", b);
+        $1.set("args", Array.from(arguments));
+        return $return($1, scopes, $1.get("a") + $1.get("b"));
+        $clearScope($0, scopes);
+        return null;
+    });
 })();

@@ -42,8 +42,15 @@ argument_identifier_and_value -> argument_type identifier (_ "=" _ value):? {% v
 	argument_type: v[0] ? v[0][0] : 'none',
 	can_be_null: v[0] ? v[0][1] : false,
 	identifier: v[1],
-	value: v[2] ? v[2][3] : undefined
+	value: v[2] ? v[2][3] : null
 }) %}
+#| identifier (_ "=" _ value):? {% v => ({
+#	type: 'argument_identifier_and_value',
+#	argument_type: 'none',
+#	can_be_null: true,
+#	identifier: v[0],
+#	value: v[1] ? v[1][3] : null
+#}) %}
 
 argument_type -> ((%keyword | identifier) "?":? __):? {% v => {
     if (!v[0]) return;
@@ -53,6 +60,7 @@ argument_type -> ((%keyword | identifier) "?":? __):? {% v => {
     }
 	let n = v[0].value[0];
 	if (n.toUpperCase() != n) {
+        return;
 		throw new SyntaxError(`Argument type must be capitalized at line ${v[0].line}, col ${v[0].col}.`);
     }
 	return [v[0], v[1]];
