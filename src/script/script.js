@@ -533,6 +533,30 @@ const range = function range(start, stop, include = false) {
 const isNaN = function isNaN(number) {
     return typeof number == 'number' && number !== number;
 }
+
+const BUILT_IN_VALUES = {
+    PI: Math.PI,
+    E: Math.E,
+    Infinity: Infinity,
+    NaN: NaN,
+    range: range, // function
+    isNaN: isNaN, // function
+    empty: function empty(object) {
+        if (['array', 'string', 'object'].includes(typeof object)) {
+            return Object.keys(object).length == 0;
+        }
+        throw new TypeError(`Unexpected type of argument for "empty" function. "array", "string" or "object" was expected`)
+    },
+    round: function round(object) {
+        return Math.round(object)
+    },
+    ceil: function ceil(object) {
+        return Math.ceil(object)
+    },
+    floor: function floor(object) {
+        return Math.floor(object)
+    }
+};
 class Variable {
     constructor(name, type, value, constant = false, ignoreError = false) {
         this.name = name;
@@ -571,30 +595,10 @@ class Scopes {
     }
     global() {
         let $0 = this.new(0);
-        $0.set('PI', Math.PI, true, true);
-        $0.set('E', Math.E, true, true);
-        $0.set('range', range, true, true);
         $0.set('this', $0.variables, true, true, true);
-        $0.set('Infinity', Infinity, true, true);
-        $0.set('NaN', NaN, true, true);
-        $0.set('isNaN', isNaN, true, true);
-        $0.set('empty', function empty(object) {
-            if (['array', 'string', 'object'].includes(typeof object)) {
-                return Object.keys(object).length == 0;
-            }
-            throw new TypeError(`Unexpected type of argument for "empty" function. "array", "string" or "object" was expected`)
-        }, true, true);
-        $0.set('round', function round(object) {
-            return Math.round(object)
-        }, true, true);
-        $0.set('ceil', function ceil(object) {
-            return Math.ceil(object)
-        }, true, true);
-        $0.set('floor', function floor(object) {
-            return Math.floor(object)
-        }, true, true);
-        //$0.set('Object', BS.Object.bind(BS, true, true);
-        //$0.set('Array', BS.Array.bind(BS, true, true);
+        $0.init(BUILT_IN_VALUES)
+        //$0.init('Object', BS.Object.bind(BS);
+        //$0.init('Array', BS.Array.bind(BS);
         return $0;
     }
 }
@@ -626,6 +630,11 @@ class Scope {
         let level = this.level
         if (level == 0 || !this.parent) return null
         return this.parent.getScope(propertyName)
+    }
+    init(values) {
+        for (let i in values) {
+            this.set(i, values[i], true, true);
+        }
     }
     set(propertyName, value, local = false, constant = false, ignoreError = false) {
         if (local || constant) {
@@ -679,15 +688,5 @@ const $0 = scopes.global();
 // your code below this line
 
 (function() {
-    $0.set("add", function add(a = 0, b = 4) {
-        const $1 = scopes.new(1, $0);
-        $1.set("this", $1.variables, true, true, true);
-        BS.checkArgType("Int", "a", 0, 1, 13);
-        $1.set("a", a);
-        $1.set("b", b);
-        $1.set("args", Array.from(arguments));
-        return $return($1, scopes, $1.get("a") + $1.get("b"));
-        $clearScope($0, scopes);
-        return null;
-    });
+
 })();

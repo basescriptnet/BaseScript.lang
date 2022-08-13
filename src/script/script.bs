@@ -1,2 +1,0 @@
-function add(Int a = 0, b = 4):=> a+b
-

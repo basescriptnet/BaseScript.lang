@@ -44,13 +44,6 @@ argument_identifier_and_value -> argument_type identifier (_ "=" _ value):? {% v
 	identifier: v[1],
 	value: v[2] ? v[2][3] : null
 }) %}
-#| identifier (_ "=" _ value):? {% v => ({
-#	type: 'argument_identifier_and_value',
-#	argument_type: 'none',
-#	can_be_null: true,
-#	identifier: v[0],
-#	value: v[1] ? v[1][3] : null
-#}) %}
 
 argument_type -> ((%keyword | identifier) "?":? __):? {% v => {
     if (!v[0]) return;
