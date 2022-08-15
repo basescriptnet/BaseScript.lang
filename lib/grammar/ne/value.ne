@@ -5,7 +5,7 @@ base -> parenthesized {% id %}
 	#| regexp {% id %}
     | Var {% id %}
 	| function_call {% id %}
-    | allowed_keywords {% id %}
+    #| allowed_keywords {% id %}
 	| string {% id %}
 	| bigInt {% id %}
 	| number {% id %}

@@ -498,6 +498,41 @@ function $clearScope(localScope, globalScope) {
     localScope.scopes.pop();
     globalScope.scopes.pop();
 }
+
+function $add(value1, value2) {
+    if (Array.isArray(value1) && Array.isArray(value2)) {
+        return [].concat(value1, value2);
+    }
+    if (Array.isArray(value1)) {
+        return [].concat(value1, value2)
+    }
+    if (BS.getType(value1) == 'Object' && BS.getType(value2) == 'Object') {
+        return Object.assign({}, value1, value2);
+    }
+    if (value1 === null || value2 === null) {
+        throw  new TypeError('"null" cannot be used as in math expressions');
+    }
+    if (typeof value1 === 'string') {
+        if (typeof value2 !== 'string') {
+            throw new TypeError('String was expected for concatination, got "'+BS.getType(value2)+'" insetead');
+        }
+        return value1 + value2;
+    }
+    if (typeof value1 === 'number') {
+        if (typeof value2 !== 'number') {
+            throw new TypeError('Number was expected for math expression, got "'+BS.getType(value2)+'" insetead');
+        }
+        return value1 + value2;
+    }
+    return value1 + value2;
+}
+
+function $update(obj, property, value) {
+    if (!property in obj) {
+        throw new Error(`Property "${property}" is not found`)
+    }
+    return obj[property] = value;
+}
 const range = function range(start, stop, include = false) {
     if (stop === undefined) {
         stop = start;
@@ -580,7 +615,11 @@ class Variable {
         this.value = value;
     }
     get realValue () {
-        return get_clear_value(this.value);
+        //return get_clear_value(this.value);
+        return this.value
+    }
+    update(operator, value) {
+        this.value = eval('this.value' + operator + 'value');
     }
 }
 
@@ -591,12 +630,12 @@ class Scopes {
     new(level, parent = this) {
         let scope = new Scope(level, parent);
         parent.scopes.push(scope);
-        return scope
+        return scope;
     }
     global() {
         let $0 = this.new(0);
         $0.set('this', $0.variables, true, true, true);
-        $0.init(BUILT_IN_VALUES)
+        $0.init(BUILT_IN_VALUES);
         //$0.init('Object', BS.Object.bind(BS);
         //$0.init('Array', BS.Array.bind(BS);
         return $0;
@@ -688,5 +727,36 @@ const $0 = scopes.global();
 // your code below this line
 
 (function() {
-
+    $0.set("num", 10);
+    $0.set("array1", BS.Array([0, 1, 2]));
+    $0.set("array2", BS.Array([3, 4, 5, $0.get("num")]));
+    $update($0.get("array2", 1), BS.last($0.get("array2", 1).length), $add($0.get("array2")[BS.last($0.get("array2").length)], 6));
+    console.log(get_clear_value($0.get("array2")));
+    $0.set("arr", BS.Array([BS.Array([0, 1]), 10]));
+    $0.set("b", BS.Array([0, 1, 2]));
+    $0.set("arr", BS.Object({
+        a: (function() {
+            const $1 = scopes.new(1, $0);
+            $1.set("this", $1.variables, true, true, true);
+            $1.set("args", Array.from(arguments));
+            return $return($1, scopes, $1.get("b"));
+            $clearScope($0, scopes);
+            return null;
+        }),
+    }));
+    $update($0.get("arr", 1).a(), BS.last($0.get("arr", 1).a().length), $add($0.get("arr").a()[BS.last($0.get("arr").a().length)], 5));
+    $update($0.get("b", 1), BS.last($0.get("b", 1).length), $add($0.get("b")[BS.last($0.get("b").length)], 10));
+    console.log(get_clear_value($0.get("b")));
+    console.log(get_clear_value($add($0.get("array1"), $0.get("array2"))));
+    $0.set("obj1", BS.Object({
+        a: 1,
+        b: 2,
+    }));
+    $0.set("obj2", BS.Object({
+        c: 3,
+        d: 4,
+    }));
+    console.log(get_clear_value($add($0.get("obj1"), $0.get("obj2"))));
+    null;
+    $0.get("Infinity");
 })();
