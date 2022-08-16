@@ -120,12 +120,12 @@ _value ->
             col: v[0].col
         }
     } %}
-	| ("new" | "await" | "yield") __ prefixExp {% v => {
-		return assign(v[0][0], {
-			type: v[0][0].text,
-			value: v[2]
-		})
-	} %}
+	#| ("new" | "await" | "yield") __ prefixExp {% v => {
+	#	return assign(v[0][0], {
+	#		type: v[0][0].text,
+	#		value: v[2]
+	#	})
+	#} %}
 	#| "@text" __ value {% html.value_to_string %}
 	| prefixExp __ "instanceof" __ prefixExp {% v => ({
 		type: 'instanceof',

@@ -13,9 +13,25 @@ scopes.append_to_global({
         expect_number(value, 'cos');
         return Math.cos(value);
     },
+    tan: function (value) {
+        expect_number(value, 'tan');
+        return Math.tan(value);
+    },
+    atan: function (value) {
+        expect_number(value, 'atan');
+        return Math.atan(value);
+    },
+    atan2: function (value) {
+        expect_number(value, 'atan2');
+        return Math.atan2(value);
+    },
     abs: function (value) {
         expect_number(value, 'abs');
         return Math.abs(value);
+    },
+    sqrt: function (value) {
+        expect_number(value, 'sqrt');
+        return Math.sqrt(value);
     },
     PI: Math.PI,
     E: Math.E,

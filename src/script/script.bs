@@ -1,2 +1,10 @@
-#include <Math>
-print min(10, 5, 5)
+#include <random>
+//print random.int(0, 100)
+//print random.getRandom()
+//print random.string(10)
+print random.int(0)
+//print Random.int(0, 100)
+//print Random.int(0, 100)
+//print Random.int(0, 100)
+//print Random.int(0, 100)
+//print Random.int(0, 100)
