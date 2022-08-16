@@ -1,20 +1,2 @@
-num = 10
-array1 = [0, 1, 2]
-array2 = [3, 4, 5, num]
-array2[] += 6
-print array2
-arr = [[0, 1], 10]
-b = [0, 1, 2]
-arr = {a: def: => b}
-arr.a()[] += 5
-b[] += 10
-print b
-print array1 + array2 // outputs [0, 1, 2, 3, 4, 5, 16] ✅
-obj1 = {a: 1, b: 2}
-obj2 = {c: 3, d: 4}
-print obj1 + obj2
-//print 1 + 'hello' // error
-null
-Infinity
-//undefined
-//print this
+#include <Math>
+print min(10, 5, 5)

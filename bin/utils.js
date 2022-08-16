@@ -3,9 +3,11 @@ const fs = require('fs');
 const path_join = require('path').join;
 const BS = require('../lib/compiler');
 const beautify = require('js-beautify').js;
+//const minify = require('@node-minify/core');
+//const uglifyjs = require('@node-minify/uglify-js');
 const path_applied = process.cwd();
 
-let writeFile = (path, fileName, content, builtins = false) => {
+let writeFile = async (path, fileName, content, builtins = false) => {
     // TODO change the line below
     let ast = '';
     try {
@@ -35,8 +37,19 @@ let writeFile = (path, fileName, content, builtins = false) => {
             let built_in = '';
             let prepend = '';
             if (builtins) {
-                built_in = fs.readFileSync(`${__dirname}/../lib/compiler/built_in/js/built_in.js`, { encoding: 'utf-8'});
+                built_in = fs.readFileSync(`${__dirname}/../lib/compiler/built_in/js/built_in.js`, { encoding: 'utf-8' });
                 built_in += fs.readFileSync(`${__dirname}/../lib/compiler/built_in/js/scope.js`, { encoding: 'utf-8' });
+                built_in = built_in
+                    //.replace(/;\s+(if|else\s|for|while|do|return(\s)|try|catch)\s*/g, ';$1$2')
+                    //.replace(/else\s+if/g, 'else if')
+                    .replace(/[ \t]*\/\/[^\n]*/g, ' ')
+                    .replace(/(\r\n?)+\s*/g, ' ')
+                    .replace(/[ \t]+/g, ' ')
+                    .replace(/\{\s+/g, '{')
+                    .replace(/\s+\}/g, '}')
+                    //.replace(/,\s+/g, ', ')
+                    .replace(/(?:\s*)(==?=?|<=?|>=?|!==?|\|\||&&)(?:\s*)/g, '$1');
+                built_in += '\n';
                 prepend = `if (!globalThis) {
                     globalThis = window || global || this || {};
                 }
@@ -46,6 +59,12 @@ let writeFile = (path, fileName, content, builtins = false) => {
                     globalThis.require = () => undefined;
                 }
                 `.replace(/\s*\/\/.*/g, '\n').replace(/\s+/g, ' ');
+                //await (async function () {
+                //    built_in = await minify({
+                //        content: built_in,
+                //        compressor: uglifyjs
+                //    });
+                //})();
             }
             // fs.mkdirSync('./build/');
             // let p = fileName.split('\\').slice(0, -1);
@@ -57,19 +76,8 @@ let writeFile = (path, fileName, content, builtins = false) => {
             fs.writeFileSync(
                 `${(`${fileName}.js`).replace(/\\/g, '/')}`,
                 //`${path_join(path_applied, `/${fileName}.js`).replace(/\\/g, '/')}`,
-                `${prepend}
-                ${built_in
-                    //.replace(/;\s+(if|else\s|for|while|do|return(\s)|try|catch)\s*/g, ';$1$2')
-                    //.replace(/else\s+if/g, 'else if')
-                    //.replace(/[ \t]*\/\/[^\n]*/g, ' ')
-                    //.replace(/\n+/g, '\n')
-                    //.replace(/[ \t]+/g, ' ')
-                    //.replace(/\{\s+/g, '{')
-                    //.replace(/\s+\}/g, '}')
-                    //.replace(/,\s+/g, ', ')
-                    //.replace(/(?:\s*)(==?=?|<=?|>=?|!==?|\|\||&&)(?:\s*)/g, '$1')
-                }`
-                    +`\n\n// your code below this line\n\n`
+                `${prepend}${built_in}`
+                    +`// your code below this line\n\n`
                     +`${beautify(contentJS)}`
                 // beautify(`
                 //     ${contentJS}
@@ -94,15 +102,16 @@ module.exports = {
         if (!watch) {
             //path = path_join(dir, arg0)
             path = dir
-            if (!/\.bs$/i.test(path)) {
-                console.error(new Error('Provided file doesn\'t have .bs extension'));
+            if (!/\.b(s|m)$/i.test(path)) {
+                console.error(new Error('Provided file doesn\'t have .bs or .bm extension'));
                 process.exit()
             }
         } else {
             path = path_join(dir, path)
             //console.log(path)
         }
-        let fileName = path.substr(0, path.length - ('.bs'.length));
+        let fileName = path.substr(0, path.length - 3); // '.bs'.length
+        let fileExtension = path.slice(-3);
         try {
             let content = '';
             if (!watch && fs.existsSync(`${path}`)) {
@@ -116,7 +125,11 @@ module.exports = {
                 //console.log(']')
                 return;
             }
-            writeFile(path, fileName, content, true);
+            let builtins = false;
+            if (fileExtension === '.bs') {
+                builtins = true;
+            }
+            writeFile(path, fileName, content, builtins);
             console.log('Compiled in ' + (Date.now() - date) + 'ms');
         } catch (err) {
             console.warn(new Error('Can\'t compile. Unexpected input.'));

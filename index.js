@@ -7,7 +7,7 @@ let lastFile = '';
 
 fs.watch(path_applied, { recursive: true }, function(event, path) {
     if (event != 'change') return;
-    if (!/\.bs$/i.test(path)) return;
+    if (!/\.b(s|m)$/i.test(path)) return;
     if (path == lastFile && lastChange + 10 > Date.now()) return;
     lastChange = Date.now();
     lastFile = path;
