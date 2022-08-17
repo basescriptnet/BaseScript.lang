@@ -1,10 +1,5 @@
-#include <random>
-//print random.int(0, 100)
-//print random.getRandom()
-//print random.string(10)
-print random.int(0)
-//print Random.int(0, 100)
-//print Random.int(0, 100)
-//print Random.int(0, 100)
-//print Random.int(0, 100)
-//print Random.int(0, 100)
+#include <Date>
+print Date.now
+print Date.year
+print Date.msInYear
+//print lastYear.now
