@@ -1,2 +1,5 @@
-a = 10
-a.f()
+#include <Date>
+print Date.now
+print Date.year
+print Date.msInYear
+//print lastYear.now

@@ -1,14 +1,23 @@
-atom -> number {% id %}
-    | string {% id %}
-    | myNull {% id %}
-    | "true" {% id %}
-    | "false" {% id %}
-    | parenthesized {% id %}
-    | prefixExp {% id %}
-    # ! function definition is missing
+#atom -> number {% id %}
+#    | string {% id %}
+#    | myNull {% id %}
+#    | "true" {% id %}
+#    | "false" {% id %}
+#    | parenthesized {% id %}
+#    | prefixExp {% id %}
+#    # ! function definition is missing
 
 # base line
-identifier -> %identifier {% id %}
+identifier -> %identifier {% (v, l, reject) => {
+    if (v[0].type == 'null' ||
+        ['Infinity', 'this', 'globalThis', 'NaN'
+        , 'Boolean', 'Object', 'Array', 'String', 'Number', 'JSON'
+        ].includes(v[0].value)) {
+        return reject;
+    }
+    return v[0]
+} %}
+    | allowed_keywords {% id %}
 
 allowed_keywords ->
     "Infinity" {% id %}
@@ -21,13 +30,17 @@ allowed_keywords ->
     | "String" {% id %}
     | "Number" {% id %}
     | "JSON" {% id %}
+    #| "null" {% id %}
+    #| myNull {% id %}
 
 convert -> prefixExp __ "as" __ convert_type {% (v, l, reject) => {
     //if (v[0] && !v[6] || !v[0] && v[6]) return reject
     return {
         type: 'convert',
         value: v[0],
-        convert_type: v[4]
+        convert_type: v[4],
+        line: v[0].line,
+        col: v[0].col
     }
 } %}
 
@@ -49,6 +62,7 @@ convert_type -> ("JSON" | "String" | "Number" | "Boolean" | "Object" | "Float" |
 # objects
 pair -> ("async" __):? key _ arguments_with_types statements_block {% object.es6_key_value %}
 	| key _ ":" _ value {% v => [v[0], v[4]] %}
+    | key {% v => [v[0], v[0]] %}
 
 key -> string {% id %}
 	| identifier {% id %}
@@ -73,7 +87,7 @@ boolean -> (%boolean) {% boolean %}
 # strings
 string -> string_concat {% id %}
 	# | string _ "[" _ number _ ":" ":":? _ number _ "]" {% string.slice %}
-	| number "px" {% string.px %}
+	#| number "px" {% string.px %}
     #| "typeof" __ prefixExp {% v => {
     #    return {
     #        type: 'typeof',
@@ -94,13 +108,13 @@ string -> string_concat {% id %}
 bigInt -> %bigInt {% number.bigInt %}
 
 number -> %number {% number.float %}
-	| ("-") _ value {% v => ({
-		type: 'additive',
-		sign: v[0][0].value,
-		value: v[2],
-        line: v[0].line,
-        col: v[0].col
-	}) %}
+	#| ("-") _ value {% v => ({
+	#	type: 'additive',
+	#	sign: v[0][0].value,
+	#	value: v[2],
+    #    line: v[0].line,
+    #    col: v[0].col
+	#}) %}
     #| "sizeof" __ prefixExp {% v => ({
 	#	type: 'sizeof',
 	#	value: v[2],

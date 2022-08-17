@@ -1,5 +1,7 @@
+left_assign -> Var {% id %}
+    | function_call {% id %}
 # value assignment
-value_reassign -> prefixExp _ "=" _ (value) {% v => {
+value_reassign -> left_assign _ "=" _ (value) {% v => {
 	return {
 		type: 'var_reassign',
 		identifier: v[0],
@@ -19,6 +21,7 @@ value_reassign -> prefixExp _ "=" _ (value) {% v => {
 		offset: v[0].offset
 	}
 } %}
+    | value_addition {% id %}
 
 var_assign -> ("let" __ | "const" __ | "\\") var_assign_list {% vars.assign %}
 	| "ASSIGN" _ (switch | value) _ "TO" _  identifier {% v => {
@@ -31,7 +34,9 @@ var_assign -> ("let" __ | "const" __ | "\\") var_assign_list {% vars.assign %}
 		value: {
 			type: 'var_assign_group',
 			identifier: v[6],
-			value: [v[2][0]]
+			value: [v[2][0]],
+            line: v[2][0].line,
+            col: v[2][0].col
 		},
 		offset: v[0].offset
 	}
@@ -50,10 +55,10 @@ var_reassign -> identifier _ "=" _ value {% v => {
 	}
 } %}
     | identifier {% v => ({
-			type: 'identifier',
-			value: v[0],
-            line: v[0].line,
-            col: v[0].col,
+        type: 'identifier',
+        value: v[0],
+        line: v[0].line,
+        col: v[0].col,
     }) %}
 	| "SET" _ identifier _ "TO" _ (switch | value) {% v => {
 	return {
@@ -65,3 +70,15 @@ var_reassign -> identifier _ "=" _ value {% v => {
 		offset: v[0].offset
 	}
 } %}
+
+value_addition ->
+    prefixExp _nbsp ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ sum {% (v, l, reject) => {
+        if (v[0].type == 'string' || v[0].type == 'number' || v[0].type == 'boolean' || v[0].type == 'null') {
+            throw new Error(`Unexpected assignment at line ${v[2][0].line}, col ${v[2][0].col}`)
+        }
+        // console.log(v[4])
+        return ({
+            type: 'expression_short_equation',
+            value: [v[0], assign(v[2][0], {value: v[2][0].value}), v[4]]
+        })
+    } %}

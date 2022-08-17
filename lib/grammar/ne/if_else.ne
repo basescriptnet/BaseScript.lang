@@ -1,13 +1,13 @@
 # if else
 if_block -> "if" statement_condition statements_block {% v => {
-	return Object.assign(v[0], {
+	return assign(v[0], {
 		type: 'if',
 		condition: v[1],
-		value: v[2],
+		value: v[2]
 	});
 } %}
     | "unless" statement_condition statements_block {% v => {
-	return Object.assign(v[0], {
+	return assign(v[0], {
 		type: 'if',
 		condition: v[1],
 		value: v[2],

@@ -1,2 +1,0 @@
-const sin = Math.sin.bind(Math),
-    cos = Math.cos.bind(Math)

@@ -16,15 +16,12 @@ annonymous_function ->
     #        async: v[0] ? true : false
     #    }
     #} %}
-	#| iife {% id %}
-
-#iife -> "(" _ annonymous_function _ ")" _ arguments {% functions.iife %}
 
 return -> "return" __nbsp value {% returns.value %}
     | "return" {% returns.empty %}
     | "=>" _nbsp value {% returns.value %}
 
-function_call -> prefixExp _nbsp arguments {% (v, l, reject) => {
+function_call -> _base _nbsp arguments {% (v, l, reject) => {
     if (v[0].type == 'annonymous_function') return reject
 	return ({
 		type: 'function_call',
@@ -45,7 +42,7 @@ argument_identifier_and_value -> argument_type identifier (_ "=" _ value):? {% v
 	argument_type: v[0] ? v[0][0] : 'none',
 	can_be_null: v[0] ? v[0][1] : false,
 	identifier: v[1],
-	value: v[2] ? v[2][3] : undefined
+	value: v[2] ? v[2][3] : null
 }) %}
 
 argument_type -> ((%keyword | identifier) "?":? __):? {% v => {
@@ -56,6 +53,7 @@ argument_type -> ((%keyword | identifier) "?":? __):? {% v => {
     }
 	let n = v[0].value[0];
 	if (n.toUpperCase() != n) {
+        return;
 		throw new SyntaxError(`Argument type must be capitalized at line ${v[0].line}, col ${v[0].col}.`);
     }
 	return [v[0], v[1]];

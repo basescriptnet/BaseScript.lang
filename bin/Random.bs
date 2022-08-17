@@ -1,6 +1,0 @@
-random = function (Int? min = 0, Int? max = 1) {
-    return Math.floor(Math.random() * (max - min) + min)
-}
-random.string = function (length) {
-    return '' // FIX
-}
