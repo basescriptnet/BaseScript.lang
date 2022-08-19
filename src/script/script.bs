@@ -1,17 +1,11 @@
-\num1 = 3
-\num2 = 4
-// beware. operators are set globally
-// experiment with this
-operator #* (Number left, Number right) {
-    // a**2 + b**2 = c**2
-    return sqrt(left ** 2 + right ** 2);
-}
-print num1 #* num2
-
-// safe division
-operator #/ (Number left, Number right) {
-    if isNaN(left / right): return 0
-    return left / right;
-}
-// Usually returns NaN, but if you use #/, it returns 0
-print Infinity #/ Infinity
+#include <random>
+print random.int(0, 10)
+print random.float(0, 10)
+print random.element(['a', 'b', 'c'])
+print random.element('abc')
+print random.stringFromSample('onlythisletters', 5)
+print random.string(8)
+print random.boolean()
+print random.getRandom()
+print random.shuffle(['a', 'b', 'c', 'd', 'e'])
+print random.shuffle('abcde')

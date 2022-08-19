@@ -538,30 +538,108 @@ const PI = 3.141592653589793,
         }
         return Object.keys(object).length;
     };
-
-
-// your code below this line
-
-var num1 = 3;
-var num2 = 4;
-BS.customOperators["*"] = function(left, right, required = false) {
-    BS.checkArgType("Number", "left", arguments[0] ?? null, 5, 13);
-    BS.checkArgType("Number", "right", arguments[1] ?? null, 5, 13);
-    if (required && typeof arguments[0] === void 0) {
-        throw new TypeError("Missing argument at 5:1");
+(function() {
+    function expect_array_or_string(value, name) {
+        if (!Array.isArray(value) && typeof value !== 'string') {
+            throw new TypeError(`Unexpected type of argument for "random.${name}" function. "array" or "string" was expected`);
+        } else if (value.length == 0) {
+            throw new Error(`Unexpected empty array or string for "random.${name}" function`);
+        }
+        return value;
     }
-    return sqrt(BS.sum(BS.pow(left, 2), BS.pow(right, 2)));
-};
-console.log(BS.customOperators["*"](num1, num2));
-BS.customOperators["/"] = function(left, right, required = false) {
-    BS.checkArgType("Number", "left", arguments[0] ?? null, 12, 13);
-    BS.checkArgType("Number", "right", arguments[1] ?? null, 12, 13);
-    if (required && typeof arguments[0] === void 0) {
-        throw new TypeError("Missing argument at 12:1");
+    let $this = globalThis || window || global || this;
+    $this.random = {
+        ALPHABET: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+        getRandom() {
+            return Math.random();
+        },
+        int(min, max) {
+            if (typeof min != 'number' || isNaN(min) || typeof max != 'number' || isNaN(max)) {
+                throw new TypeError(`Unexpected type of argument for "random.int" function. "number" was expected`);
+            }
+            return ~~(random.getRandom() * (max | 0 - min | 0) + min | 0);
+        },
+        intInclusive(min, max) {
+            if (typeof min != 'number' || isNaN(min) || typeof max != 'number' || isNaN(max)) {
+                throw new TypeError(`Unexpected type of argument for "random.intInclusive" function. "number" was expected`);
+            }
+            return random.int(min, max + 1);
+        },
+        float(min, max) {
+            if (typeof min != 'number' || isNaN(min) || typeof max != 'number' || isNaN(max)) {
+                throw new TypeError(`Unexpected type of argument for "random.float" function. "number" was expected`);
+            }
+            return random.getRandom() * (max - min) + min;
+        },
+        floatInclusive(min, max) {
+            if (typeof min != 'number' || isNaN(min) || typeof max != 'number' || isNaN(max)) {
+                throw new TypeError(`Unexpected type of argument for "random.floatInclusive" function. "number" was expected`);
+            }
+            return random.float(min, max + 1);
+        },
+        boolean() {
+            return random.getRandom() > 0.5;
+        },
+        element(array) {
+            expect_array_or_string(array, 'element');
+            return array[random.int(0, array.length)];
+        },
+        string(length) {
+            if (typeof length !== 'number' || isNaN(length)) {
+                throw new TypeError(`Unexpected type of argument for "random.string" function. "number" was expected`);
+            }
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += random.element(random.ALPHABET);
+            }
+            return result;
+        },
+        stringFromSample(sample, length) {
+            if (typeof sample != 'string' || sample.length == 0) {
+                throw new TypeError(`Unexpected type of argument for "random.stringFromSample" function. "string" was expected`);
+            }
+            if (typeof length !== 'number' || isNaN(length)) {
+                throw new TypeError(`Unexpected type of argument for "random.stringFromSample" function. "number" was expected`);
+            }
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += random.element(sample);
+            }
+            return result;
+        },
+        shuffle(array) {
+            expect_array_or_string(array, 'shuffle');
+            let curId = array.length;
+            let copy = [];
+            if (typeof array == 'string') {
+                copy = array.split('');
+            } else {
+                copy = array.slice();
+            }
+            while (0 !== curId) {
+                let randId = Math.floor(Math.random() * curId);
+                curId -= 1;
+                let tmp = copy[curId];
+                copy[curId] = copy[randId];
+                copy[randId] = tmp;
+            }
+            if (typeof array == 'string') {
+                return copy.join('');
+            }
+            return copy;
+        }
     }
-    if (isNaN(BS.div(left, right))) {
-        return 0;
-    }
-    return BS.div(left, right);
-};
-console.log(BS.customOperators["/"](Infinity, Infinity));
+}).call(this);
+
+// Your code below this line
+
+console.log(random.int(0, 10));
+console.log(random.float(0, 10));
+console.log(random.element(["a", "b", "c"]));
+console.log(random.element("abc"));
+console.log(random.stringFromSample("onlythisletters", 5));
+console.log(random.string(8));
+console.log(random.boolean());
+console.log(random.getRandom());
+console.log(random.shuffle(["a", "b", "c", "d", "e"]));
+console.log(random.shuffle("abcde"));

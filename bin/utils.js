@@ -65,7 +65,6 @@ let writeFile = (path, fileName, content) => {
                     //.replace(/,\s+/g, ', ')
                     //.replace(/(?:\s*)(==?=?|<=?|>=?|!==?|\|\||&&)(?:\s*)/g, '$1')
                 }`
-                    +`\n\n// your code below this line\n\n`
                     +`${beautify(contentJS)}`
                 // beautify(`
                 //     ${contentJS}
