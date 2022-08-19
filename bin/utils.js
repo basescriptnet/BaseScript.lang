@@ -4,7 +4,15 @@ const BS = require('../lib/compiler');
 const beautify = require('js-beautify').js;
 // const beautify = require('@wmhilton/beautify')
 const path_applied = process.cwd();
-
+let minify = function (code) {
+    return code.replace(/[ \t]*\/\/[^\n]*/g, ' ')
+        .replace(/(\r\n?)+\s*/g, ' ')
+        .replace(/[ \t]+/g, ' ')
+        .replace(/\{\s+/g, '{')
+        .replace(/\s+\}/g, '}')
+        //.replace(/,\s+/g, ', ')
+        .replace(/(?:\s*)(==?=?|<=?|>=?|!==?|\|\||&&)(?:\s*)/g, '$1');
+}
 let writeFile = (path, fileName, content) => {
     // TODO change the line below
     let ast = '';
@@ -30,7 +38,13 @@ let writeFile = (path, fileName, content) => {
             if (!fileName) return
             console.log('[File System]: Writing to: '+fileName+'.js');
             let ast_to_js = require('../lib/compiler/ast_to_js');
-            var contentJS = ast_to_js(ast);
+            var tmp = ast_to_js(ast);
+            let preIndex = tmp.indexOf('\n\n// Your code below this line\n\n');
+            let includes = tmp.slice(0, preIndex);
+            let contentJS = tmp.slice(preIndex + 1);
+            if (preIndex == -1) {
+                includes = '';
+            }
             //contentJS = contentJS.slice(0, contentJS.length-6)
             contentJS += '\n';
             let built_in = fs.readFileSync(`${__dirname}/../lib/compiler/built_in.js`, { encoding: 'utf-8'});
@@ -54,22 +68,8 @@ let writeFile = (path, fileName, content) => {
                 `${(`${fileName}.js`).replace(/\\/g, '/')}`,
                 //`${path_join(path_applied, `/${fileName}.js`).replace(/\\/g, '/')}`,
                 `${prepend}
-                ${built_in
-                    //.replace(/;\s+(if|else\s|for|while|do|return(\s)|try|catch)\s*/g, ';$1$2')
-                    //.replace(/else\s+if/g, 'else if')
-                    //.replace(/[ \t]*\/\/[^\n]*/g, ' ')
-                    //.replace(/\n+/g, '\n')
-                    //.replace(/[ \t]+/g, ' ')
-                    //.replace(/\{\s+/g, '{')
-                    //.replace(/\s+\}/g, '}')
-                    //.replace(/,\s+/g, ', ')
-                    //.replace(/(?:\s*)(==?=?|<=?|>=?|!==?|\|\||&&)(?:\s*)/g, '$1')
-                }`
-                    +`${beautify(contentJS)}`
-                // beautify(`
-                //     ${contentJS}
-                // \n`)
-                );
+                ${minify(built_in)}\n${minify(includes)}\n\n${beautify(contentJS)}`, 'utf8'
+            );
                 // # sourceMappingURL=${fileName}.bs.map\n` // add later
                 // fs.writeFileSync(fileName+'.bs.map', content)
         }
