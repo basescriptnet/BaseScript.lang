@@ -185,6 +185,7 @@ globalThis.BS = {
     //    if (r) return r;
     //    return function () {console.warn('@import is not supported yet in browsers.')};
     //})(),
+    customOperators: {},
     customTypes: {},
     types: {
         Array (value) {
@@ -543,5 +544,24 @@ const PI = 3.141592653589793,
 
 var num1 = 3;
 var num2 = 4;
-var v = BS.mul(num1, num2);
-console.log(BS.mul("I love BaseScript!\n", 5));
+BS.customOperators["*"] = function(left, right, required = false) {
+    BS.checkArgType("Number", "left", arguments[0] ?? null, 5, 13);
+    BS.checkArgType("Number", "right", arguments[1] ?? null, 5, 13);
+    if (required && typeof arguments[0] === void 0) {
+        throw new TypeError("Missing argument at 5:1");
+    }
+    return sqrt(BS.sum(BS.pow(left, 2), BS.pow(right, 2)));
+};
+console.log(BS.customOperators["*"](num1, num2));
+BS.customOperators["/"] = function(left, right, required = false) {
+    BS.checkArgType("Number", "left", arguments[0] ?? null, 12, 13);
+    BS.checkArgType("Number", "right", arguments[1] ?? null, 12, 13);
+    if (required && typeof arguments[0] === void 0) {
+        throw new TypeError("Missing argument at 12:1");
+    }
+    if (isNaN(BS.div(left, right))) {
+        return 0;
+    }
+    return BS.div(left, right);
+};
+console.log(BS.customOperators["/"](Infinity, Infinity));

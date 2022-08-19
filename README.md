@@ -523,6 +523,25 @@ while (isTrue):
 // learn more at https://www.w3schools.com/js/js_strict.asp
 ```
 
+## Custom operators
+
+> Declaration
+
+```javascript
+// operator "#" [A-Za-z0-9_\/*+-.&|$@!^#~]:+ ...
+operator #/ (Number left, Number right) {
+    if isNaN(left / right): return 0
+    return left / right;
+}
+```
+
+> Usage
+
+```javascript
+// outputs 0 instead of NaN
+print Infinity #/ Infinity
+```
+
 ## Even more is coming soon!
 
 > The documentation is not final, and more examples and syntax sugar tricks will be added

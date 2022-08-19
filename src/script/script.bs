@@ -1,4 +1,17 @@
 \num1 = 3
 \num2 = 4
-\v = num1 * num2 // better math errors
-print 'I love BaseScript!\n' * 5
+// beware. operators are set globally
+// experiment with this
+operator #* (Number left, Number right) {
+    // a**2 + b**2 = c**2
+    return sqrt(left ** 2 + right ** 2);
+}
+print num1 #* num2
+
+// safe division
+operator #/ (Number left, Number right) {
+    if isNaN(left / right): return 0
+    return left / right;
+}
+// Usually returns NaN, but if you use #/, it returns 0
+print Infinity #/ Infinity

@@ -106,6 +106,7 @@ blocks ->
 	| for_block {% id %}
 	| try_catch_finally {% id %}
 	| switch_multiple {% id %}
+    | operator_declaration {% id %}
     #| "test" statements_block _ "expect" _ value {% v => ({
     #    type: 'test',
     #    value: v[1],
@@ -155,6 +156,23 @@ type_declaration -> "type" __ identifier _ arguments_with_types statements_block
         line: v[0].line,
         col: v[0].col
 	})
+} %}
+operator -> "#" [A-Za-z0-9_\/*+-.&|$@!^#~]:+ {% v => ({
+    type: 'operator',
+    value: v[1]
+}) %}
+operator_declaration -> "operator" __ operator _ arguments_with_types statements_block {% v => {
+    if (v[4].value.length < 2 && v[4].value.length > 2) {
+        throw new Error(`Operator declaration requires two argument`)
+    }
+    return assign(v[0], {
+        type: 'operator_declaration',
+        identifier: v[2],
+        arguments: v[4],
+        value: v[5],
+        line: v[0].line,
+        col: v[0].col
+    })
 } %}
 
 with -> "with" __ value statements_block  {% v => assign(v[0], {

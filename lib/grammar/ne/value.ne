@@ -84,6 +84,15 @@ pow -> pow _nbsp ("**" | "%") _ unary {% v => ({
     line: v[0].line,
     col: v[0].col
 }) %}
+| pow _nbsp operator _ unary {% v => ({
+    type: 'pow',
+    left: v[0],
+    right: v[4],
+    operator: v[2].value,
+    value: null,
+    line: v[0].line,
+    col: v[0].col
+}) %}
     | base {% id %}
 
 expression ->
