@@ -1,67 +1,11 @@
 if (!globalThis) { globalThis = window || global || this || {}; } try { globalThis.require = require; } catch (err) { globalThis.require = () => undefined; } 
-                globalThis.BS = {
-    Node (tagName, id, className, attributes, children) {
-        let el = document.createElement(tagName);
-        id && (el.id = id);
-        className && (el.className = className); 
-        if (children) {
-            el.append(children);
-        }
-        if (typeof attributes == 'object') {
-            for(let i in attributes) {
-                el.setAttribute(i, attributes[i]);
-            }
-        }
-        return el;
-    },
-    DOMtoJSON (node) { 
-        node = node || this;
-        let obj = {
-            nodeType: node.nodeType
-        };
-        if (node.tagName) {
-            obj.tagName = node.tagName.toLowerCase();
-        } else
-        if (node.nodeName) {
-            obj.nodeName = node.nodeName;
-        }
-        if (node.nodeValue) {
-            obj.nodeValue = node.nodeValue;
-        }
-        let attrs = node.attributes;
-        let childNodes = node.childNodes;
-        let length;
-        let arr;
-        if (attrs) {
-            length = attrs.length;
-            arr = obj.attributes = new Array(length);
-            for (let i = 0; i < length; i++) {
-                const attr = attrs[i];
-                arr[i] = [attr.nodeName, attr.nodeValue];
-            }
-        }
-        if (childNodes) {
-            length = childNodes.length;
-            arr = obj.childNodes = new Array(length);
-            for (let i = 0; i < length; i++) {
-                arr[i] = this.DOMtoJSON(childNodes[i]);
-            }
-        }
-        return obj;
-    },
-    valueToDOM (value) {
-        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null || value === void 0) {
-            return value + '';
-        }
-        if (BS.types['HTML'](value)) { 
-            return value;
-        }
-        return document.createTextNode(value);
-    },
-    cloneNode (value) {
-        let clone = value.cloneNode(true);
-        return clone;
-    },
+                // polifill for Array.prototype.isArray
+if (!Array.isArray) {
+    Array.isArray = function(arg) {
+        return Object.prototype.toString.call(arg) === '[object Array]';
+    };
+}
+globalThis.BS = {
     through (value0, value1, line, col) {
         if (typeof value0 != 'number' || typeof value1 != 'number') {
             throw new TypeError(`Number is expected on the line ${line}, col ${col}.`);
@@ -73,10 +17,40 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
             output.push(i);
         }
         if (value0 != min)
-            output = output.reverse()
+            output = output.reverse();
         return output;
     },
-    delete (value, index) {   
+    sum(value1, value2) {
+        if (Array.isArray(value1) && Array.isArray(value2)) {
+            return [].concat(value1, value2);
+        }
+        if (Array.isArray(value1)) {
+            return [].concat(value1, value2)
+        }
+        if (BS.getType(value1) == 'Object' && BS.getType(value2) == 'Object') {
+            return Object.assign({}, value1, value2);
+        }
+        if (value1 === null || value1 === void 0 || value2 === null || value2 === void 0) {
+            throw  new TypeError('"null" cannot be used as in math expressions');
+        }
+        if (typeof value1 === 'string') {
+            if (typeof value2 !== 'string') {
+                throw new TypeError('String was expected for concatination, got "'+BS.getType(value2)+'" insetead');
+            }
+            return value1 + value2;
+        }
+        if (typeof value1 === 'number') {
+            if (typeof value2 !== 'number') {
+                throw new TypeError('Number was expected for math expression, got "'+BS.getType(value2)+'" insetead');
+            }
+            return value1 + value2;
+        }
+        return value1 + value2;
+    },
+    delete (value, index) {
+        // if (typeof value === 'string') {
+        //     return value.substring(0, index) + value.substring(index+1, value.length);
+        // }
         Array.prototype.splice.call(value, index, 1);
         return value;
     },
@@ -85,14 +59,17 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
             throw new TypeError(`Array or string was expected at line ${line}, col ${col}`);
         }
         if (typeof start != 'number') {
-            throw new TypeError(`Number was expected at line ${line}, col ${col}`)
+            throw new TypeError(`Number was expected at line ${line}, col ${col}`);
         }
         if (end === null && step === null) {
-            return value.slice(start)
+            return value.slice(start);
         }
         step = step|0;
         if (step >= 0) step = 1;
-        else step = -1;   
+        else step = -1;
+            // throw new Error(`Step argument on slicing must not be zero at line ${line}, col ${col}`);
+        // if (step !== 1 && step !== -1)
+        //     throw new Error(`Step must be 1 or -1 at ${line}, col ${col}`);
         let result = value.slice(start, end);
         if (step === -1) {
             if (typeof value === 'string')
@@ -101,21 +78,23 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
         }
         return result;
     },
-    ast: (function () {
-        let r = globalThis.require('./index.js');
-        if (r) return r;
-        return function () {console.warn('Ast is not supported yet in browsers.')}
-    })(),
-    parse: (function () {
-        let r = globalThis.require('./ast_to_js.js');
-        if (r) return r;
-        return function () {console.warn('@eval is not supported yet in browsers.')}
-    })(),
-    fs: (function () {
-        let r = globalThis.require('fs');
-        if (r) return r;
-        return function () {console.warn('@import is not supported yet in browsers.')};
-    })(),
+    //ast: (function () {
+    //    let r = globalThis.require('./index');
+    //    if (r) return r;
+    //    return function () {console.warn('Ast is not supported yet in browsers.')}
+    //})(),
+    //parse: (function () {
+    //    let r = globalThis.require('./ast_to_js.js');
+    //    if (r) return r;
+    //    return function () {console.warn('@eval is not supported yet in browsers.')}
+    //})(),
+    //fs: (function () {
+    //    let r = globalThis.require('fs');
+    //    console.log(r);
+    //    if (r) return r;
+    //    return function () {console.warn('@import is not supported yet in browsers.')};
+    //})(),
+    customTypes: {},
     types: {
         Array (value) {
             return Array.isArray(value);
@@ -135,6 +114,9 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
         Number (value) {
             return typeof value === 'number' && !Number.isNaN(value);
         },
+        BigInt(value) {
+            return typeof value === 'bigint';
+        },
         NaN (value) {
             return Number.isNaN(value);
         },
@@ -150,19 +132,33 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
         Boolean (value) {
             return typeof value === 'boolean';
         },
-        HTML (value) {
-            return value instanceof Element;
-        },
-        Object (value) {
+        Object(value) {
+            if (BS.types.HTML && BS.types.HTML(value)) {
+                return false;
+            }
             return typeof value === 'object' && value !== null;
         },
     },
-    convert (value, type) {
+    checkArgType(type, value, line, col) {
+        if (type in this.customTypes) {
+            let r = BS.customTypes[type];
+            if (r && r(value))
+                return true;
+        }
+        if (type in this.types) {
+            let r = BS.types[type];
+            if (r && r(value))
+                return true;
+        }
+        throw new TypeError(`Argument "${value}" is not type of "${type}" at line ${line}, col ${col}.`);
+    },
+    convert(value, type, outerType) {
         let t = this.getType(value);
         if (t) t = t.toLowerCase();
         let tmp = null;
         if (typeof type !== 'object' && t == type.toLowerCase()) return value;
-        let gt = function (value, type) {
+        let gt = function (value, type, outerType) {
+            outerType = outerType || this.getType(value);
             switch (type) {
                 case 'Number':
                 case 'Float':
@@ -180,6 +176,7 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
                     if (t == 'undefined') return 'undefined';
                     else return value.toString();
                 case 'Array':
+                    if (t == 'undefined' || 'null') return []
                     if (t == 'html') return Object.values(this.DOMtoJSON(value));
                     if (t == 'object') return Object.values(value);
                     if (t == 'string') {
@@ -205,8 +202,8 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
                 case 'Boolean':
                     return Boolean(value);
                 case 'List':
+                    let ul = document.createElement('ul');
                     if (t == 'object' || t == 'array' || t == 'html') {
-                        let ul = document.createElement('ul');
                         for (let i in value) {
                             let li = document.createElement('li');
                             if (t == 'object') {
@@ -217,28 +214,52 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
                                 li.appendChild(document.createTextNode(': '));
                             }
                             let span = document.createElement('span');
+                            //let li2;
+                            //if (ty == 'Array')
+                            //    li2 = document.createElement('li');
                             span.className = 'convert_value';
-                            if (this.getType(value[i]) == 'string') {
-                                span.className += ' string';
-                                span.innerText = `"${value[i]}"`;
-                            } else if (this.getType(value[i]) == 'number') {
-                                span.className += ' number';
-                                span.innerText = `${value[i]}`;
-                            } else if (this.getType(value[i]) == 'array') {
-                                span.className += ' array';
-                                span.innerText = JSON.stringify(value[i], null, 2);
+                            let ty = this.getType(value[i]);
+                            if (ty == 'String' || ty == 'Number' || ty == 'Int' || ty == 'Float') {
+                                //span.className += ' string';
+                                if (outerType == 'Array') {
+                                    let li2 = document.createElement('li');
+                                    li2.innerText = gt(value[i], type, outerType);
+                                    if (ty == 'String') li2.innerText = `"${li2.innerText}"`;
+                                    span.append(li2);
+                                    //span.append(li) = `"${value[i]}"`;
+                                } else {
+                                    span.innerText = `"${value[i]}"`;
+                                }
+                            } else if (ty == 'Array') {
+                                //debugger
+                                //span.className += ' array';
+                                //span.innerText = JSON.stringify(value[i], null, 2);
+                                span.append('[')
+                                span.append(gt(value[i], type, 'Array'))
+                                span.append(']')
+                            } else if (ty == 'Object') {
+                                //span.innerText = JSON.stringify(value[i], null, 2);
+                                //let innerSpan = gt(value[i], type)
+                                span.append(gt(value[i], type))
                             }
                             else span.innerText = `${value[i]}`;
+                            span.className += ` ${ty}`;
                             li.append(span);
+                            //if (li2) li.append(li2);
                             ul.append(li);
                         }
                         return ul;
+                    } else if (t == 'int' || t == 'float' || t == 'string' || null) {
+                        let li = document.createElement('li');
+                        li.textContent = value;
+                        ul.append(li);
                     }
-                    return document.createElement('ul');
+                    return ul;
             };
-        };
+        }.bind(this);
         if (typeof type != 'string') {
-            let r = value; 
+            let r = value;
+            // debugger
             console.log(type.length);
             for (let i = 0; i < type.length; i++) {
                 r = gt(r, type[i]);
@@ -253,88 +274,95 @@ if (!globalThis) { globalThis = window || global || this || {}; } try { globalTh
                 }
                 console.log(r);
             }
-        }; 
+        };
+        // console.log('h', gt(value,type))
         return gt(value, type);
     },
     getType (value) {
         for (let i in this.types) {
             try {
                 if (this.types[i](value)) return i;
+                //if (this.curstomTypes[i](value)) return i;
             } catch (err) {continue}
         }
     },
-    sizeof(object) {  
+    sizeof(object) {
+        // ? Can be simplified
+        //* No need for so many checks
         if (object instanceof Set || object instanceof Map)
             return object.size;
         if (object instanceof Array || object instanceof String)
             return object.length;
         if (object instanceof Object)
-            return Object.keys(object).length; 
+            return Object.keys(object).length;
+        //else return 0
         if (object === void 0 || object === null) {
-            return 0 
+            return 0
+            //throw new TypeError('Cannot convert undefined or null to object');
         }
         return Object.keys(object).length;
     },
-    deepFreeze (object) { 
-        const propNames = Object.getOwnPropertyNames(object); 
+    deepFreeze (object) {
+        // Retrieve the property names defined on object
+        const propNames = Object.getOwnPropertyNames(object);
+        // Freeze properties before freezing self
         for (const name of propNames) {
             const value = object[name];
 
             if (value && typeof value === "object") {
-                BS.deepFreeze(value);
+                globalThis.BS.deepFreeze(value);
             }
         }
         return Object.freeze(object);
     },
-    storage: [], 
+    last(number) {
+        // returns the last index of array item
+        if (number > 0) return number - 1;
+        return 0;
+    },
+    storage: [],
+    // require('./ast_to_js.js')// || function () {console.warn('@eval is not supported yet in browsers.')}
 };
 const BS = globalThis.BS;
-try {
-    Element;
-} catch {
-    globalThis.Element = {prototype: {}};
-    Element = globalThis.Element;
+
+const TypedArray = Reflect.getPrototypeOf(Int8Array);
+for (const C of [Array, String, TypedArray]) {
+    Object.defineProperty(C.prototype, "at", {
+        value: function at(n) {
+            // ToInteger() abstract op
+            n = Math.trunc(n) || 0;
+            // Allow negative indexing from the end
+            if (n < 0) n += this.length;
+            // OOB access is guaranteed to return undefined
+            if (n < 0 || n >= this.length) return undefined;
+            // Otherwise, this is just normal property access
+            return this[n];
+        },
+        writable: true,
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(C.prototype, "last", {
+        value: function last() {
+            return this[this.length-1];
+        },
+        writable: true,
+        enumerable: false,
+        configurable: true
+    });
 }
-Element.prototype._append = Element.prototype.append;
-Element.prototype.append = function (children) {
-    if (Array.isArray(children)) {
-        for (let i = 0, l = children.length; i < l; i++) {
-            this._append(children[i]);
-        }
-    } else {
-        this._append(children);
-    }
-    return this;
-};
-Element.prototype.json = function () {
-    return globalThis.BS.DOMtoJSON(this);
-};
-Element.prototype.text = function (content) {
-    if (content === void 0) {
-        return this.textContent;
-    }
-    this.textContent = content;
-    return this;
-};
-Element.prototype.listen = function (event, callback) {
-    this.addEventListener(event, callback);
-    return this;
-};
-Element.prototype.css = function (obj) {
-    for (let i in obj) {
-        this.style[i] = obj[i];
-    }
-    return this;
-};
-Element.prototype.events = function (obj) {
-    for (let i in obj) {
-        this.addEventListener(i, obj[i]);
-    }
-    return this;
-};
-Array.prototype.last = function () {
-    return this[this.length - 1];
-};
+Object.defineProperty(String.prototype, "noBreaks", {
+    value: function noBreaks() {
+        return this.replace(/\r\n?/g, '');
+    },
+    writable: true,
+    enumerable: false,
+    configurable: true
+});
+// ! causes issues in for in loop
+//Array.prototype.last = function () {
+//    return this[this.length - 1];
+//};
 function list (amount, callback) {
     let array = [];
     for (let i = 0; i < amount; i++) {
@@ -359,10 +387,10 @@ function range(start, stop, include = false){
             stop++
         }
     }
-    let i = start; 
-    return { 
-        [Symbol.iterator]:() => { 
-            return { 
+    let i = start; // start
+    return { // iterator protocol
+        [Symbol.iterator]:() => { // @@iterator
+            return { // object with the next function
                 next () {
                     while(i !== stop){
                         let temp = i;
@@ -370,7 +398,7 @@ function range(start, stop, include = false){
                         else i++;
                         return {
                             value: temp,
-                            done: false
+                            done: false,
                         }
                     }
                     return {done: true}
@@ -413,23 +441,12 @@ const PI = 3.141592653589793,
         if (object === void 0 || object === null) {
             throw new TypeError('Cannot convert undefined or null to object');
         }
-        if (object instanceof Set || object instanceof Map)
+        if (object instanceof Set || object instanceof Map) {
             return object.size;
+        }
         return Object.keys(object).length;
     };
 
 
 // your code below this line
 
-//(async function () {
-random = function(min = 0, max = 1) {
-    var arguments = Array.from(arguments || []);
-    if (!BS.types["Int"](min) && min !== null) throw new TypeError("Argument \"min\" is not type of Int at line 1, col 19.");
-    if (!BS.types["Int"](max) && max !== null) throw new TypeError("Argument \"max\" is not type of Int at line 1, col 19.");
-    return Math.floor(Math.random() * (max - min) + min);
-};
-random.string = function(length) {
-    var arguments = Array.from(arguments || []);
-    return "";
-};
-                //})();

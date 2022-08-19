@@ -1,13 +1,13 @@
 # loops
 while_block -> "while" statement_condition statements_block {%  v => {
-	return Object.assign(v[0], {
+	return assign(v[0], {
 		type: 'while',
 		condition: v[1],
 		value: v[2],
 	});
 } %}
 for_block -> "for" __ identifier __ ("in" | "of") __ value statements_block {%  v => {
-	return Object.assign(v[0], {
+	return assign(v[0], {
 		type: 'for_' + v[4][0],
 		condition: v[1],
 		identifier: v[2],
@@ -16,7 +16,7 @@ for_block -> "for" __ identifier __ ("in" | "of") __ value statements_block {%  
 	});
 } %}
 for_block -> "for" _ "(" _ identifier __ ("in" | "of") __ value _ ")" statements_block {%  v => {
-	return Object.assign(v[0], {
+	return assign(v[0], {
 		type: 'for_' + v[6][0],
 		//condition: v[4],
 		identifier: v[4],

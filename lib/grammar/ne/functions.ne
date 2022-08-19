@@ -8,23 +8,13 @@ annonymous_function ->
 	("async" __):? ("function" | "def") (__ identifier):? _ arguments_with_types statements_block {% functions.annonymous %}
 	| ("async" __):? ("function" | "def") (__ identifier):? statements_block {% functions.annonymous_with_no_args %}
     # ! returns multiple results if assigned or if has pre-spacing
-    #| ("async" __):? _ arguments_with_types _ "=>" statements_block {% v => {
-    #    return {
-    #        type: 'annonymous_function',
-    #        value: v[5],
-    #        arguments: v[2],
-    #        async: v[0] ? true : false
-    #    }
-    #} %}
-	#| iife {% id %}
-
-#iife -> "(" _ annonymous_function _ ")" _ arguments {% functions.iife %}
+    #| lambda {% id %}
 
 return -> "return" __nbsp value {% returns.value %}
     | "return" {% returns.empty %}
-    | "=>" _nbsp value {% returns.value %}
+    #| "=>" _nbsp value {% returns.value %}
 
-function_call -> prefixExp _nbsp arguments {% (v, l, reject) => {
+function_call -> _base _nbsp arguments {% (v, l, reject) => {
     if (v[0].type == 'annonymous_function') return reject
 	return ({
 		type: 'function_call',
@@ -45,10 +35,10 @@ argument_identifier_and_value -> argument_type identifier (_ "=" _ value):? {% v
 	argument_type: v[0] ? v[0][0] : 'none',
 	can_be_null: v[0] ? v[0][1] : false,
 	identifier: v[1],
-	value: v[2] ? v[2][3] : undefined
+	value: v[2] ? v[2][3] : null
 }) %}
 
-argument_type -> ((%keyword | identifier) "?":? __):? {% v => {
+argument_type -> (identifier "?":? __):? {% v => {
     if (!v[0]) return;
 	v[0] = v[0][0];
     if (v[0] && v[0] instanceof Array) {
@@ -56,7 +46,28 @@ argument_type -> ((%keyword | identifier) "?":? __):? {% v => {
     }
 	let n = v[0].value[0];
 	if (n.toUpperCase() != n) {
+        return;
 		throw new SyntaxError(`Argument type must be capitalized at line ${v[0].line}, col ${v[0].col}.`);
     }
 	return [v[0], v[1]];
 } %}
+
+lambda_arguments -> arguments_with_types {% id %}
+    | identifier {% id %}
+
+lambda -> ("async" __):? _ lambda_arguments _ "=>" statements_block {% v => {
+        return {
+            type: 'annonymous_function',
+            value: v[5],
+            arguments: v[2],
+            async: v[0] ? true : false
+        }
+    } %}
+    #| ("async" __):? _ lambda_arguments _ "=>" statement {% v => {
+    #    return {
+    #        type: 'lambda',
+    #        value: v[6],
+    #        arguments: v[2],
+    #        async: v[0] ? true : false
+    #    }
+    #} %}

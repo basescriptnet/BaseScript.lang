@@ -1,2 +1,4 @@
-a = 10
-a.f()
+\num1 = 3
+\num2 = 4
+\v = num1 * num2 // better math errors
+print 'I love BaseScript!\n' * 5

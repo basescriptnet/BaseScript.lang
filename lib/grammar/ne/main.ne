@@ -80,7 +80,10 @@ statement -> blocks {% id %}
 	#| "DELETE" __ "THAT" EOL {% v => ({
 	#	type: 'DELETE',
 	#}) %}
-	| "delete" __ value {% statement.delete %}
+	#| "delete" __ value {% statement.delete %}
+    | "delete" arguments {% statement.delete %}
+    #| "free" arguments {% statement.free %}
+    #| "sleep" arguments {% statement.sleep %}
 	| return {% id %}
 	| "throw" __ value {% statement.throw %}
 	| ("break" | "continue") {% statement.break_continue %}
@@ -90,6 +93,7 @@ statement -> blocks {% id %}
 	#| "@include" __ string EOL {% statement.include %}
 	| var_assign {% id %}
 	| value_reassign {% statement.value_reassign %}
+    #| value_addition {% statement.value_addition %}
 	| value {% statement.value %}
 
 blocks ->
@@ -102,11 +106,37 @@ blocks ->
 	| for_block {% id %}
 	| try_catch_finally {% id %}
 	| switch_multiple {% id %}
+    #| "test" statements_block _ "expect" _ value {% v => ({
+    #    type: 'test',
+    #    value: v[1],
+    #    expect: v[5]
+    #}) %}
 
-statements_block -> _ "{" statements _ (";" _):? "}" {% v => v[2] %}
-	| _ "BEGIN" __ statements _ (";" _):? "END" {% v => v[3] %}
-	| _ ":" _ statement {% v => [v[3]] %}
-	| _ "do" __ statement {% v => [v[3]] %}
+statements_block -> _ "{" statements _ (";" _):? "}" {% v => ({
+    type: 'scope',
+    value: v[2],
+    line: v[2].line,
+    col: v[2].col
+}) %}
+	| _ "BEGIN" __ statements _ (";" _):? "END" {% v => ({
+    type: 'scope',
+    value: v[3],
+    line: v[3].line,
+    col: v[3].colva
+}) %}
+	| _ ":" _ statement {% v => ({
+        type: 'scope',
+        value: [v[3]],
+        line: v[3].line,
+        col: v[3].colva
+    }) %}
+    #{% v => [v[3]] %}
+	| _ "do" __ statement {% v => ({
+        type: 'scope',
+        value: [v[3]],
+        line: v[3].line,
+        col: v[3].colva
+    }) %}
 ### END statements ###
 
 type_declaration -> "type" __ identifier _ arguments_with_types statements_block {% v => {
