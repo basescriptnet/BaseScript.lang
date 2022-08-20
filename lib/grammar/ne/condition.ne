@@ -27,8 +27,7 @@ condition -> condition __ ("and" | "or" | "&&" | "||") __ _value {% v => {
 		col: v[0].col,
 	}
 } %}
-|
-condition _ comparision_operators _value {% v => {
+| condition _ comparision_operators _value {% v => {
     return {
         type: 'value',
         left: v[0],
@@ -60,6 +59,11 @@ condition _ comparision_operators _value {% v => {
 			value: v[0]
 		}
 	} %}
+    | _value _ "??" _ _value {% v => ({
+        type: 'nullish_check',
+        condition: v[0],
+        value: v[4],
+    }) %}
     | _value {% condition.value %}
 
 statement_condition -> _ condition {% v => v[1] %}

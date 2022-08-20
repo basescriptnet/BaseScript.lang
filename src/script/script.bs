@@ -1,12 +1,6 @@
-#include <random>
-namespace random
-
-print ::[]
-print ::int(0, 100)
-print ::['int'](0, 100)
-namespace random.int
-print ::(0, 10)
-//(0, 100)
-
 namespace document
-print ::body
+::querySelector('body').innerHTML = 'hello world!'
+
+namespace document.body.style
+::backgroundColor = 'red'
+::color = 'white'

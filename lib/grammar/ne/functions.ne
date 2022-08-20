@@ -12,12 +12,13 @@ annonymous_function ->
 
 return -> "return" __nbsp value {% returns.value %}
     | "return" {% returns.empty %}
-    #| "=>" _nbsp value {% returns.value %}
+    | "=>" _nbsp value {% returns.value %}
 
 function_call -> _base _nbsp arguments {% (v, l, reject) => {
     if (v[0].type == 'annonymous_function') return reject
 	return ({
 		type: 'function_call',
+        //check: v[1] ? true : false,
 		value: v[0],
 		arguments: v[2],
 	})

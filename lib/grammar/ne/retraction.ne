@@ -24,8 +24,7 @@ Var ->
         col: v[0].col
         //identifier: v[0].value
 	}) %}
-	|
-    _base _ "." _ (%keyword | identifier) {% (v, l, reject) => {
+	| _base _ "." _ (%keyword | identifier) {% (v, l, reject) => {
         if (v[0].type == 'annonymous_function') return reject
         return {
             type: 'dot_retraction_v2',
@@ -35,6 +34,17 @@ Var ->
             col: v[0].col
         }
     } %}
+    #| _base _ "?." _ (%keyword | identifier) {% (v, l, reject) => {
+    #    if (v[0].type == 'annonymous_function') return reject
+    #    return {
+    #        type: 'dot_retraction_v2',
+    #        check: true,
+    #        from: v[0],
+    #        value: v[4][0],
+    #        line: v[0].line,
+    #        col: v[0].col
+    #    }
+    #} %}
     | "::" (%keyword | identifier) {% (v, l, reject) => {
         return {
             type: 'namespace_retraction',
@@ -58,6 +68,7 @@ Var ->
         line: v[0].line,
         col: v[0].col
 	}) %}
+    | function_call {% id %}
     | identifier {% id %}
 
 # ! removed all for now, code above already replaces this

@@ -4,7 +4,7 @@ base -> parenthesized {% id %}
 	#| annonymous_function {% id %}
 	#| regexp {% id %}
     | Var {% id %}
-	| function_call {% id %}
+	#| function_call {% id %}
     #| allowed_keywords {% id %}
 	| string {% id %}
 	| bigInt {% id %}
@@ -151,14 +151,14 @@ _value ->
 	# | ("this" | identifier | html | object | number | function_call) _ "." _ ("this" | identifier | html | object | number | function_call) {% v => v %}
 	| myNull {% id %}
     | ternary {% id %}
-    | "private" statements_block {% v => {
-        return {
-            type: 'private',
-            value: v[1],
-            line: v[0].line,
-            col: v[0].col
-        }
-    } %}
+    #| "private" statements_block {% v => {
+    #    return {
+    #        type: 'private',
+    #        value: v[1],
+    #        line: v[0].line,
+    #        col: v[0].col
+    #    }
+    #} %}
 	# | annonymous_function {% id %}
 
 prefixExp ->

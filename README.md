@@ -1,6 +1,7 @@
 <div align="center">
 <p>
-    <img width="200" src="https://github.com/basescriptnet/BaseScript.lang/blob/master/logo.jpg?sanitize=true">
+    <!--<img width="200" src="https://github.com/basescriptnet/BaseScript.lang/blob/master/logo.jpg?sanitize=true">-->
+    <img width="200" src="https://avatars.githubusercontent.com/u/88979822?s=400&u=eb99cb7c07a14d8a61d1724095b689cb260bccfa&v=4">
 </p>
 <h1>🏗️ BaseScript</h1>
 
@@ -8,7 +9,7 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/blob/master/BUGS.md) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.1.25-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.1.26-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
