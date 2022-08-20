@@ -22,6 +22,14 @@ function_call -> _base _nbsp arguments {% (v, l, reject) => {
 		arguments: v[2],
 	})
 } %}
+    | "::" arguments {% (v, l, reject) => {
+    if (v[0].type == 'annonymous_function') return reject
+	return ({
+        type: 'namespace_retraction',
+        retraction_type: 'function_call',
+		arguments: v[1],
+	})
+} %}
 
 # arguments
 arguments -> "(" _ ")" {% args.empty %}

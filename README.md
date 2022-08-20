@@ -1,41 +1,51 @@
-# BaseScript Language
-BaseScript is a programming language, which aims to compile your code to JavaScript.
+<div align="center">
+<p>
+    <img width="200" src="https://github.com/basescriptnet/BaseScript.lang/blob/master/logo.jpg?sanitize=true">
+</p>
+<h1>🏗️ BaseScript</h1>
+
+[BaseScript.net](https://BaseScript.net)
+
+[About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/blob/master/BUGS.md) | [license](#-license)
+
+<b><img src="https://img.shields.io/badge/version-0.1.25-yellow" alt="version"></b>
+</div>
+
+## ℹ️ About
+
+🏗️ BaseScript is a programming language, which aims to compile your code to JavaScript.
 
 This page represents the simple to follow documentation of the language.
 
-[How to contact the creators](#how-to-contact-the-creators)<br>
-[Contents](#contents)
+## 🔗 How to contact the creators
 
-## How to contact the creators
+📬 Email: [basescriptnet<wbr>@gmail.com](mailto://basescriptnet@gmail.com)<br>
+✈️ Telegram: [@basescript](t.me/basescript)<br>
+📹 YouTube: [BaseScript Channel](https://www.youtube.com/channel/UCmNoL3N13lRHbcGYT8vr6lA)
 
-Email: [basescriptnet<wbr>@gmail.com](mailto://basescriptnet@gmail.com)<br>
-Telegram: @basescript<br>
-Website: [BaseScript.net](https://basescript.net/)<br>
-GitHub: [BaseScript.lang](https://github.com/basescriptnet/BaseScript.lang)<br>
-YouTube: [BaseScript Channel](https://www.youtube.com/channel/UCmNoL3N13lRHbcGYT8vr6lA)
+## 📁 Docs
+<b>• Content: <b>
+ - [Getting started](#%EF%B8%8F-getting-started)
+ - [How to contact the creators](#-how-to-contact-the-creators)
+ - [Variables](#%EF%B8%8F-variables)
+ - [Arrays](#%EF%B8%8F-arrays)
+ - [Objects](#-objects)
+ - [Strings](#-strings)
+ - [Ternar operator](#-ternar-operator)
+ - [Numbers](#%EF%B8%8F%E2%83%A3-numbers)
+ - [BigInts](#-bigint)
+ - [Statement block scope](#-statement-block-scope)
+ - [LOG, print, WRITE and ERROR keywords](#-log-print-write-and-error-keywords)
+ - [Conditions](#-conditions)
+ - [if else statements](#-if-else-statements)
+ - [Functions](#-functions)
+ - [Custom types](#-custom-types)
+ - [Debugger](#-debugger)
+ - [try|catch|finally statement](#-trycatchfinally-statement)
+ - [Switch cases](#-switch-cases)
+ - [Strict mode](#%EF%B8%8F-strict-mode)
 
-## Contents
- - [Getting started](#getting-started)
- - [How to contact the creators](#how-to-contact-the-creators)
- - [Variables](#variables)
- - [Arrays](#arrays)
- - [Objects](#objects)
- - [Strings](#strings)
- - [Ternar operator](#ternar-operator)
- - [Numbers](#numbers)
- - [BigInts](#bigint)
- - [Statement block scope](#Statement-block-scope)
- - [LOG, print, WRITE and ERROR keywords](#log-print-write-and-error-keywords)
- - [Conditions](#conditions)
- - [if else statements](#if-else-statements)
- - [Functions](#functions)
- - [Custom types](#custom-types)
- - [Debugger](#debugger)
- - [try|catch|finally statement](#trycatchfinally-statement)
- - [Switch cases](#switch-cases)
- - [Strict mode](#strict-mode)
-
-## Getting started
+## ▶️ Getting started
 
 > Install via npm
 
@@ -46,7 +56,7 @@ npm i basescript.js -g
 > At any directory use
 
 ```sh
-bs <file_name> options?
+bs <file_name> [options?]
 ```
 
 > For help use
@@ -61,7 +71,7 @@ bs -help
 npm install -g ./
 ```
 
-## Variables
+## 🗄️ Variables
 
 > Variable declaration
 
@@ -71,7 +81,7 @@ let num, num1 = 1, num2
 \num3 // equivalent to let num3
 ```
 
-#### ***Note: any value becomes immutable***
+#### ***📝 Note: any value becomes immutable***
 
 > Const declaration
 
@@ -93,7 +103,7 @@ identifier = value
 Object.doSomething = value
 ```
 
-## Arrays
+## 🗃️ Arrays
 
 > Array creation
 
@@ -128,7 +138,7 @@ array[]
 array[] = value
 ```
 
-## Objects
+## 🧱 Objects
 
 > Object creation
 
@@ -150,7 +160,7 @@ object['x']
 value instanceof value2
 ```
 
-## Strings
+## 💬 Strings
 
 > String creation
 
@@ -189,7 +199,7 @@ typeof value
 typeof(value)
 ```
 
-## Ternar operator
+## ❓ Ternar operator
 
 > Regular JS way
 
@@ -215,7 +225,7 @@ true if isNaN(value)
 true if isNaN(value) else false
 ```
 
-## Numbers
+## #️⃣ Numbers
 
 > Declaration
 
@@ -237,7 +247,7 @@ sizeof value
 sizeof(value)
 ```
 
-## BigInt
+## 🔢 BigInt
 
 > BigInts are threated as numbers, but return typeof BigInt
 
@@ -248,7 +258,7 @@ sizeof(value)
 // floating point numbers are not allowed
 ```
 
-## Statement block scope
+## 📑 Statement block scope
 
 > Example with if block
 
@@ -265,9 +275,9 @@ if value:
     statement
 ```
 
-## LOG, print, WRITE and ERROR keywords
+## 🚪 LOG, print, WRITE and ERROR keywords
 
-#### ***Note: optional parenthesis are accepted***
+#### ***📝 Note: optional parenthesis are accepted***
 
 > print and LOG
 
@@ -295,7 +305,7 @@ ERROR "Something went wrong"
 // console.error("Something went wrong")
 ```
 
-## Conditions
+## 🔄 Conditions
 
 > Comparision operators
 
@@ -321,14 +331,14 @@ random > some_number && random > other_number && random > 20
 // it needs to be at least more, than 20
 ```
 
-> If statement without else
+> ↔️ If statement without else
 
 ```javascript
 num > 0
 num > 0 and num < 5 or num == undefined
 ```
 
-## if else statements
+## 🚸 If else statements
 
 > If statement without else
 
@@ -367,7 +377,7 @@ if (!isAdmin) {
     console.log("You don't have access");
 }
 ```
-## Functions
+## 🚄 Functions
 
 > Declaration
 
@@ -405,7 +415,7 @@ function add(a, b):=> a + b
 
 > Typed arguments and args constant
 
-### NOTE: every function contains **args** constant, which is an array representation of **arguments** object
+### 📝 NOTE: every function contains **args** constant, which is an array representation of **arguments** object
 
 ```javascript
 // this ensures that a and b are integers
@@ -419,7 +429,7 @@ function say(String text) {
 }
 ```
 
-## Custom types
+## 🧩 Custom types
 
 > Declaration
 
@@ -432,7 +442,7 @@ type NotEmptyArray (Array value) {
 > Notes: type name must start with uppercase letter<br>
 > Exactly one argument is required
 
-## Debugger
+## 🚧 Debugger
 
 > Starting the debugger
 
@@ -442,7 +452,7 @@ if num < 0 {
 }
 ```
 
-## try|catch|finally statement
+## 🙌 try|catch|finally statement
 
 > try without catch and finally
 
@@ -484,7 +494,7 @@ try {
 }
 ```
 
-## switch cases
+## 👏 Switch cases
 
 > Declaration, cases?, default?
 
@@ -501,7 +511,7 @@ switch typeof value {
 }
 ```
 
-## while loop
+## 🔛 While loop
 
 > Declaration
 
@@ -514,7 +524,7 @@ while (isTrue):
     print true
 ```
 
-## strict mode
+## ☝️ Strict mode
 
 > Declaration
 
@@ -523,7 +533,7 @@ while (isTrue):
 // learn more at https://www.w3schools.com/js/js_strict.asp
 ```
 
-## Custom operators
+## 📏 Custom operators
 
 > Declaration
 
@@ -542,14 +552,16 @@ operator #/ (Number left, Number right) {
 print Infinity #/ Infinity
 ```
 
-## Even more is coming soon!
+## 🤫 More, more is coming soon!
 
 > The documentation is not final, and more examples and syntax sugar tricks will be added
 
 > We are constantly updating, fixing and adding new features!
 
-## License
+## 📃 License
 
-MIT
+**😉 Free Software, Hell Yeah!**
 
-**Free Software, Hell Yeah!**
+This project is open-sourced software licensed under the MIT License.
+
+See the [LICENSE](https://github.com/basescriptnet/BaseScript.lang/blob/master/LICENSE) file for more information.

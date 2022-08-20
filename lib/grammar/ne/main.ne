@@ -95,6 +95,7 @@ statement -> blocks {% id %}
 	| value_reassign {% statement.value_reassign %}
     #| value_addition {% statement.value_addition %}
 	| value {% statement.value %}
+    | "namespace" __ value {% statement.namespace %}
 
 blocks ->
 	if_block {% id %}

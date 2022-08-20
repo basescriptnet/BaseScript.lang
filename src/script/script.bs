@@ -1,11 +1,12 @@
 #include <random>
-print random.int(0, 10)
-print random.float(0, 10)
-print random.element(['a', 'b', 'c'])
-print random.element('abc')
-print random.stringFromSample('onlythisletters', 5)
-print random.string(8)
-print random.boolean()
-print random.getRandom()
-print random.shuffle(['a', 'b', 'c', 'd', 'e'])
-print random.shuffle('abcde')
+namespace random
+
+print ::[]
+print ::int(0, 100)
+print ::['int'](0, 100)
+namespace random.int
+print ::(0, 10)
+//(0, 100)
+
+namespace document
+print ::body

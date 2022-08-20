@@ -35,6 +35,29 @@ Var ->
             col: v[0].col
         }
     } %}
+    | "::" (%keyword | identifier) {% (v, l, reject) => {
+        return {
+            type: 'namespace_retraction',
+            retraction_type: 'dot',
+            value: v[1][0],
+            line: v[1][0].line,
+            col: v[1][0].col
+        }
+    } %}
+    | "::" "[" _ value _ "]" {% v => ({
+        type: 'namespace_retraction',
+        retraction_type: 'item_retraction',
+        value: v[3],
+        line: v[0].line,
+        col: v[0].col
+        //identifier: v[0].value
+	}) %}
+    | "::" "[" _ "]" {% v => ({
+        type: 'namespace_retraction',
+        retraction_type: 'item_retraction_last',
+        line: v[0].line,
+        col: v[0].col
+	}) %}
     | identifier {% id %}
 
 # ! removed all for now, code above already replaces this

@@ -6,13 +6,8 @@ if (!Array.isArray) {Array.isArray=function(arg) {return Object.prototype.toStri
 
 // Your code below this line
 
+console.log(random[BS.last(random.length - 1)]);
+console.log(random.int(0, 100));
+console.log(random["int"](0, 100));
 console.log(random.int(0, 10));
-console.log(random.float(0, 10));
-console.log(random.element(["a", "b", "c"]));
-console.log(random.element("abc"));
-console.log(random.stringFromSample("onlythisletters", 5));
-console.log(random.string(8));
-console.log(random.boolean());
-console.log(random.getRandom());
-console.log(random.shuffle(["a", "b", "c", "d", "e"]));
-console.log(random.shuffle("abcde"));
+console.log(document.body);
