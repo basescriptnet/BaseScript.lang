@@ -158,7 +158,9 @@ type_declaration -> "type" __ identifier _ arguments_with_types statements_block
 } %}
 operator -> "#" [A-Za-z0-9_\/*+-.&|$@!^#~]:+ {% v => ({
     type: 'operator',
-    value: v[1]
+    value: v[1],
+    line: v[0].line,
+    col: v[0].col
 }) %}
 operator_declaration -> "operator" __ operator _ arguments_with_types statements_block {% v => {
     if (v[4].value.length < 2 && v[4].value.length > 2) {

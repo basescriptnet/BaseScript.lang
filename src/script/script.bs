@@ -1,10 +1,12 @@
-let ✅ = {
-    👍: '👍',
-    👎: '👎',
+let var_name
+if defined var_name { // or defined(var_name)
+    print "var_name is defined" // it is defined, but not necessarily assigned a value
+} else {
+    print "var_name is not defined"
 }
-print ✅.👍 + ✅.👎
-
-operator #😂 (left, right) {
-    return left + right
-}
-print 1 #😂 2
+let existing_var = 10
+// undefined
+print safeValue(existing_var.non_existing_property.another_non_existing_property)
+print safeValue(existing_var) // 10
+print safeValue(I_dont_exist) ?? "I_dont_exist is not defined" // I_dont_exist is not defined
+print safeValue(non_existing_var) // undefined

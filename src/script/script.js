@@ -6,16 +6,63 @@ if (!Array.isArray) {Array.isArray=function(arg) {return Object.prototype.toStri
 
 // Your code below this line
 
-var emoji_var90bp8y9989 = ({
-    emoji_var90bp8y128077: "👍",
-    emoji_var90bp8y128078: "👎",
-});
-console.log(BS.sum(emoji_var90bp8y9989.emoji_var90bp8y128077, emoji_var90bp8y9989.emoji_var90bp8y128078));
-BS.customOperators["emoji_var90bp8y128514"] = function(left, right, required = false) {
-
-    if (required && typeof arguments[0] === void 0) {
-        throw new TypeError("Missing argument at 7:1");
+var var_name;
+if ((function() {
+        try {
+            var_name
+        } catch (e) {
+            return false;
+        }
+        return true;
+    })()) {
+    console.log("var_name is defined");
+} else {
+    console.log("var_name is not defined");
+}
+var existing_var = 10;
+console.log((function() {
+    try {
+        existing_var.non_existing_property.another_non_existing_property
+    } catch (e) {
+        return undefined;
     }
-    return BS.sum(left, right);
-};
-console.log(BS.customOperators["emoji_var90bp8y128514"](1, 2));
+    return existing_var.non_existing_property.another_non_existing_property;
+})());
+console.log((function() {
+    try {
+        existing_var
+    } catch (e) {
+        return undefined;
+    }
+    return existing_var;
+})());
+console.log(((((function() {
+    try {
+        I_dont_exist
+    } catch (e) {
+        return undefined;
+    }
+    return I_dont_exist;
+})()) === null) || ((function() {
+    try {
+        I_dont_exist
+    } catch (e) {
+        return undefined;
+    }
+    return I_dont_exist;
+})()) === void(0)) ? "I_dont_exist is not defined" : (function() {
+    try {
+        I_dont_exist
+    } catch (e) {
+        return undefined;
+    }
+    return I_dont_exist;
+})());
+console.log((function() {
+    try {
+        non_existing_var
+    } catch (e) {
+        return undefined;
+    }
+    return non_existing_var;
+})());

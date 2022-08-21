@@ -12,6 +12,13 @@ base -> parenthesized {% id %}
 	| array {% id %}
     | convert {% id %}
 	| object {% id %}
+    | "safeValue" _ arguments {% v => ({
+        type: 'safeValue',
+        value: v[2],
+        line: v[0].line,
+        col: v[0].col
+    }) %}
+
 	#| boolean {% id %}
 
 sum -> sum _nbsp ("+" | "-") _ product {% v => ({

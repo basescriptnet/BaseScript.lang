@@ -86,6 +86,18 @@ myNull -> "null" {% Null %}
 
 # booleans
 boolean -> (%boolean) {% boolean %}
+    | "defined" _nbsp identifier {% v => ({
+        type: 'defined',
+        value: v[2],
+        line: v[0].line,
+        col: v[0].col
+    }) %}
+    | "defined" _nbsp "(" _ identifier _ ")" {% v => ({
+        type: 'defined',
+        value: v[4],
+        line: v[0].line,
+        col: v[0].col
+    }) %}
 	# | condition {% condition.value %}
 
 # strings
