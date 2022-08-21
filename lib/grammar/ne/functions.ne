@@ -5,10 +5,12 @@ function_declaration -> ("async" __):? ("function") __ identifier _ arguments_wi
 
 annonymous_function ->
     # | ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
-	("async" __):? ("function" | "def") (__ identifier):? _ arguments_with_types statements_block {% functions.annonymous %}
-	| ("async" __):? ("function" | "def") (__ identifier):? statements_block {% functions.annonymous_with_no_args %}
+	("async" __):? function_declarator (__ identifier):? _ arguments_with_types statements_block {% functions.annonymous %}
+	| ("async" __):? function_declarator (__ identifier):? statements_block {% functions.annonymous_with_no_args %}
     # ! returns multiple results if assigned or if has pre-spacing
     #| lambda {% id %}
+
+function_declarator -> ("function" | "def" | "void" | "Int" | "Float" | "Array" | "Object" | "Null" | "Boolean" | "Number" | "String") {% v => v[0] %}
 
 return -> "return" __nbsp value {% returns.value %}
     | "return" {% returns.empty %}

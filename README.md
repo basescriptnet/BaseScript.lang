@@ -9,7 +9,7 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/blob/master/BUGS.md) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.1.27-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.1.28-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
@@ -196,7 +196,6 @@ multiline string!`
 
 ```javascript
 // returns the type of the value
-typeof value
 typeof(value)
 ```
 
@@ -244,7 +243,6 @@ true if isNaN(value) else false
 ```javascript
 // this returns the length of the object keys
 // or if not iterable - 0
-sizeof value
 sizeof(value)
 ```
 
@@ -500,7 +498,7 @@ try {
 > Declaration, cases?, default?
 
 ```javascript
-switch typeof value {
+switch typeof(value) {
     case 'String':
         return value
     case 'Number':
