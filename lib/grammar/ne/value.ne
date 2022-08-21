@@ -162,6 +162,12 @@ _value ->
         line: v[0].line,
         col: v[0].col
     }) %}
+    | "void" _nbsp arguments {% v => ({
+        type: 'void',
+        value: v[2],
+        line: v[0].line,
+        col: v[0].col
+    }) %}
     | ternary {% id %}
     #| "private" statements_block {% v => {
     #    return {

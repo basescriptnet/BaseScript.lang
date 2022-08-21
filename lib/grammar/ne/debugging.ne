@@ -1,14 +1,16 @@
-debugging -> ("LOG" | "print") debugging_body {% v => ({
+debugging -> ("LOG" | "print") (__ "if"):? debugging_body {% v => ({
 	type: 'debugging',
 	method: 'log',
-	value: v[1],
+    conditional: v[1],
+	value: v[2],
     line: v[0].line,
     col: v[0].col
 }) %}
-| "ERROR" debugging_body {% v => ({
+| "ERROR" (__ "if"):? debugging_body {% v => ({
 	type: 'debugging',
 	method: 'error',
-	value: v[1],
+    conditional: v[1],
+	value: v[2],
     line: v[0].line,
     col: v[0].col
 }) %}

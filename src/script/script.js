@@ -6,63 +6,30 @@ if (!Array.isArray) {Array.isArray=function(arg) {return Object.prototype.toStri
 
 // Your code below this line
 
-var var_name;
+if (window) {
+    console.log(window);
+}
 if ((function() {
         try {
-            var_name
+            I_dont_exist
         } catch (e) {
             return false;
         }
         return true;
     })()) {
-    console.log("var_name is defined");
-} else {
-    console.log("var_name is not defined");
+    console.log((function() {
+        try {
+            I_dont_exist
+        } catch (e) {
+            return false;
+        }
+        return true;
+    })());
 }
-var existing_var = 10;
-console.log((function() {
-    try {
-        existing_var.non_existing_property.another_non_existing_property
-    } catch (e) {
-        return undefined;
-    }
-    return existing_var.non_existing_property.another_non_existing_property;
-})());
-console.log((function() {
-    try {
-        existing_var
-    } catch (e) {
-        return undefined;
-    }
-    return existing_var;
-})());
-console.log(((((function() {
-    try {
-        I_dont_exist
-    } catch (e) {
-        return undefined;
-    }
-    return I_dont_exist;
-})()) === null) || ((function() {
-    try {
-        I_dont_exist
-    } catch (e) {
-        return undefined;
-    }
-    return I_dont_exist;
-})()) === void(0)) ? "I_dont_exist is not defined" : (function() {
-    try {
-        I_dont_exist
-    } catch (e) {
-        return undefined;
-    }
-    return I_dont_exist;
-})());
-console.log((function() {
-    try {
-        non_existing_var
-    } catch (e) {
-        return undefined;
-    }
-    return non_existing_var;
-})());
+if (NaN) {
+    console.log(NaN);
+}
+errorMessge = "I am an error message";
+if (errorMessge) {
+    console.error(errorMessge);
+}

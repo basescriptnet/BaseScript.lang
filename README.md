@@ -9,7 +9,7 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/blob/master/BUGS.md) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.1.30-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.1.31-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
@@ -285,16 +285,17 @@ if value:
 // just a syntax sugar
 print 10 // console.log(10)
 print(10) // console.log(10)
+print if defined I_dont_exist // will not print anything unless the condition is truthy!
 LOG "hello world" // console.log("hello world")
 ```
 
-> WRITE
+<!--> WRITE
 
 ```javascript
 // appends the message to the HTML body element
 // equivalent to document.write() method
 WRITE "Message" // document.write("Message")
-```
+```-->
 
 > ERROR
 
@@ -302,6 +303,7 @@ WRITE "Message" // document.write("Message")
 // equivalent to console.error() method
 ERROR "Something went wrong"
 // console.error("Something went wrong")
+ERROR if errorMessage // shows an error if errorMessage is not falsy
 ```
 
 ## 🔄 Conditions
