@@ -1,4 +1,10 @@
-String test(a, b) {
-    return [a, b] + [0, 1, 2, b]
+let ✅ = {
+    👍: '👍',
+    👎: '👎',
 }
-print test(1, 2) // 120122
+print ✅.👍 + ✅.👎
+
+operator #😂 (left, right) {
+    return left + right
+}
+print 1 #😂 2

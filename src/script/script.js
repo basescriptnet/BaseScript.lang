@@ -6,8 +6,16 @@ if (!Array.isArray) {Array.isArray=function(arg) {return Object.prototype.toStri
 
 // Your code below this line
 
-function test(a, b) {
-    const args = Array.from(arguments);
-    return BS.convert(BS.sum([a, b], [0, 1, 2, b]), "String");
+var emoji_var90bp8y9989 = ({
+    emoji_var90bp8y128077: "👍",
+    emoji_var90bp8y128078: "👎",
+});
+console.log(BS.sum(emoji_var90bp8y9989.emoji_var90bp8y128077, emoji_var90bp8y9989.emoji_var90bp8y128078));
+BS.customOperators["emoji_var90bp8y128514"] = function(left, right, required = false) {
+
+    if (required && typeof arguments[0] === void 0) {
+        throw new TypeError("Missing argument at 7:1");
+    }
+    return BS.sum(left, right);
 };
-console.log(test(1, 2));
+console.log(BS.customOperators["emoji_var90bp8y128514"](1, 2));

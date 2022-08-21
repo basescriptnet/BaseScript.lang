@@ -100,14 +100,11 @@ statement -> blocks {% id %}
 
 blocks ->
 	if_block {% id %}
-    # ! is included in value as annonymous function
-    # ! but has a possibility to add name. So no need for this line
-    #| function_declaration {% id %}
-	| type_declaration {% id %}
 	| while_block {% id %}
 	| for_block {% id %}
 	| try_catch_finally {% id %}
 	| switch_multiple {% id %}
+	| type_declaration {% id %}
     | operator_declaration {% id %}
     #| "test" statements_block _ "expect" _ value {% v => ({
     #    type: 'test',
@@ -148,7 +145,7 @@ type_declaration -> "type" __ identifier _ arguments_with_types statements_block
 	}
 	//debugger
 	if (v[4].value.length == 0) {
-	    throw new Error(`Type declaration requires at least one argument.`)
+        throw new Error(`Type declaration requires at least one argument.`)
 	}
 	return assign(v[0], {
 		type: 'type_declaration',
