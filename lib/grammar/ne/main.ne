@@ -87,6 +87,7 @@ statement -> blocks {% id %}
 	| return {% id %}
 	| "throw" __ value {% statement.throw %}
 	| ("break" | "continue") {% statement.break_continue %}
+    | "swap" __ value _ "," _ value {% statement.swap %}
 	#| "echo" __ value EOL {% statement.echo %}
 	#| %eval __ value EOL {% statement.eval %}
 	#| "import" __ value {% statement.import %}

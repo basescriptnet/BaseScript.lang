@@ -150,6 +150,11 @@ _value ->
 	# | obj_retract {% id %}
 	# | ("this" | identifier | html | object | number | function_call) _ "." _ ("this" | identifier | html | object | number | function_call) {% v => v %}
 	| myNull {% id %}
+    | "new" _ "." _ "target" {% v => ({
+        type: 'new.target',
+        line: v[0].line,
+        col: v[0].col
+    }) %}
     | ternary {% id %}
     #| "private" statements_block {% v => {
     #    return {

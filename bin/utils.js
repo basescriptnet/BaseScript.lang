@@ -68,7 +68,7 @@ let writeFile = (path, fileName, content) => {
                 `${(`${fileName}.js`).replace(/\\/g, '/')}`,
                 //`${path_join(path_applied, `/${fileName}.js`).replace(/\\/g, '/')}`,
                 `${prepend}
-                ${minify(built_in)}\n${minify(includes)}\n\n${beautify(contentJS)}`, 'utf8'
+                ${minify(built_in)}\n${minify(includes) + '\n'}\n${beautify(contentJS)}`, 'utf8'
             );
                 // # sourceMappingURL=${fileName}.bs.map\n` // add later
                 // fs.writeFileSync(fileName+'.bs.map', content)

@@ -1,6 +1,1 @@
-namespace document
-::querySelector('body').innerHTML = 'hello world!'
-
-namespace document.body.style
-::backgroundColor = 'red'
-::color = 'white'
+swap alert, confirm
