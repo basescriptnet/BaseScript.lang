@@ -1,5 +1,1 @@
-print if window // prints the window
-print if defined I_dont_exist // skips
-print if NaN // skips
-errorMessge = "I am an error message"
-ERROR if errorMessge // prints the error message
+print if (safeValue(I_dont_exist) as Function)()

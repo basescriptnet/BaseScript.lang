@@ -48,7 +48,7 @@ convert -> prefixExp __ "as" __ convert_type {% (v, l, reject) => {
     }
 } %}
 
-convert_type -> ("JSON" | "String" | "Number" | "Boolean" | "Object" | "Float" | "Int" | "Array") {% v => v[0][0] %}
+convert_type -> ("Function" | "JSON" | "String" | "Number" | "Boolean" | "Object" | "Float" | "Int" | "Array") {% v => v[0][0] %}
     # ! removed for now
 	#| "Array" "[" convert_type "]" {% v => {
 	#	return {

@@ -81,7 +81,7 @@ statement -> blocks {% id %}
 	#	type: 'DELETE',
 	#}) %}
 	#| "delete" __ value {% statement.delete %}
-    | "delete" arguments {% statement.delete %}
+    | "delete" _nbsp value {% statement.delete %}
     #| "free" arguments {% statement.free %}
     #| "sleep" arguments {% statement.sleep %}
 	| return {% id %}
