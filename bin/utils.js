@@ -2,7 +2,6 @@ const fs = require('fs');
 const path_join = require('path').join;
 const BS = require('../lib/compiler');
 const beautify = require('js-beautify').js;
-// const beautify = require('@wmhilton/beautify')
 const path_applied = process.cwd();
 let minify = function (code) {
     return code.replace(/[ \t]*\/\/[^\n]*/g, ' ')
@@ -13,7 +12,7 @@ let minify = function (code) {
         //.replace(/,\s+/g, ', ')
         .replace(/(?:\s*)(==?=?|<=?|>=?|!==?|\|\||&&)(?:\s*)/g, '$1');
 }
-let writeFile = (path, fileName, content) => {
+let writeFile = (path, fileName, content, extension = '.bs') => {
     // TODO change the line below
     let ast = '';
     try {
@@ -47,28 +46,33 @@ let writeFile = (path, fileName, content) => {
             }
             //contentJS = contentJS.slice(0, contentJS.length-6)
             contentJS += '\n';
-            let built_in = fs.readFileSync(`${__dirname}/../lib/compiler/built_in.js`, { encoding: 'utf-8'});
+            let built_in = '';
+            let prepend = '';
+            if (extension == '.bs') {
+                built_in = minify(fs.readFileSync(`${__dirname}/../lib/compiler/built_in.js`, { encoding: 'utf-8' }));
+                built_in += '\n';
+                prepend = `if (!globalThis) {
+                    globalThis = window || global || this || {};
+                }
+                try {
+                    globalThis.require = require;
+                } catch (err) {
+                    globalThis.require = () => undefined;
+                }
+                `.replace(/\s*\/\/.*/g, '\n').replace(/\s+/g, ' ');
+            }
             // fs.mkdirSync('./build/');
             // let p = fileName.split('\\').slice(0, -1);
             // console.log(p.join('/'))
             // if (!fs.existsSync(p.join('/'))) {
             //     fs.mkdirSync(`${path_applied}/${p.join('/')}`, {recursive: true})
             // }
-            let prepend = `if (!globalThis) {
-                globalThis = window || global || this || {};
-            }
-            try {
-                globalThis.require = require;
-            } catch (err) {
-                globalThis.require = () => undefined;
-            }
-            `.replace(/\s*\/\/.*/g, '\n').replace(/\s+/g, ' ');
             // console.log(path_join(path_applied, `/${fileName}.js`).replace(/\\/g, '/'))
             fs.writeFileSync(
                 `${(`${fileName}.js`).replace(/\\/g, '/')}`,
                 //`${path_join(path_applied, `/${fileName}.js`).replace(/\\/g, '/')}`,
-                `${prepend}
-                ${minify(built_in)}\n${minify(includes) + '\n'}\n${beautify(contentJS)}`, 'utf8'
+                `${prepend}`
+                + built_in + (minify(includes) + '\n') + beautify(contentJS), 'utf8'
             );
                 // # sourceMappingURL=${fileName}.bs.map\n` // add later
                 // fs.writeFileSync(fileName+'.bs.map', content)
@@ -89,8 +93,8 @@ module.exports = {
         if (!watch) {
             //path = path_join(dir, arg0)
             path = dir
-            if (!/\.bs$/i.test(path)) {
-                console.error(new Error('Provided file doesn\'t have .bs extension'));
+            if (!/\.b(s|m)$/i.test(path)) {
+                console.error(new Error('Provided file doesn\'t have .bs or .bm extension'));
                 process.exit()
             }
         } else {
@@ -98,6 +102,7 @@ module.exports = {
             //console.log(path)
         }
         let fileName = path.substr(0, path.length - ('.bs'.length));
+        let extension = path.substr(path.length - ('.bs'.length));
         //console.dir(fs.promises)
         //console.log(fs.existsSync(`${path}`))
         //console.log(`${path_applied}${watch ? '/' + path : ''}`)
@@ -105,19 +110,19 @@ module.exports = {
         try {
             let content = '';
             if (!watch && fs.existsSync(`${path}`)) {
-                content = BS(`${path}`);
+                content = BS(`${path}`, extension);
             } else {
                 if (!fs.existsSync(`${path}`))
                     path = `${path_applied}${watch ? '\\' + path : ''}`;
                 //console.log(path)
                 //process.exit()
-                content = BS(path);
+                content = BS(path, extension);
             }
             if (content === void 0) {
                 //console.log(']')
                 return;
             }
-            let result = writeFile(path, fileName, content);
+            let result = writeFile(path, fileName, content.result, content.extension);
             // result !== void 0 && console.log(`[Output]: ${result}`);
             console.log('Compiled in ' + (Date.now() - date) + 'ms');
         } catch (err) {

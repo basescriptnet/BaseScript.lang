@@ -23,7 +23,8 @@ value_reassign -> left_assign _ "=" _ (value) {% v => {
 } %}
     | value_addition {% id %}
 
-var_assign -> ("let" __ | "const" __ | "\\") var_assign_list {% vars.assign %}
+var_assign -> assign_type var_assign_list {% vars.assign %}
+    #| assign_type var_assign_list {% vars.assign %}
 	| "ASSIGN" _ (switch | value) _ "TO" _  identifier {% v => {
 	return {
 		type: 'var_assign',
@@ -41,6 +42,17 @@ var_assign -> ("let" __ | "const" __ | "\\") var_assign_list {% vars.assign %}
 		offset: v[0].offset
 	}
 } %}
+
+assign_type ->
+#(identifier | %keyword) __ {% (v, l, reject) => {
+#    if (['let', 'const', '\\'].includes(v[0][0].value)) return reject;
+#    if (v[0][0].value[0].toUpperCase() != v[0][0].value[0]) {
+#        return reject;
+#    }
+#    return v[0][0];
+#} %}
+#    |
+    ("let" __ | "const" __ | "\\") {% v => v[0][0].value %}
 
 var_assign_list -> var_reassign (_ "," _ var_reassign {% v => v[3] %}):* {% vars.var_assign_list %}
 

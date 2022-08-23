@@ -1,3 +1,8 @@
+
+let $this = globalThis || window || global || this;
+if ($this.random && $this.random.getRandom) {
+    return;
+}
 function expect_array_or_string(value, name) {
     if (!Array.isArray(value) && typeof value !== 'string') {
         throw new TypeError(`Unexpected type of argument for "random.${name}" function. "array" or "string" was expected`);
@@ -6,7 +11,6 @@ function expect_array_or_string(value, name) {
     }
     return value;
 }
-let $this = globalThis || window || global || this;
 $this.random = {
     ALPHABET: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
     getRandom() {

@@ -1,1 +1,2 @@
-print if (safeValue(I_dont_exist) as Function)()
+#include <random>
+let a = 10

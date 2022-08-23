@@ -90,7 +90,7 @@ statement -> blocks {% id %}
     | "swap" __ value _ "," _ value {% statement.swap %}
 	#| "echo" __ value EOL {% statement.echo %}
 	#| %eval __ value EOL {% statement.eval %}
-	#| "import" __ value {% statement.import %}
+	#| "import" __ string {% statement.import %}
 	#| "@include" __ string EOL {% statement.include %}
 	| var_assign {% id %}
 	| value_reassign {% statement.value_reassign %}
