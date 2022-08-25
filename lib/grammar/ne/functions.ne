@@ -49,6 +49,9 @@ argument_identifier_and_value -> argument_type identifier (_ "=" _ value):? {% v
 	value: v[2] ? v[2][3] : null
 }) %}
 
+#argument_type_name -> identifier {% id %}
+#    | %keyword {% id %}
+
 argument_type -> (identifier "?":? __):? {% v => {
     if (!v[0]) return;
 	v[0] = v[0][0];

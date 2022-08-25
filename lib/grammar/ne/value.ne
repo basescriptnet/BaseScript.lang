@@ -100,6 +100,17 @@ pow -> pow _nbsp ("**" | "%") _ unary {% v => ({
     line: v[0].line,
     col: v[0].col
 }) %}
+    | base _nbsp ("|" | "&" | ">>>" | "<<" | ">>" | "^") _ base {% v => ({
+        type: 'bitwise_middle',
+        left: v[0],
+        operator: v[2][0].value,
+        right: v[4],
+    }) %}
+    | "~":+ _nbsp base {% v => ({
+        type: 'bitwise_not',
+        operator: v[0].map(i => i.value).join(''),
+        value: v[2],
+    }) %}
     | base {% id %}
 
 expression ->

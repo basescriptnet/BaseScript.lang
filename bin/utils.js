@@ -9,7 +9,8 @@ let minify = function (code) {
         .replace(/[ \t]+/g, ' ')
         .replace(/\{\s+/g, '{')
         .replace(/\s+\}/g, '}')
-        //.replace(/,\s+/g, ', ')
+        .replace(/\}\s+/g, '}')
+        .replace(/(,|;)\s+/g, '$1 ')
         .replace(/(?:\s*)(==?=?|<=?|>=?|!==?|\|\||&&)(?:\s*)/g, '$1');
 }
 let writeFile = (path, fileName, content, extension = '.bs') => {
@@ -39,10 +40,10 @@ let writeFile = (path, fileName, content, extension = '.bs') => {
             let ast_to_js = require('../lib/compiler/ast_to_js');
             var tmp = ast_to_js(ast);
             let preIndex = tmp.indexOf('\n\n// Your code below this line\n\n');
-            let includes = tmp.slice(0, preIndex);
+            let includes = '';
             let contentJS = tmp.slice(preIndex + 1);
-            if (preIndex == -1) {
-                includes = '';
+            if (preIndex != -1) {
+                includes = minify(tmp.slice(0, preIndex)) + '\n';
             }
             //contentJS = contentJS.slice(0, contentJS.length-6)
             contentJS += '\n';
@@ -72,7 +73,7 @@ let writeFile = (path, fileName, content, extension = '.bs') => {
                 `${(`${fileName}.js`).replace(/\\/g, '/')}`,
                 //`${path_join(path_applied, `/${fileName}.js`).replace(/\\/g, '/')}`,
                 `${prepend}`
-                + built_in + (minify(includes) + '\n') + beautify(contentJS), 'utf8'
+                + built_in + includes + beautify(contentJS), 'utf8'
             );
                 // # sourceMappingURL=${fileName}.bs.map\n` // add later
                 // fs.writeFileSync(fileName+'.bs.map', content)

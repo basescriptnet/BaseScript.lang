@@ -30,6 +30,8 @@ allowed_keywords ->
     | "String" {% id %}
     | "Number" {% id %}
     | "JSON" {% id %}
+    | "Float" {% id %}
+    | "Int" {% id %}
     | "undefined" {% v => assign(v[0], {
         type: 'keyword',
         value: 'void(0)'
