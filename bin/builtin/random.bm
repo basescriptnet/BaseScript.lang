@@ -1,8 +1,8 @@
-
+//#include <external>
 let $this = globalThis || window || global || this
 if $this.random && $this.random.getRandom:
     return
-if BS.libs.includes['random']:
+if BS && BS.libs && BS.libs.includes['random']:
     return
 
 BS.libs.push('random')
@@ -10,7 +10,8 @@ BS.libs.push('random')
 function expect_array_or_string(value, name) {
     if (!Array.isArray(value) && typeof(value) !== 'String') {
         throw new TypeError(`Unexpected type of argument for "random.${name}" function. "array" or "string" was expected`)
-    } else if (value.length == 0) {
+    }
+    if (value.length == 0) {
         throw new Error(`Unexpected empty array or string for "random.${name}" function`)
     }
     return value

@@ -1,8 +1,9 @@
+//#include <external>
 if BS.libs.includes('typedArrays'): return
 
 BS.libs.push('typedArrays')
 
-let types = ['Int', 'Float', 'String', 'Boolean', 'Function', 'Array', 'Object']
+\types = ['Int', 'Float', 'String', 'Boolean', 'Function', 'Array', 'Object']
 
 BS.defineProperty(Array.prototype, "isTypeof", function isTypeOf(String value) {
     if BS.customTypes[value] != undefined {
@@ -13,10 +14,8 @@ BS.defineProperty(Array.prototype, "isTypeof", function isTypeOf(String value) {
 
 // Typed Arrays
 for i from 0 till types.length {
-    let t = types[i]
-    BS.customTypes[t + 'Array'] = function (value) {
-        if typeof(value) !== 'Array':
-            return false
+    \t = types[i]
+    BS.customTypes[t + 'Array'] = function (Array value) {
         for j from 0 till value.length {
             if typeof(value[j]) !== t:
                 return false

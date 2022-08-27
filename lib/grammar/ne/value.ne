@@ -1,5 +1,22 @@
 # expressions
 
+bitwise -> bitwise _nbsp ("|" | "&" | ">>>" | "<<" | ">>" | "^") _ base {% v => ({
+        type: 'bitwise_middle',
+        left: v[0],
+        operator: v[2][0].value,
+        right: v[4],
+    }) %}
+    | new_statement {% id %}
+
+new_statement -> ("new" | "await" | "yield") __ base {% (v, l, reject) => {
+    if (['new', 'await', 'yield'].includes(v[2].type)) return reject;
+		return assign(v[0][0], {
+			type: v[0][0].text,
+			value: v[2]
+		})
+	} %}
+    | base {% id %}
+
 base -> parenthesized {% id %}
 	#| annonymous_function {% id %}
 	#| regexp {% id %}
@@ -65,11 +82,18 @@ product -> product _nbsp ("*" | "/") _ unary {% v => ({
 
 unary -> "-" _nbsp unary {% v => {
     return {
-    type: 'number_negative',
-    value: v[2],
-    line: v[0].line,
-    col: v[0].col
-}} %}
+        type: 'number_negative',
+        value: v[2],
+        line: v[0].line,
+        col: v[0].col
+    }} %}
+    | "~":+ _nbsp pow {% v => ({
+        type: 'bitwise_not',
+        operator: v[0].map(i => i.value).join(''),
+        value: v[2],
+        line: v[0].line,
+        col: v[0].col
+    }) %}
     | pow {% id %}
 
 pow -> pow _nbsp ("**" | "%") _ unary {% v => ({
@@ -91,7 +115,7 @@ pow -> pow _nbsp ("**" | "%") _ unary {% v => ({
     line: v[0].line,
     col: v[0].col
 }) %}
-| pow _nbsp operator _ unary {% v => ({
+| pow _nbsp operator __ unary {% v => ({
     type: 'pow',
     left: v[0],
     right: v[4],
@@ -100,18 +124,7 @@ pow -> pow _nbsp ("**" | "%") _ unary {% v => ({
     line: v[0].line,
     col: v[0].col
 }) %}
-    | base _nbsp ("|" | "&" | ">>>" | "<<" | ">>" | "^") _ base {% v => ({
-        type: 'bitwise_middle',
-        left: v[0],
-        operator: v[2][0].value,
-        right: v[4],
-    }) %}
-    | "~":+ _nbsp base {% v => ({
-        type: 'bitwise_not',
-        operator: v[0].map(i => i.value).join(''),
-        value: v[2],
-    }) %}
-    | base {% id %}
+    | bitwise {% id %}
 
 expression ->
 	#| expression _nbsp ("**" | "*" | "+" | "-" | "/" | "%") _ prefixExp {% (v, l, reject) => {
@@ -147,12 +160,6 @@ _value ->
             col: v[0].col
         }
     } %}
-	| ("new" | "await" | "yield") __ prefixExp {% v => {
-		return assign(v[0][0], {
-			type: v[0][0].text,
-			value: v[2]
-		})
-	} %}
 	#| "@text" __ value {% html.value_to_string %}
 	| prefixExp __ "instanceof" __ prefixExp {% v => ({
 		type: 'instanceof',
