@@ -126,15 +126,15 @@ pow -> pow _nbsp ("**" | "%") _ unary {% v => ({
 }) %}
     | bitwise {% id %}
 
-expression ->
-	#| expression _nbsp ("**" | "*" | "+" | "-" | "/" | "%") _ prefixExp {% (v, l, reject) => {
-    #    if (v[0].type == 'annonymous_function') return reject;
-    #    return ({
-    #        type: 'expression',
-    #        value: [v[0], v[2][0], v[4]]
-    #    })
-    #} %}
-    prefixExp {% id %}
+#expression ->
+#	#| expression _nbsp ("**" | "*" | "+" | "-" | "/" | "%") _ prefixExp {% (v, l, reject) => {
+#    #    if (v[0].type == 'annonymous_function') return reject;
+#    #    return ({
+#    #        type: 'expression',
+#    #        value: [v[0], v[2][0], v[4]]
+#    #    })
+    ##} %}
+    #prefixExp {% id %}
     # ! removed for now
 	#| "(" _ expression _ ")" (_ arguments):? {% v => ({
 	#	type: 'expression_with_parenthesis',
@@ -150,7 +150,7 @@ expression ->
 value -> condition {% id %}
     #| _value {% id %}
 _value ->
-	expression {% id %}
+	prefixExp {% id %}
     |
     "!" _ prefixExp {% v => {
         return {

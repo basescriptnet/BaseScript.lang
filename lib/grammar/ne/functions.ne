@@ -1,7 +1,7 @@
 # functions
 # function_declaration -> ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") __ identifier _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
-function_declaration -> ("async" __):? ("function") __ identifier _ arguments_with_types statements_block {% functions.declaration %}
-	| ("async" __):? ("function") __ identifier statements_block {% functions.declaration_with_no_args %}
+#function_declaration -> ("async" __):? ("function") __ identifier _ arguments_with_types statements_block {% functions.declaration %}
+#	| ("async" __):? ("function") __ identifier statements_block {% functions.declaration_with_no_args %}
 
 annonymous_function ->
     # | ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
@@ -10,7 +10,7 @@ annonymous_function ->
     # ! returns multiple results if assigned or if has pre-spacing
     #| lambda {% id %}
 
-function_declarator -> ("function" | "def" | "void" | "Int" | "Float" | "Array" | "Object" | "Null" | "Boolean" | "Number" | "String") {% v => v[0] %}
+function_declarator -> ("function" | "def" | "void" | "Int" | "Float" | "Array" | "Object" | "Null" | "Boolean" | "Number" | "String") {% id %}
 
 return -> "return" __nbsp value {% returns.value %}
     | "return" {% returns.empty %}
@@ -26,7 +26,7 @@ function_call -> _base _nbsp arguments {% (v, l, reject) => {
 	})
 } %}
     | "::" arguments {% (v, l, reject) => {
-    if (v[0].type == 'annonymous_function') return reject
+    // if (v[0].type == 'annonymous_function') return reject
 	return ({
         type: 'namespace_retraction',
         retraction_type: 'function_call',
@@ -66,22 +66,22 @@ argument_type -> (identifier "?":? __):? {% v => {
 	return [v[0], v[1]];
 } %}
 
-lambda_arguments -> arguments_with_types {% id %}
-    | identifier {% id %}
+#lambda_arguments -> arguments_with_types {% id %}
+#    | identifier {% id %}
 
-lambda -> ("async" __):? _ lambda_arguments _ "=>" statements_block {% v => {
-        return {
-            type: 'annonymous_function',
-            value: v[5],
-            arguments: v[2],
-            async: v[0] ? true : false
-        }
-    } %}
-    #| ("async" __):? _ lambda_arguments _ "=>" statement {% v => {
-    #    return {
-    #        type: 'lambda',
-    #        value: v[6],
-    #        arguments: v[2],
-    #        async: v[0] ? true : false
-    #    }
-    #} %}
+#lambda -> ("async" __):? _ lambda_arguments _ "=>" statements_block {% v => {
+#        return {
+#            type: 'annonymous_function',
+#            value: v[5],
+#            arguments: v[2],
+#            async: v[0] ? true : false
+#        }
+#    } %}
+#    #| ("async" __):? _ lambda_arguments _ "=>" statement {% v => {
+#    #    return {
+#    #        type: 'lambda',
+#    #        value: v[6],
+#    #        arguments: v[2],
+#    #        async: v[0] ? true : false
+#    #    }
+#    #} %}

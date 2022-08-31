@@ -7,24 +7,27 @@ const run_code = require('./run_code.js');
 let ast_to_js = require('../lib/compiler/ast_to_js');
 let minify = function (code) {
     return code.replace(/[ \t]*\/\/[^\n]*\n*/g, '')
-        .replace(/(\r\n?)+\s*/g, ' ')
-        .replace(/[ \t]+/g, ' ')
-        .replace(/\{\s+/g, '{')
-        .replace(/\s+\}/g, '}')
-        .replace(/\}\s+/g, '}')
-        .replace(/(,|;)\s+/g, '$1 ')
+        .replace(/(\r\n?|[ \t])+/g, ' ')
+        //.replace(/[ \t]+/g, ' ')
+        //.replace(/\{\s+/g, '{')
+        //.replace(/\s+\}/g, '}')
+        //.replace(/\}\s+/g, '}')
+        .replace(/\s*(,|;|\}|\{)\s+/g, '$1 ')
         .replace(/(?:\s*)(==?=?|<=?|>=?|!==?|\|\||&&)(?:\s*)/g, '$1');
 }
 let writeFile = (path, fileName, content, extension = '.bs') => {
-    if (!fileName) return
-    // TODO change the line below
-    let ast = content;
-    //let ast = '';
+    if (!fileName) {
+        return console.warn('Filename cannot be empty');
+    }
     try {
-        //ast = JSON.parse(JSON.stringify(content, null, 4));
-        var tmp = ast_to_js(ast);
+        // content = JSON.parse(JSON.stringify(content, null, 4));
+        //console.time('ast_to_js');
+        var tmp = ast_to_js(content);
+        //console.timeEnd('ast_to_js');
 
-        if (tmp.result === void 0) return;
+        if (tmp.result === void 0) {
+            return;
+        }
         console.log('[File System]: Writing to: '+fileName+'.js');
 
         let includes = minify(tmp.includes);
@@ -38,7 +41,7 @@ let writeFile = (path, fileName, content, extension = '.bs') => {
         );
         // # sourceMappingURL=${fileName}.bs.map\n` // add later
         // fs.writeFileSync(fileName+'.bs.map', content)
-        return ast;
+        return content;
     } catch (err) {
         console.log(err);
         return void console.error('[Error]: Can\'t compile. Unexpected input.')
@@ -58,17 +61,23 @@ module.exports = {
         } else {
             path = path_join(dir, path)
         }
-        let fileName = path.substr(0, path.length - 3);
-        let extension = path.substr(path.length - 3);
+        let fileName = path.substr(0, path.length - 3); // .bs
+        let extension = path.substr(path.length - 3); // .bs
 
         try {
             let content = '';
+            // ! text_to_ast is really time consuming
+            // ! so we use it only when we need to parse a file
             if (!watch && fs.existsSync(path)) {
+                //console.time('text_to_ast');
                 content = BS(path, extension);
+                //console.timeEnd('text_to_ast');
             } else {
                 if (!fs.existsSync(path))
                     path = `${path_applied}${watch ? '\\' + path : ''}`;
+                //console.time('text_to_ast');
                 content = BS(path, extension);
+                //console.timeEnd('text_to_ast');
             }
             if (content === void 0) {
                 return;
@@ -76,7 +85,7 @@ module.exports = {
             if (run) {
                 let tmp = ast_to_js(content.result);
 
-                if (tmp.result && tmp.result.length === 0 || !tmp.result) return
+                if (tmp.result && tmp.result.length === 0 || !tmp.result) return;
                 let includes = tmp.includes;
                 let contentJS = tmp.result;
                 let final = includes + '\n' + contentJS;
@@ -90,12 +99,12 @@ module.exports = {
             }
 
             let wrote = writeFile(path, fileName, content.result, content.extension);
-            if (wrote !== void 0 || wrote !== false || wrote !== null)
+            if (wrote !== void 0 || wrote !== false || wrote !== null) {
                 console.log('Compiled in ' + (Date.now() - date) + 'ms');
+            }
         } catch (err) {
             console.warn('Can\'t compile. Unexpected input.');
             console.warn(err);
-            //console.warn(new Error(err.message));
         }
     }
 }

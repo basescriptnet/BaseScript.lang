@@ -9,7 +9,7 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/blob/master/BUGS.md) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.1.35-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.1.36-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
@@ -80,6 +80,12 @@ npm install -g ./
 
 ** Note: .bs files are compiled to .js files. .bm files are modular files, that will
 be compiled during the runtime as dependencies to .bs files. **
+
+> Run from CLI without an output file
+
+```sh
+bs run <file_name>
+```
 
 ## 🗄️ Variables
 

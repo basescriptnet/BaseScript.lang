@@ -20,9 +20,9 @@ includes -> _ "#include" _ "<" (identifier | keyword) ">" {% v => {
 # ? removed _ at the end. Works fine
 decorated_statements -> _ %decorator includes:* statements {% v => ({
 	type: 'decorator',
-	line: v[1].line,
-	col: v[1].col,
-	offset: v[1].offset,
+	line: v[3].line,
+	col: v[3].col,
+	offset: v[3].offset,
 	decorator: v[1].value,
 	includes: v[2],
 	value: v[3],
@@ -71,7 +71,7 @@ statements -> (_ global EOL {% v => v[1] %}):* (_ statement EOL):* (_ statement)
 statement -> blocks {% id %}
 	| debugging {% id %} # ! needs test
 	| class_declaration {% id %}
-	| with {% id %}
+	#| with {% id %} # ! deprecated
 	| "debugger" {% statement.debugger %}
 	#| "SAVE" __ value EOL {% v => ({
 	#	type: 'SAVE',
@@ -176,20 +176,20 @@ operator_declaration -> "operator" __ operator _ arguments_with_types statements
     })
 } %}
 
-with -> "with" __ value statements_block  {% v => assign(v[0], {
-	type: 'with',
-	obj: v[2],
-	value: v[3],
-    line: v[0].line,
-    col: v[0].col
-}) %}
-    | "with" _ "(" _ value _ ")" statements_block  {% v => assign(v[0], {
-	type: 'with',
-	obj: v[4],
-	value: v[7],
-    line: v[0].line,
-    col: v[0].col
-}) %}
+#with -> "with" __ value statements_block  {% v => assign(v[0], {
+#	type: 'with',
+#	obj: v[2],
+#	value: v[3],
+#    line: v[0].line,
+#    col: v[0].col
+#}) %}
+#    | "with" _ "(" _ value _ ")" statements_block  {% v => assign(v[0], {
+#	type: 'with',
+#	obj: v[4],
+#	value: v[7],
+#    line: v[0].line,
+#    col: v[0].col
+#}) %}
 
 global -> "@" "global" __ identifier {% v => ({
     type: 'global',
