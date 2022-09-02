@@ -1,5 +1,4 @@
-#! /usr/bin/env node
-// console.log(process.argv)
+// Read CLI arguments, watch files and run them
 const path_applied = process.cwd();
 const yargs = require("yargs");
 const fs = require("fs");
@@ -63,5 +62,4 @@ if (watch) {
         console.log(path, 'has changed');
         utils.parse(dir, arg0, path, true)
     });
-} else {
 }

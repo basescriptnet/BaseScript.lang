@@ -1,6 +1,6 @@
 {
     "name": "basescript.js",
-    "version": "0.1.36",
+    "version": "0.1.37",
     "description": "A scritpting language powered with Node.js and Nearley, that compiles down to JavaScript, and has the possibility for even more!",
     "main": "index.js",
     "scripts": {
@@ -27,8 +27,12 @@
         "typescript",
         "less code"
     ],
-    "author": "basescript.net",
-    "license": "ISC",
+    "author": {
+        "name": "basescript.net",
+        "email": "basescriptnet@gmail.com",
+        "url": "https://basescript.net"
+    },
+    "license": "MIT",
     "bugs": {
         "url": "https://github.com/basescriptnet/basescript/issues"
     },
@@ -38,7 +42,6 @@
         "microtime": "^3.0.0",
         "moo": "^0.5.1",
         "nearley": "^2.20.1",
-        "node-gyp": "^9.1.0",
         "yargs": "^17.3.1"
     }
 }

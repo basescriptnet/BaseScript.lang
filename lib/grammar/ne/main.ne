@@ -17,7 +17,6 @@ includes -> _ "#include" _ "<" (identifier | keyword) ">" {% v => {
     }
 } %}
 
-# ? removed _ at the end. Works fine
 decorated_statements -> _ %decorator includes:* statements {% v => ({
 	type: 'decorator',
 	line: v[3].line,
@@ -82,8 +81,6 @@ statement -> blocks {% id %}
 	#}) %}
 	#| "delete" __ value {% statement.delete %}
     | "delete" _nbsp value {% statement.delete %}
-    #| "free" arguments {% statement.free %}
-    #| "sleep" arguments {% statement.sleep %}
 	| return {% id %}
 	| "throw" __ value {% statement.throw %}
 	| ("break" | "continue") {% statement.break_continue %}
@@ -106,6 +103,7 @@ blocks ->
 	| switch_multiple {% id %}
 	| type_declaration {% id %}
     | operator_declaration {% id %}
+    | interface {% id %}
     #| "test" statements_block _ "expect" _ value {% v => ({
     #    type: 'test',
     #    value: v[1],
@@ -122,20 +120,20 @@ statements_block -> _ "{" statements _ (";" _):? "}" {% v => ({
     type: 'scope',
     value: v[3],
     line: v[3].line,
-    col: v[3].colva
+    col: v[3].col
 }) %}
 	| _ ":" _ statement {% v => ({
         type: 'scope',
         value: [v[3]],
         line: v[3].line,
-        col: v[3].colva
+        col: v[3].col
     }) %}
     #{% v => [v[3]] %}
 	| _ "do" __ statement {% v => ({
         type: 'scope',
         value: [v[3]],
         line: v[3].line,
-        col: v[3].colva
+        col: v[3].col
     }) %}
 ### END statements ###
 
@@ -174,6 +172,36 @@ operator_declaration -> "operator" __ operator _ arguments_with_types statements
         line: v[0].line,
         col: v[0].col
     })
+} %}
+
+interface -> "interface" __ identifier _ "{" _ (key "?":? _ ":" _ identifier _) ("," _ key "?":? _ ":" _ identifier _ {% v => v.slice(2) %}):* ("," _):? "}" {% v => {
+    if (v[2].value[0].toUpperCase() != v[2].value[0]) {
+        throw new SyntaxError(`Interface name must be capitalized.`)
+    }
+    if (v[6].length == 0) {
+        throw new Error(`Interface declaration requires at least one argument.`)
+    }
+    let values = [v[6], ...v[7]];
+    let obj = {};
+    for (let i in values) {
+        if (values[i][5].value[0].toUpperCase() != values[i][5].value[0]) {
+            throw new SyntaxError(`Interface key must be capitalized.`)
+        }
+        if (obj[values[i][0].value]) {
+            throw new SyntaxError(`Interface key must be unique.`)
+        }
+        obj[values[i][0].value] = {
+            nullable: values[i][1] ? true : false,
+            value: values[i][5].value
+        }
+    }
+    return {
+        type: 'interface',
+        identifier: v[2].value,
+        value: obj,
+        line: v[0].line,
+        col: v[0].col
+    }
 } %}
 
 #with -> "with" __ value statements_block  {% v => assign(v[0], {

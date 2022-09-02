@@ -1,2 +1,25 @@
 #include <builtins>
-#include <math>
+
+interface Person {
+    name: String,
+    age: Number,
+    children?: Person // ? means nullable
+}
+
+// possible grammar for type alias
+//interface Person {
+//    String name,
+//    Number age,
+//    Person? children // ? means nullable
+//}
+
+Person[] test (Person p) {
+    return [p, {name: "James", age: 10, children: null}]
+}
+
+print test ({name: "John", age: 42, children: {name: "Jane", age: 12, children: null}})
+
+Int[] | Int test2 (Int[] a) {
+    return a.reduce(def (x, y): => x + y)
+}
+print test2([1, 2, 3])
