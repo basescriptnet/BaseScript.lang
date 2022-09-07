@@ -6,14 +6,14 @@ const path_applied = process.cwd();
 const run_code = require('./run_code.js');
 let ast_to_js = require('../lib/compiler/ast_to_js');
 let minify = function (code) {
-    return code.replace(/[ \t]*\/\/[^\n]*\n*/g, '')
-        .replace(/(\r\n?|[ \t])+/g, ' ')
+    return code.replace(/[ \t]*\/\/[^\n]*\n*/g, '') // remove comments
+        .replace(/(\r\n?|[ \t])+/g, ' ') // remove spaces
         //.replace(/[ \t]+/g, ' ')
         //.replace(/\{\s+/g, '{')
         //.replace(/\s+\}/g, '}')
         //.replace(/\}\s+/g, '}')
-        .replace(/\s*(,|;|\}|\{)\s+/g, '$1 ')
-        .replace(/(?:\s*)(==?=?|<=?|>=?|!==?|\|\||&&)(?:\s*)/g, '$1');
+        .replace(/\s*(,|;|\}|\{)\s+/g, '$1 ') // remove spaces around separators
+        .replace(/(?:\s*)(==?=?|<=?|>=?|!==?|\|\||&&)(?:\s*)/g, '$1'); // remove spaces around operators
 }
 let writeFile = (path, fileName, content, extension = '.bs') => {
     if (!fileName) {

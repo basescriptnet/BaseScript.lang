@@ -1,10 +1,25 @@
 #include <builtins>
 
+type NumericString (String value) {
+    if (/^\d+$/.test(value)) {
+        return true;
+    }
+}
+
 interface Person {
     name: String,
-    age: Number,
+    age: Int[] | NumericString,
     children?: Person // ? means nullable
 }
+
+Person a () {
+    return {
+        name: "John",
+        age: 43,
+        children: {name: 'Jane', age: 12, children: null}
+    }
+}
+print a()
 
 // possible grammar for type alias
 //interface Person {

@@ -174,7 +174,8 @@ operator_declaration -> "operator" __ operator _ arguments_with_types statements
     })
 } %}
 
-interface -> "interface" __ identifier _ "{" _ (key "?":? _ ":" _ identifier _) ("," _ key "?":? _ ":" _ identifier _ {% v => v.slice(2) %}):* ("," _):? "}" {% v => {
+# TODO replace "identifier" with "_value_type"
+interface -> "interface" __ identifier _ "{" _ (key "?":? _ ":" _ _value_type _) ("," _ key "?":? _ ":" _ _value_type _ {% v => v.slice(2) %}):* ("," _):? "}" {% v => {
     if (v[2].value[0].toUpperCase() != v[2].value[0]) {
         throw new SyntaxError(`Interface name must be capitalized.`)
     }
@@ -184,15 +185,20 @@ interface -> "interface" __ identifier _ "{" _ (key "?":? _ ":" _ identifier _) 
     let values = [v[6], ...v[7]];
     let obj = {};
     for (let i in values) {
-        if (values[i][5].value[0].toUpperCase() != values[i][5].value[0]) {
-            throw new SyntaxError(`Interface key must be capitalized.`)
+        for (let j in values[i][5].value) {
+            let key = values[i][5].value[j];
+            // Interface key must be capitalized
+            if (key[0].toUpperCase() != key[0]) {
+                throw new SyntaxError(`Interface key must be capitalized.`)
+            }
         }
         if (obj[values[i][0].value]) {
-            throw new SyntaxError(`Interface key must be unique.`)
+            throw new SyntaxError(`Interface key must be unique. "${values[i][0].value}" is already defined`)
         }
         obj[values[i][0].value] = {
             nullable: values[i][1] ? true : false,
-            value: values[i][5].value
+            value: values[i][5].value,
+            is_array: values[i][5].is_array
         }
     }
     return {
