@@ -2,20 +2,20 @@
 
 type NumericString (String value) {
     if (/^\d+$/.test(value)) {
-        return true;
+        return true
     }
 }
 
 interface Person {
     name: String,
-    age: Int[] | NumericString,
+    age: Int | NumericString,
     children?: Person // ? means nullable
 }
 
 Person a () {
     return {
         name: "John",
-        age: 43,
+        age: '43',
         children: {name: 'Jane', age: 12, children: null}
     }
 }
