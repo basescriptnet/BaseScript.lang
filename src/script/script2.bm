@@ -1,0 +1,3 @@
+#include <random>
+
+print random.int(0, 10)

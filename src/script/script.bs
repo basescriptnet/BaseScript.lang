@@ -1,25 +1,26 @@
 #include <builtins>
 
-type NumericString (String value) {
-    if (/^\d+$/.test(value)) {
-        return true
-    }
-}
+<interface
+//type NumericString (String value) {
+//    if (/^\d+$/.test(value)) {
+//        return true
+//    }
+//}
 
-interface Person {
-    name: String,
-    age: Int | NumericString,
-    children?: Person // ? means nullable
-}
+//interface Person {
+//    name: String,
+//    age: Int | NumericString,
+//    children?: Person // ? means nullable
+//}
 
-Person a () {
-    return {
-        name: "John",
-        age: '43',
-        children: {name: 'Jane', age: 12, children: null}
-    }
-}
-print a()
+//Person a () {
+//    return {
+//        name: "John",
+//        age: '43',
+//        children: {name: 'Jane', age: 12, children: null}
+//    }
+//}
+//print a()
 
 // possible grammar for type alias
 //interface Person {
@@ -28,13 +29,15 @@ print a()
 //    Person? children // ? means nullable
 //}
 
-Person[] test (Person p) {
-    return [p, {name: "James", age: 10, children: null}]
-}
+//Person[] test (Person p) {
+//    return [p, {name: "James", age: 10, children: null}]
+//}
 
-print test ({name: "John", age: 42, children: {name: "Jane", age: 12, children: null}})
+//print test ({name: "John", age: 42, children: {name: "Jane", age: 12, children: null}})
 
-Int[] | Int test2 (Int[] a) {
-    return a.reduce(def (x, y): => x + y)
-}
-print test2([1, 2, 3])
+//Int[] | Int test2 (Int[] a) {
+//    return a.reduce(def (x, y): => x + y)
+//}
+//print test2([1, 2, 3])
+
+@include 'script2.bm'

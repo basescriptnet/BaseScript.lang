@@ -88,7 +88,7 @@ statement -> blocks {% id %}
 	#| "echo" __ value EOL {% statement.echo %}
 	#| %eval __ value EOL {% statement.eval %}
 	#| "import" __ string {% statement.import %}
-	#| "@include" __ string EOL {% statement.include %}
+	#| "@" "include" __nbsp string {% statement.include %}
 	| var_assign {% id %}
 	| value_reassign {% statement.value_reassign %}
     #| value_addition {% statement.value_addition %}

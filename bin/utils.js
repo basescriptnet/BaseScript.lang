@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path_join = require('path').join;
+const path_dirname = require('path').dirname;
 const BS = require('../lib/compiler');
 const beautify = require('js-beautify').js;
 const path_applied = process.cwd();
@@ -22,7 +23,7 @@ let writeFile = (path, fileName, content, extension = '.bs') => {
     try {
         // content = JSON.parse(JSON.stringify(content, null, 4));
         //console.time('ast_to_js');
-        var tmp = ast_to_js(content);
+        var tmp = ast_to_js(content, path_dirname(path).replace('\\', '/'));
         //console.timeEnd('ast_to_js');
 
         if (tmp.result === void 0) {
@@ -61,8 +62,8 @@ module.exports = {
         } else {
             path = path_join(dir, path)
         }
-        let fileName = path.substr(0, path.length - 3); // .bs
-        let extension = path.substr(path.length - 3); // .bs
+        let fileName = path.substr(0, path.length - 3); // .bs  or .bm
+        let extension = path.substr(path.length - 3); // .bs or .bm
 
         try {
             let content = '';
@@ -70,26 +71,26 @@ module.exports = {
             // ! so we use it only when we need to parse a file
             if (!watch && fs.existsSync(path)) {
                 //console.time('text_to_ast');
-                content = BS(path, extension);
+                content = BS(path, extension, path);
                 //console.timeEnd('text_to_ast');
             } else {
                 if (!fs.existsSync(path))
                     path = `${path_applied}${watch ? '\\' + path : ''}`;
                 //console.time('text_to_ast');
-                content = BS(path, extension);
+                content = BS(path, extension, path);
                 //console.timeEnd('text_to_ast');
             }
             if (content === void 0) {
                 return;
             }
             if (run) {
-                let tmp = ast_to_js(content.result);
+                let tmp = ast_to_js(content.result, path_dirname(path).replace('\\', '/'));
 
                 if (tmp.result && tmp.result.length === 0 || !tmp.result) return;
                 let includes = tmp.includes;
                 let contentJS = tmp.result;
                 let final = includes + '\n' + contentJS;
-                run_code(final);
+                run_code(final, path_dirname(path).replace('\\', '/'), path.split('\\').pop());
                 process.exit();
             }
             if (content.extension == '.bm') {
