@@ -97,5 +97,24 @@ $this.random = {
         if typeof(array) == 'String':
             return copy.join('')
         return copy
+    },
+    chances(Array array, Array weight) {
+        if (array.length == 0 || weight.length == 0) {
+            throw new Error(`Unexpected empty array or string for "random.chances" function`)
+        }
+        if (array.length != weight.length) {
+            throw new Error(`Unexpected length of array and weight for "random.chances" function`)
+        }
+        let sum = 0
+        for i from 0 till weight.length:
+            sum += weight[i]
+        let rand = random.getRandom() * sum
+        let cur = 0
+        for i from 0 till weight.length {
+            cur += weight[i]
+            if rand <= cur:
+                return array[i]
+        }
+        return array[array.length - 1]
     }
 }

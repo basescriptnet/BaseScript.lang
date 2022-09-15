@@ -1,3 +1,12 @@
 #include <random>
+namespace random
 
-print random.int(0, 10)
+print ::int(0, 10)
+print ::chances([1, 2, 3, 4, 5], [0.1, 0.2, 0.3, 0.4, 5])
+
+
+console.group("script2")
+print 'from script2'
+print __dirname
+print __filename
+console.groupEnd('scipt2')

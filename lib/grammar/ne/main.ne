@@ -7,17 +7,49 @@ process -> decorated_statements _ (";" _):? {% (v, l, reject) => {
     return v[0];
 } %}
 
-includes -> _ "#include" _ "<" (identifier | keyword) ">" {% v => {
-    if (v[4][0].value == 'HTML') HTML_ALLOWED = true;
+single_include -> "#include" _nbsp "<" (identifier | keyword) ">" {% v => {
+    if (v[3][0].value == 'HTML') HTML_ALLOWED = true;
     return {
         type: 'built_in_include',
-        value: v[4][0].value,
-        line: v[1].line,
-        col: v[1].col
+        value: v[3][0].value,
+        line: v[0].line,
+        col: v[0].col
     }
 } %}
+| "#include" __nbsp string {% v => ({
+    type: "include",
+    value: v[2].value,
+    line: v[0].line,
+    col: v[0].col
+}) %}
 
-decorated_statements -> _ %decorator includes:* statements {% v => ({
+includes -> includes EOL single_include {% (v, l, reject) =>
+    v[0].concat(v[2])
+%}
+| single_include {% v => [v[0]] %}
+
+group_include -> (_ includes):? {% v => v[0] ? v[0][1] : [] %}
+
+#_ "#include" _ "<" (identifier | keyword) ">" {% v => {
+#    if (v[4][0].value == 'HTML') HTML_ALLOWED = true;
+#    return {
+#        type: 'built_in_include',
+#        value: v[4][0].value,
+#        line: v[1].line,
+#        col: v[1].col
+#    }
+#} %}
+#    | ((includes EOL):* | _) "#include" __nbsp string {% v => {
+#        return {
+#            type: 'include',
+#            value: v[3].value,
+#            line: v[1].line,
+#            col: v[1].col,
+#            addon: v[0][0] && v[0][0].lenght ? v[0][0].map(v => v[0]) : []
+#        }
+#    } %}
+
+decorated_statements -> _ %decorator group_include statements {% v => ({
 	type: 'decorator',
 	line: v[3].line,
 	col: v[3].col,
@@ -26,13 +58,14 @@ decorated_statements -> _ %decorator includes:* statements {% v => ({
 	includes: v[2],
 	value: v[3],
 }) %}
-	| includes:* statements {% v => ({
+	| group_include statements {% v => {
+        return ({
 		type: 'decorator',
 		includes: v[0],
 		value: v[1],
         line: v[0] ? v[0].line : v[1].line,
         col: v[0] ? v[0].col : v[1].col
-	}) %}
+	})} %}
 
 ### statements ###
 #(statement EOL):* (statement EOL:?):?

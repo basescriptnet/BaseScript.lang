@@ -1,43 +1,10 @@
 #include <builtins>
+#include "./script2.bm"
 
-<interface
-//type NumericString (String value) {
-//    if (/^\d+$/.test(value)) {
-//        return true
-//    }
-//}
+console.group("script1")
+print 'from script1'
+print __dirname
+print __filename
+console.groupEnd('scipt1')
 
-//interface Person {
-//    name: String,
-//    age: Int | NumericString,
-//    children?: Person // ? means nullable
-//}
-
-//Person a () {
-//    return {
-//        name: "John",
-//        age: '43',
-//        children: {name: 'Jane', age: 12, children: null}
-//    }
-//}
-//print a()
-
-// possible grammar for type alias
-//interface Person {
-//    String name,
-//    Number age,
-//    Person? children // ? means nullable
-//}
-
-//Person[] test (Person p) {
-//    return [p, {name: "James", age: 10, children: null}]
-//}
-
-//print test ({name: "John", age: 42, children: {name: "Jane", age: 12, children: null}})
-
-//Int[] | Int test2 (Int[] a) {
-//    return a.reduce(def (x, y): => x + y)
-//}
-//print test2([1, 2, 3])
-
-@include 'script2.bm'
+print "Everything is connected correctly"

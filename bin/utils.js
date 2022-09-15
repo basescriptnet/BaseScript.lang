@@ -5,7 +5,7 @@ const BS = require('../lib/compiler');
 const beautify = require('js-beautify').js;
 const path_applied = process.cwd();
 const run_code = require('./run_code.js');
-let ast_to_js = require('../lib/compiler/ast_to_js');
+let ast_to_js = require('../lib/compiler/ast_to_js.min.js');
 let minify = function (code) {
     return code.replace(/[ \t]*\/\/[^\n]*\n*/g, '') // remove comments
         .replace(/(\r\n?|[ \t])+/g, ' ') // remove spaces
@@ -22,8 +22,9 @@ let writeFile = (path, fileName, content, extension = '.bs') => {
     }
     try {
         // content = JSON.parse(JSON.stringify(content, null, 4));
+        //* this is pretty fast
         //console.time('ast_to_js');
-        var tmp = ast_to_js(content, path_dirname(path).replace('\\', '/'));
+        var tmp = ast_to_js(content, pathJS(path).dir);
         //console.timeEnd('ast_to_js');
 
         if (tmp.result === void 0) {
@@ -32,13 +33,14 @@ let writeFile = (path, fileName, content, extension = '.bs') => {
         console.log('[File System]: Writing to: '+fileName+'.js');
 
         let includes = minify(tmp.includes);
+        let dirs = tmp.dirs;
         let contentJS = tmp.result;
         contentJS += '\n';
         fs.writeFileSync(
             `${(`${fileName}.js`).replace(/\\/g, '/')}`,
             (includes ? includes + '\n\n' : '') +
             '// Your code below this line\n\n'+
-            beautify(contentJS), 'utf8'
+            beautify(dirs + '\n' + contentJS), 'utf8'
         );
         // # sourceMappingURL=${fileName}.bs.map\n` // add later
         // fs.writeFileSync(fileName+'.bs.map', content)
