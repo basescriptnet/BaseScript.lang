@@ -6,23 +6,12 @@ if (globalThis.development) {
 }
 const path_applied = process.cwd();
 const run_code = require('./run_code.js');
-let ast_to_js = require(internalPaths.ast_to_js);
-//let minify = function (code) {
-//    return code.replace(/[ \t]*\/\/[^\n]*\n*/g, '') // remove comments
-//        .replace(/(\r\n?|[ \t])+/g, ' ') // remove spaces
-//        //.replace(/[ \t]+/g, ' ')
-//        //.replace(/\{\s+/g, '{')
-//        //.replace(/\s+\}/g, '}')
-//        //.replace(/\}\s+/g, '}')
-//        .replace(/\s*(,|;|\}|\{)\s+/g, '$1 ') // remove spaces around separators
-//        .replace(/(?:\s*)(==?=?|<=?|>=?|!==?|\|\||&&)(?:\s*)/g, '$1'); // remove spaces around operators
-//}
+let ast_to_js = require(internalPaths.ast_to_js);
 let writeFile = (path, fileName, content, extension = '.bs', silent = false, env) => {
     if (!fileName) {
         return console.warn('Filename cannot be empty');
     }
-    try {
-        // content = JSON.parse(JSON.stringify(content, null, 4));
+    try {
         // this is pretty fast. Max was 3ms for regular file
         var tmp = ast_to_js(content, pathJS(path).dir);
 
@@ -104,20 +93,12 @@ module.exports = {
                 let dirs = tmp.dirs;
                 let contentJS = beautify(tmp.result);
                 let builtins = '';
-
-                //let files = fs.readdirSync(pathJS(__dirname).add(internalPaths.built_in_from_utils.split('/').slice(0, 3).join('/')));
-                //files.forEach(file => {
-                //    console.log(file)
-                //});
-                //console.log('exit')
-                //return
+
                 if (!tmp.builtins) {
                     builtins = fs.readFileSync(pathJS(__dirname).add(internalPaths.built_in_from_utils), 'utf8');
                 }
                 let final = builtins + dirs + includes + '\n' + contentJS;
-                run_code(final, pathJS(path).dir, path.split('\\').pop());
-                //let exec = require('child_process').execSync;
-                //exec(`node ${fileName}.js ${args.join(' ')}`, { stdio: 'inherit' });
+                run_code(final, pathJS(path).dir, path.split('\\').pop());
                 process.exit();
             }
             let wrote = writeFile(path, fileName, content.result, content.extension, run ? true : false, env);
@@ -145,23 +126,10 @@ module.exports = {
             let includes = tmp.includes;
             let dirs = ''//tmp.dirs;
             let contentJS = beautify(tmp.result);
-            let builtins = '';
-
-            //let files = fs.readdirSync(pathJS(__dirname).add(internalPaths.built_in_from_utils.split('/').slice(0, 3).join('/')));
-            //files.forEach(file => {
-            //    console.log(file)
-            //});
-            //console.log('exit')
-            //return
-            //if (!tmp.builtins) {
-            //    builtins = fs.readFileSync(pathJS(__dirname).add(internalPaths.built_in_from_utils), 'utf8');
-            //}
+            let builtins = '';
             let final = builtins + dirs + includes + '\n' + contentJS;
             //run_code(final, pathJS(path).dir, path.split('\\').pop());
-            return final
-            //let exec = require('child_process').execSync;
-            //exec(`node ${fileName}.js ${args.join(' ')}`, { stdio: 'inherit' });
-            // unreachable code //console.log('Compiled in ' + (Date.now() - date) + 'ms');
+            return final
         } catch (err) {
             console.warn('Can\'t compile. Unexpected input.');
             console.warn(err);

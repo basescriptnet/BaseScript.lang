@@ -38,7 +38,7 @@ module.exports = function (content, path) {
         //vm.createContext(sandbox);
         //vm.runInContext(script, sandbox);
         script.runInNewContext(sandbox);
-        console.log('Success?')
+        console.log('Success!')
     } catch (err) {
         console.error(err.message);
         console.trace(err);

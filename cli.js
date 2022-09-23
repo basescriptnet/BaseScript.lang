@@ -18,26 +18,7 @@ global.internalPaths = {
 };
 
 global.development = require('./package.json').isDevelopment;
-global.extension = '.js';
-
-//if (!development) {
-//    global.internalPaths = {
-//        utils: './bin/utils',
-//        ast_to_js: '../lib/compiler/ast_to_js',
-//        text_to_ast: './text_to_ast.min.js',
-//        compiler: '../lib/compiler',
-//        built_in: './built_in.min.js',
-//        built_in_from_utils: '../lib/compiler/built_in.min.js',
-//        bin: './bin/',
-//        grammar: './lib/grammar',
-//        nearley: '../../nearley/lib/nearley.js',
-//        nearleyCompile: "../../nearley/lib/compile.js",
-//        nearleyGenerate: "../../nearley/lib/generate.js",
-//        nearleyGrammar: "../../nearley/lib/nearley-language-bootstrapped.js",
-//    };
-//    global.extension = '.min.js';
-//}
-
+global.extension = '.js';
 global.baseUrl = {
     path: path_applied.replace(/\\/g, '/'),
     from_indexJS: true,
@@ -164,52 +145,12 @@ if (!options.out && !options.run && !options.watch) {
         console.error("Output file must be a .js file.");
         process.exit();
     }
-}
-
-//if (options.from && options.to) {
-//    const path = require('path');
-//    const from = path.resolve(options.from);
-//    const to = path.resolve(options.to);
-//    //const fromDir = path.dirname(from);
-//    //const toDir = path.dirname(to);
-//    //const fromName = path.basename(from);
-//    //const toName = path.basename(to);
-//    const fromExt = path.extname(from);
-//    const toExt = path.extname(to);
-//    if (fromExt != '.bs' && fromExt != '.bm' || toExt != '.js') {
-//        console.log('Invalid file extensions.');
-//        process.exit();
-//    }
-//    //const fromNameNoExt = path.basename(from, fromExt);
-//    //const toNameNoExt = path.basename(to, toExt);
-//};
+}
 let dir = pathJS(path_applied).add(options.file);
 baseUrl.filename = pathJS(dir).filename;
 baseUrl.ext = pathJS(dir).ext;
 baseUrl.relative = pathJS(options.file).dir;
-let arg0 = '';
-
-//if (!options.args) options.args = '';
-//console.log(options.args);
-//return
-//console.log(options._.concat(JSON.parse(options.args)));
-//return;
-//if (arg0 != './') {
-//    if (/^\.\//.test(arg0)) {
-//        arg0 = arg0.slice(1)
-//    }
-//    dir = pathJS(path_applied).add(arg0)
-//    baseUrl.relative = pathJS(arg0).dir;
-//}
-//console.log(utils.fromString(`
-//namespace random
-//print ::int
-//print "hello world"
-//print "bye"
-//print defined Idontexist
-//try:def(String a):=>a+'hello'
-//`))
-//process.exit();
+let arg0 = '';
 if (!fs.existsSync(dir)) {
     console.error(dir);
     console.error(new Error('Provided location doesn\'t exist'))
@@ -253,7 +194,6 @@ if (options.watch) {
         // sometimes the file is changed twice in a row, so we need to wait a bit
         if (actionDone[path] | 0 == mtime | 0) {
             return void setTimeout(() => {
-                //actionDone[path] = 0
                 delete actionDone[path];
             }, 30);
         };

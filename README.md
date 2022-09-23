@@ -7,9 +7,9 @@
 
 [BaseScript.net](https://BaseScript.net)
 
-[About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/blob/master/BUGS.md) | [license](#-license)
+[About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/issues) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.1.44-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.1.45-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
