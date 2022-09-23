@@ -611,4 +611,4 @@ print(John()) // outputs: { nickname: 'John' }
 
 This project is open-sourced software licensed under the MIT License.
 
-See the [LICENSE](https://github.com/basescriptnet/BaseScript.lang/blob/master/LICENSE) file for more information.
+See the [LICENSE](https://github.com/basescriptnet/BaseScript.lang/blob/master/LICENSE.md) file for more information.
