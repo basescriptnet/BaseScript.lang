@@ -11,4 +11,4 @@ Person Tim {
     }
 }
 
-print(Tim()); // outputs: { name: 'Tim' }
+print(Tim()) // outputs: { name: 'Tim' }
