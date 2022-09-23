@@ -9,7 +9,7 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/blob/master/BUGS.md) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.1.41-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.1.44-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
@@ -48,6 +48,8 @@ This page represents the simple to follow documentation of the language.
 
 ## ▶️ Getting started
 
+> Learn more about [CLI usage](./CLI.md).
+
 > Install via npm
 
 ```sh
@@ -57,16 +59,16 @@ npm i basescript.js -g
 > At any directory use
 
 ```sh
-bs <file_name> [options?]
+bsc -f <file_name> [options?]
 ```
 
 > For help use
 
 ```sh
-bs -help
+bsc -help
 ```
 
-> To install globally after downloading, you can use
+> To install globally after git clone, you can use
 
 ```sh
 npm install -g ./
@@ -74,17 +76,19 @@ npm install -g ./
 
 > Include built-in functionality in .bs files
 
+> If you already have it in the main file, connected files won't need it
+
 ```cpp
 #include <builtins>
 ```
 
-** Note: .bs files are compiled to .js files. .bm files are modular files, that will
-be compiled during the runtime as dependencies to .bs files. **
+<!--** Note: .bs files are compiled to .js files. .bm files are modular files, that will
+be compiled during the runtime as dependencies to .bs files. **-->
 
 > Run from CLI without an output file
 
 ```sh
-bs run <file_name>
+bsc -f <file_name> -r
 ```
 
 ## 🗄️ Variables
@@ -97,7 +101,7 @@ let num, num1 = 1, num2
 \num3 // equivalent to let num3
 ```
 
-#### ***📝 Note: any value becomes immutable***
+<!--#### ***📝 Note: any value becomes immutable***-->
 
 > Const declaration
 
@@ -568,7 +572,7 @@ operator #/ (Number left, Number right) {
 print Infinity #/ Infinity
 ```
 
-## 🤫 More, more is coming soon!
+## 🤫 More and more is coming soon!
 
 > The documentation is not final, and more examples and syntax sugar tricks will be added
 
