@@ -45,8 +45,8 @@ This page represents the simple to follow documentation of the language.
  - [try|catch|finally statement](#-trycatchfinally-statement)
  - [Switch cases](#-switch-cases)
  - [Strict mode](#%EF%B8%8F-strict-mode)
- - [Custom operators](#%F0%9F%93%8F%20Custom%20operators)
- - [Interfaces](#%F0%9F%95%B9%20Interface)
+ - [Custom operators](#-custom-operators)
+ - [Interfaces](#-interfaces)
 
 ## ▶️ Getting started
 
@@ -575,12 +575,12 @@ operator #/ (Number left, Number right) {
 print Infinity #/ Infinity
 ```
 
-## 🕹 Interface
+## 🕹 Interfaces
 
 
 > Declaration
 
-```javascript
+```typescript
 // the name of the interface should preferably start with a higher case
 interface Programmer {
     nickname: String
