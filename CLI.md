@@ -38,6 +38,12 @@ npm i basescript.js -g
 bsc -f "<file_name>"
 ```
 
+> To alternatively run the cli
+
+```sh
+node cli --file "<file_name>" [--run?]
+```
+
 > Specify the output file
 
 ```sh
