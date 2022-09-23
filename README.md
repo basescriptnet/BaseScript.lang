@@ -45,6 +45,8 @@ This page represents the simple to follow documentation of the language.
  - [try|catch|finally statement](#-trycatchfinally-statement)
  - [Switch cases](#-switch-cases)
  - [Strict mode](#%EF%B8%8F-strict-mode)
+ - [Custom operators](#-custom-operators)
+ - [Interfaces](#-interfaces)
 
 ## ▶️ Getting started
 
@@ -555,6 +557,7 @@ while (isTrue):
 
 ## 📏 Custom operators
 
+
 > Declaration
 
 ```javascript
@@ -572,6 +575,30 @@ operator #/ (Number left, Number right) {
 print Infinity #/ Infinity
 ```
 
+## 🕹 Interfaces
+
+
+> Declaration
+
+```typescript
+// the name of the interface should preferably start with a higher case
+interface Programmer {
+    nickname: String
+}
+```
+
+> Usage
+
+```javascript
+Programmer John {
+    return  {
+        nickname: "John"
+    }
+}
+
+print(John()) // outputs: { nickname: 'John' }
+```
+
 ## 🤫 More and more is coming soon!
 
 > The documentation is not final, and more examples and syntax sugar tricks will be added
@@ -584,4 +611,4 @@ print Infinity #/ Infinity
 
 This project is open-sourced software licensed under the MIT License.
 
-See the [LICENSE](https://github.com/basescriptnet/BaseScript.lang/blob/master/LICENSE) file for more information.
+See the [LICENSE](https://github.com/basescriptnet/BaseScript.lang/blob/master/LICENSE.md) file for more information.
