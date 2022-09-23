@@ -45,6 +45,8 @@ This page represents the simple to follow documentation of the language.
  - [try|catch|finally statement](#-trycatchfinally-statement)
  - [Switch cases](#-switch-cases)
  - [Strict mode](#%EF%B8%8F-strict-mode)
+ - [Custom operators](#%F0%9F%93%8F%20Custom%20operators)
+ - [Interfaces](#%F0%9F%95%B9%20Interface)
 
 ## ▶️ Getting started
 
@@ -555,6 +557,7 @@ while (isTrue):
 
 ## 📏 Custom operators
 
+
 > Declaration
 
 ```javascript
@@ -570,6 +573,30 @@ operator #/ (Number left, Number right) {
 ```javascript
 // outputs 0 instead of NaN
 print Infinity #/ Infinity
+```
+
+## 🕹 Interface
+
+
+> Declaration
+
+```javascript
+// the name of the interface should preferably start with a higher case
+interface Programmer {
+    nickname: String
+}
+```
+
+> Usage
+
+```javascript
+Programmer John {
+    return  {
+        nickname: "John"
+    }
+}
+
+print(John()) // outputs: { nickname: 'John' }
 ```
 
 ## 🤫 More and more is coming soon!
