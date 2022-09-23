@@ -1,0 +1,14 @@
+// You can run the file and see the output from here using:
+// node ../cli --file interface.bs --run
+
+interface Person {
+    name: String
+}
+
+Person Tim {
+    return  {
+        name: "Tim"
+    }
+}
+
+print(Tim()); // outputs: { name: 'Tim' }
