@@ -5,13 +5,13 @@
 const lexer = moo.compile({
     string: [
         {
-            match: /"(?:\\["bfnrtvxu$\\]|[^"\\])*"/, value: x => x.slice(1, -1)
+            match: /"(?:\\["'`bfnrtvxu$\\]|[^"\\])*"/, quoteType: '\"'
         },
         {
-            match: /'(?:\\['bfnrtvxu$\\]|[^'\\])*'/, value: x => x.slice(1, -1)
+            match: /'(?:\\["'`bfnrtvxu$\\]|[^'\\])*'/, quoteType: '\''
         },
         {
-            match: /`(?:\\[`bfnrtvxu$\\]|[^`\\])*`/, value: x => JSON.stringify(x).slice(2, -2), lineBreaks: true
+            match: /`(?:\\["'`bfnrtvxu$\\]|[^`\\])*`/, lineBreaks: true, quoteType: '\`'
         },
     ],
     space: {
@@ -322,7 +322,25 @@ key -> string {% id %}
 	| %keyword {% id %}
 
 # strings
-string_concat -> %string {% id %}
+string_concat -> %string {% v => {
+        if (v[0].value.startsWith('"')) {
+            v[0].quoteType = '"'
+            v[0].value = v[0].value.slice(1, -1)
+        } else if (v[0].value.startsWith("'")) {
+            v[0].quoteType = "'"
+            v[0].value = v[0].value.slice(1, -1)
+        } else {
+            v[0].quoteType = '`'
+            v[0].value = JSON.stringify(v[0].value).slice(2, -2)
+        }
+        return {
+            quoteType: v[0].quoteType,
+            type: 'string',
+            value: v[0].value,
+            line: v[0].line, col: v[0].col, offset: v[0].offset,
+        }
+    }
+ %}
     #| string_concat _ "+" _ %string {% string_concat %}
 
 # regexp
@@ -1622,7 +1640,8 @@ const string = {
         reversed: v[7] ? true : false
     })
 }
-function string_concat (v) {
+function string_concat(v) {
+    console.log(v[0])
     return assign(v[0], {
         value: v[0].value + v[4].value
     })
