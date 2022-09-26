@@ -17,7 +17,7 @@ const lexer = moo.compile({
     space: {
         match: /(?:\s+|\/\/[^\n\r]*(?:\n+\s*)?)+/,
         lineBreaks: true,
-        value: v => v.replace(/\/\/[^\n\r]*/g, '')
+        value: v => v.replace(/\/\/[^-\n\r]?[^\n\r]*/g, '')
     },
     //'@constructor': 'constructor',
     keyword: ['interface', 'void', 'defined', 'safeValue', 'swap', 'namespace', 'Boolean', 'Number', 'String', 'Array', 'Object', 'unless', 'than', 'constructor', 'null', 'const', 'print', 'var',
@@ -25,7 +25,7 @@ const lexer = moo.compile({
         'POP', 'SHIFT', 'UNSHIFT', 'FROM', 'Int', 'Float', 'BEGIN', 'END', 'SET', 'TO', 'typeof', 'instanceof', 'in', 'of', 'type', 'super',
         'extends', 'function', 'def', 'this', 'echo', 'export', 'as', 'JSON', 'yield', 'async', 'try', 'catch', 'finally', 'static', 'while',
         'if', 'else', 'import', 'from', 'let', 'const', 'null', 'of', 'default', 'caseof', 'switch', 'with', 'for', 'case', 'default', 'elif',
-        'debugger', 'or', 'and', 'return', 'new', 'is', 'not', 'throw', 'break', 'continue'].map(i => new RegExp(`\\b${i}\\b`)),
+        'debugger', 'or', 'and', 'return', 'new', 'is', 'not', 'throw', 'break', 'continue', 'when'].map(i => new RegExp(`\\b${i}\\b`)),
     //regexp: /\/((?![*+?])(?:[^\r\n\[/\\]|\\.|\[(?:[^\r\n\]\\]|\\.)*\])+)\/((?:g(?:im?|mi?)?|i(?:gm?|mg?)?|m(?:gi?|ig?)?)?)/,
     regexp: /\/(?:\\[ \/><bBfFnNrRtTvVxXuUsSwWdD.+*^$[\]{}|?:\\]|[^><\n\/\\])*?\//,
     operator: ['+', '-', '/', '**', '*', '%'],
@@ -134,7 +134,8 @@ statements -> (_ global EOL {% v => v[1] %}):* (_ statement EOL):* (_ statement)
 } %}
 
 statement -> blocks {% id %}
-	| debugging {% id %} # ! needs test
+    # ! needs test
+	| debugging {% id %}
 	| class_declaration {% id %}
 	#| with {% id %} # ! deprecated
 	| "debugger" {% statement.debugger %}
@@ -176,14 +177,19 @@ statements_block -> _ "{" statements _ (";" _):? "}" {% v => ({
     line: v[3].line,
     col: v[3].col
 }) %}
+	#| _ ":" _ statement {% v => ({
+    #    @t scope
+    #    value: [v[3]],
+    #    line: v[3].line, col: v[3].col, offset: v[3].offset,
+    #}) %}
 	| _ ":" _ statement {% v => ({
         type: 'scope',
         value: [v[3]],
-        line: v[3].line,
-        col: v[3].col
+        line: v[3].line, col: v[3].col, offset: v[3].offset,
+        mustEndWithEOL: true
     }) %}
     #{% v => [v[3]] %}
-	| _ "do" __ statement {% v => ({
+	| _nbsp "do" __ statement {% v => ({
         type: 'scope',
         value: [v[3]],
         line: v[3].line,
@@ -204,15 +210,13 @@ type_declaration -> "type" __ identifier _ arguments_with_types statements_block
 		identifier: v[2],
 		arguments: v[4],
 		value: v[5],
-        line: v[0].line,
-        col: v[0].col
+        line: v[0].line, col: v[0].col, offset: v[0].offset,
 	})
 } %}
 operator -> "#" [A-Za-z0-9_\/*+-.&|$@!^#~]:+ {% v => ({
     type: 'operator',
     value: v[1],
-    line: v[0].line,
-    col: v[0].col
+    line: v[0].line, col: v[0].col, offset: v[0].offset,
 }) %}
 operator_declaration -> "operator" __ operator _ arguments_with_types statements_block {% v => {
     if (v[4].value.length < 2 && v[4].value.length > 2) {
@@ -223,8 +227,7 @@ operator_declaration -> "operator" __ operator _ arguments_with_types statements
         identifier: v[2],
         arguments: v[4],
         value: v[5],
-        line: v[0].line,
-        col: v[0].col
+        line: v[0].line, col: v[0].col, offset: v[0].offset,
     })
 } %}
 
@@ -259,13 +262,12 @@ interface -> "interface" __ identifier _ "{" _ (key "?":? _ ":" _ _value_type _)
         type: 'interface',
         identifier: v[2].value,
         value: obj,
-        line: v[0].line,
-        col: v[0].col
+        line: v[0].line, col: v[0].col, offset: v[0].offset,
     }
 } %}
 global -> "@" "global" __ identifier {% v => ({
     type: 'global',
-	value: v[3]
+	value: v[3],
 }) %}
 
 # base line
@@ -304,8 +306,7 @@ convert -> prefixExp __ "as" __ convert_type {% (v, l, reject) => {
         type: 'convert',
         value: v[0],
         convert_type: v[4],
-        line: v[0].line,
-        col: v[0].col
+        line: v[0].line, col: v[0].col, offset: v[0].offset,
     }
 } %}
 
@@ -337,37 +338,35 @@ boolean -> (%boolean) {% boolean %}
     | "defined" _nbsp identifier {% v => ({
         type: 'defined',
         value: v[2],
-        line: v[0].line,
-        col: v[0].col
+        line: v[0].line, col: v[0].col, offset: v[0].offset,
     }) %}
     | "defined" _nbsp "(" _ identifier _ ")" {% v => ({
         type: 'defined',
         value: v[4],
-        line: v[0].line,
-        col: v[0].col
+        line: v[0].line, col: v[0].col, offset: v[0].offset,
     }) %}
 	# | condition {% condition.value %}
 
 # strings
 string -> string_concat {% id %}
-	| "typeof" _ "(" _ value _ ")" {% v => ({
-		type: 'typeof',
-		value: v[4],
-        line: v[0].line,
-        col: v[0].col
-	}) %}
+	#| "typeof" _ "(" _ value _ ")" {% v => ({
+	#	type: 'typeof',
+	#	value: v[4],
+    #    line: v[0].line,
+    #    col: v[0].col
+	#}) %}
 
 # numbers
 # ! is not tested
 bigInt -> %bigInt {% number.bigInt %}
 
 number -> %number {% number.float %}
-    | "sizeof" _ "(" _ value _ ")" {% v => ({
-		type: 'sizeof',
-		value: v[4],
-        line: v[0].line,
-        col: v[0].col
-	}) %}
+    #| "sizeof" _ "(" _ value _ ")" {% v => ({
+	#	type: 'sizeof',
+	#	value: v[4],
+    #    line: v[0].line,
+    #    col: v[0].col
+	#}) %}
 
 # objects
 object -> "{" _ "}" {% object.empty %}
@@ -498,9 +497,7 @@ if_block -> "if" statement_condition statements_block {% v => {
         unless: true
 	});
 } %}
-	| if_block
-	#(_ elif_block):*
-	_ else_block {% v => {
+	| if_block _ else_block {% v => {
 	return {
 		type: 'if_else',
 		if: v[0],
@@ -512,16 +509,18 @@ if_block -> "if" statement_condition statements_block {% v => {
 		col: v[0].col
 	}
 } %}
-else_block -> "else" __ statement {% (v, l, reject) => {
-    //if (v[2].type == 'if') return reject;
-    if (v[2].type == 'statement_value' && v[2].value.type == 'value' && v[2].value.value.type == 'object') return reject
-    //if (v[2].type == 'value' && v[2].value.type == 'object') debugger
-	return assign(v[0], {
-		type: 'else',
-		value: [v[2]],
-	});
-} %}
-	| "else" statements_block {% v => {
+else_block ->
+#"else" __ statement {% (v, l, reject) => {
+#    //if (v[2].type == 'if') return reject;
+#    if (v[2].type == 'statement_value' && v[2].value.type == 'value' && v[2].value.value.type == 'object') return reject
+#    //if (v[2].type == 'value' && v[2].value.type == 'object') debugger
+#	return assign(v[0], {
+#		type: 'else',
+#		value: [v[2]],
+#	});
+#} %}
+#	|
+    "else" statements_block {% v => {
     //if (v[1].type == 'value' && v[1].value.type == 'object') debugger
     return assign(v[0], {
 		type: 'else',
@@ -529,8 +528,10 @@ else_block -> "else" __ statement {% (v, l, reject) => {
 	});
 } %}
 
-ternary -> condition _ "?" _ value (_ ":" _ value):? {% condition.ternary %}
-    | value __nbsp "if" _ condition (_ "else" _ value):? {% condition.ternary_with_if %}
+ternary -> condition _ "?" _ value (_ ":" _ value) {% condition.ternary %}
+    | value __nbsp "if" _ condition (__nbsp "else" _nbsp value) {% condition.ternary_with_if %}
+    #| value __nbsp "if" _nbsp condition {% condition.ternary_with_if %}
+    #| value __nbsp "when" _nbsp condition {% condition.ternary_with_if %}
 # try catch finally
 try_catch_finally -> try_catch (_ finally):? {% v => ({
 	type: 'try_catch_finally',
@@ -811,11 +812,11 @@ argument_type -> _value_type __ {% v => {
 	| "<" _ {% v => assign(v[0], {type: 'comparision_operator', value:  '<' }) %}
 	| ">" _ {% v => assign(v[0], {type: 'comparision_operator', value:  '>' }) %}
 
-condition -> condition __ ("and" | "or" | "&&" | "||") __ _value {% v => {
+condition -> condition (__ "and" __ | __ "or" __ | _ "&&" _ | _ "||" _) _value {% v => {
 	return {
 		type: 'condition_group',
-		value: [v[0], v[4]],
-		separator: ' ' + v[2][0] + ' ',
+		value: [v[0], v[2]],
+		separator: ' ' + v[1][1] + ' ',
 		line: v[0].line,
 		lineBreaks: v[0].lineBreaks,
 		offset: v[0].offset,
@@ -1041,6 +1042,14 @@ unary -> "-" _nbsp unary {% v => {
             line: v[0].line,
             col: v[0].col
         }} %}
+    | "typeof" __ unary {% v => ({
+        type: 'typeof',
+        value: v[2]
+    }) %}
+    | "sizeof" __ unary {% v => ({
+        type: 'sizeof',
+        value: v[2]
+    }) %}
     | "~":+ _nbsp pow {% v => ({
         type: 'bitwise_not',
         operator: v[0].map(i => i.value).join(''),
@@ -1080,8 +1089,10 @@ pow -> pow _nbsp ("**" | "%") _ unary {% v => ({
 }) %}
     | bitwise {% id %}
 
+
 value -> condition {% id %}
-    #| _value {% id %}
+    | ternary {% id %}
+
 _value ->
 	prefixExp {% id %}
     |
@@ -1112,8 +1123,7 @@ _value ->
         value: v[2],
         line: v[0].line,
         col: v[0].col
-    }) %}
-    | ternary {% id %}
+    }) %}
 prefixExp ->
 #parenthesized {% id %}
     sum {% id %}
@@ -1147,29 +1157,32 @@ EOL -> [\n]:+ {% v => 'EOL' %}
 	| _nbsp ";" (_nbsp "/" "/" [^\n]:* [\n]:*):? {% v => v[1] %}
     | _nbsp "/" "/" [^\n]:* [\n]:*  {% v => 'EOL' %}
 # Not breaking space
-_nbsp -> ([ ] | [\t]):* {% (v, l, reject) => {
-    if (v[0].length) {
-        if (/\n/g.test(v[0][0])) {
-            return reject
-        }
-        return {type: 'nbsp', value: v[0].map(i => i.value).join('')}
-    }
-    return {type: 'nbsp', value: ''}
+_nbsp -> (" " | [\t]):* {% (v, l, reject) => {
+    let f = v[0].map(i => i.value).join('');
+    //if (f.length) {
+      //  if (/\n|\r/g.test(f)) {
+        //    return reject
+        //}
+        return {type: 'nbsp', value: f}
+    //}
+    //return {type: 'nbsp', value: ''}
 } %}
 
-__nbsp -> ([ ] | [\t]):+ {% (v, l, reject) => {
+__nbsp -> (" " | [\t]):+ {% (v, l, reject) => {
     let f = v[0].map(i => i.value).join('');
-    if (/\n/g.test(f)) {
-        return reject
-    }
-    return {type: 'nbsp', value: f}
-    //return {type: 'nbsp', value: ' '}
+    //if (f.length) {
+      //  if (/\n|\r/g.test(f)) {
+        //    return reject
+        //}
+        return {type: 'nbsp', value: f}
+    //}
 } %}
 
 ### END whitespace ###
 
 @{%
-    const functions = {
+    const parsed = new Map();
+const functions = {
     annonymous: v => {
         // console.log(v[0][0].value)
         //debugger
@@ -1249,26 +1262,81 @@ const condition = {
         offset: v[0].offset,
         col: v[0].col,
     }),
-    ternary: v => ({
-        type: 'ternary',
-        left: v[4],
-        right: v[5] ? v[5][3] : null,
-        value: v[0],
-        line: v[0].line,
-        lineBreaks: v[0].lineBreaks,
-        offset: v[0].offset,
-        col: v[0].col,
-    }),
-    ternary_with_if: v => ({
-        type: 'ternary',
-        left: v[0],
-        right: v[5] ? v[5][3] : null,
-        value: v[4],
-        line: v[0].line,
-        lineBreaks: v[0].lineBreaks,
-        offset: v[0].offset,
-        col: v[0].col,
-    }),
+    ternary: (v, l, reject) => {
+        if (v[0].value && v[0].value.type === 'annonymous_function')
+            return reject;
+        //if (parsed.has(v[0].line)) {
+        //    if (parsed.get(v[0].line).indexOf(v[0].col) != -1) {
+        //        return reject;
+        //    }
+        //    parsed.get(v[0].line).push(v[0].col);
+        //} else {
+        //    parsed.set(v[0].line, [v[0].col]);
+        //}
+
+        if (parsed.has(v[0].line)) {
+            let v0 = parsed.get(v[0].line);
+            let any = v0.filter(i => i.col === v[0].col);
+            for (let i = 0; i < any.length; i++) {
+                if (any[i].else === !!v[6] && any[i].offset === v[0].offset + v[2].offset + v[4].offset + (!!v[6] ? v[6].offset : 0)) {
+                    //debugger
+                    return reject;
+                }
+            }
+            v0.push({ col: v[0].col, offset: v[0].offset, else: !!v[6] });
+        } else {
+            parsed.set(v[0].line, [{ col: v[0].col, offset: v[0].offset + v[2].offset + v[4].offset + (!!v[6] ? v[6].offset : 0), else: !!v[6] }]);
+        }
+
+        return {
+            type: 'ternary',
+            left: v[4],
+            right: v[5] ? v[5][3] : null,
+            value: v[0],
+            line: v[0].line,
+            lineBreaks: v[0].lineBreaks,
+            offset: v[0].offset,
+            col: v[0].col,
+        }
+    },
+    ternary_with_if: (v, l, reject) => {
+        if (v[0].value && v[0].value.type === 'annonymous_function')
+            return reject;
+        //if (parsed.has(v[0].line)) {
+        //    if (parsed.get(v[0].line).indexOf(v[0].col) != -1) {
+        //        //console.log(v[5])
+        //        return reject;
+        //    }
+        //    parsed.get(v[0].line).push(v[0].col);
+        //} else {
+        //    parsed.set(v[0].line, [v[0].col]);
+        //}
+
+        if (parsed.has(v[0].line)) {
+            let v0 = parsed.get(v[0].line);
+            let any = v0.filter(i => i.col === v[0].col);
+            for (let i = 0; i < any.length; i++) {
+                if (any[i].else === !!v[6] && any[i].offset === v[0].offset + v[2].offset + v[4].offset + (!!v[6] ? v[6].offset : 0)) {
+                    //debugger
+                    return reject;
+                }
+            }
+            v0.push({ col: v[0].col, offset: v[0].offset, else: !!v[6] });
+        } else {
+            parsed.set(v[0].line, [{ col: v[0].col, offset: v[0].offset + v[2].offset + v[4].offset + (!!v[6] ? v[6].offset : 0), else: !!v[6] }]);
+        }
+
+        return {
+            type: 'ternary',
+            left: v[0],
+            right: v[5] ? v[5][3] : null,
+            value: v[4],
+            line: v[0].line,
+            lineBreaks: v[0].lineBreaks,
+            offset: v[0].offset,
+            col: v[0].col,
+        }
+    },
 }
 const vars = {
     assign: v => {
@@ -1350,7 +1418,7 @@ const args = {
             output.push(v[3][i][3])
         }
         delete v[0].text
-        return Object.assign(v[0], {
+        return assign(v[0], {
             type: 'arguments',
             value: output
         });
@@ -1484,7 +1552,7 @@ const array = {
             output.push(v[3][i][3])
         }
         delete v[0].text
-        return Object.assign(v[0], {
+        return assign(v[0], {
             type: 'array',
             value: output
         });

@@ -7,7 +7,7 @@
 
 [BaseScript.net](https://BaseScript.net)
 
-<b><img src="https://img.shields.io/badge/version-0.1.45-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.1.46-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
@@ -36,12 +36,6 @@ npm i basescript.js -g
 
 ```sh
 bsc -f "<file_name>"
-```
-
-> To alternatively run the cli
-
-```sh
-node cli --file "<file_name>" [--run?]
 ```
 
 > Specify the output file

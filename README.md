@@ -9,7 +9,7 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/issues) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.1.45-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.1.46-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
@@ -45,8 +45,6 @@ This page represents the simple to follow documentation of the language.
  - [try|catch|finally statement](#-trycatchfinally-statement)
  - [Switch cases](#-switch-cases)
  - [Strict mode](#%EF%B8%8F-strict-mode)
- - [Custom operators](#-custom-operators)
- - [Interfaces](#-interfaces)
 
 ## ▶️ Getting started
 
@@ -217,6 +215,7 @@ multiline string!`
 
 ```javascript
 // returns the type of the value
+typeof value
 typeof(value)
 ```
 
@@ -231,18 +230,18 @@ isNaN(value) ? isFinite(value) ? 1 : 0 : -1
 
 > Shortened way
 
-```javascript
+<!--```javascript
 isNaN(value) ? 1
 isNaN(value) ? 1 : 0
 // not implemented yet
 // use isNaN(value) and isFinite(value) ? 1 instead
 isNaN(value) ? isFinite(value) ? 1
-```
+```-->
 
 > With if else
 
+<!--//true if isNaN(value)-->
 ```javascript
-true if isNaN(value)
 true if isNaN(value) else false
 ```
 
@@ -264,6 +263,7 @@ true if isNaN(value) else false
 ```javascript
 // this returns the length of the object keys
 // or if not iterable - 0
+sizeof value
 sizeof(value)
 ```
 
@@ -557,7 +557,6 @@ while (isTrue):
 
 ## 📏 Custom operators
 
-
 > Declaration
 
 ```javascript
@@ -575,30 +574,6 @@ operator #/ (Number left, Number right) {
 print Infinity #/ Infinity
 ```
 
-## 🕹 Interfaces
-
-
-> Declaration
-
-```typescript
-// the name of the interface should preferably start with a higher case
-interface Programmer {
-    nickname: String
-}
-```
-
-> Usage
-
-```javascript
-Programmer John {
-    return  {
-        nickname: "John"
-    }
-}
-
-print(John()) // outputs: { nickname: 'John' }
-```
-
 ## 🤫 More and more is coming soon!
 
 > The documentation is not final, and more examples and syntax sugar tricks will be added
@@ -611,4 +586,4 @@ print(John()) // outputs: { nickname: 'John' }
 
 This project is open-sourced software licensed under the MIT License.
 
-See the [LICENSE](https://github.com/basescriptnet/BaseScript.lang/blob/master/LICENSE.md) file for more information.
+See the [LICENSE](https://github.com/basescriptnet/BaseScript.lang/blob/master/LICENSE) file for more information.

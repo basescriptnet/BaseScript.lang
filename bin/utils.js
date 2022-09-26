@@ -7,7 +7,7 @@ if (globalThis.development) {
 const path_applied = process.cwd();
 const run_code = require('./run_code.js');
 let ast_to_js = require(internalPaths.ast_to_js);
-let writeFile = (path, fileName, content, extension = '.bs', silent = false, env) => {
+let writeFile = (path, fileName, content, silent = false, env) => {
     if (!fileName) {
         return console.warn('Filename cannot be empty');
     }
@@ -43,7 +43,7 @@ let writeFile = (path, fileName, content, extension = '.bs', silent = false, env
 
 module.exports = {
     parse(dir, arg0 = '', path, watch = false, run = false, to = '', args = [], env = false) {
-        //console.clear()
+        console.clear()
         let date = Date.now();
         if (!watch) {
             path = dir
@@ -58,9 +58,7 @@ module.exports = {
         let fileName = path.substr(0, path.length - 3); // .bs  or .bm
         if (to) {
             fileName = to.substr(0, to.length - 3);
-        }
-        let extension = path.substr(path.length - 3); // .bs or .bm
-
+        }
         try {
             let content = '';
             // ! text_to_ast is really time consuming
@@ -98,10 +96,10 @@ module.exports = {
                     builtins = fs.readFileSync(pathJS(__dirname).add(internalPaths.built_in_from_utils), 'utf8');
                 }
                 let final = builtins + dirs + includes + '\n' + contentJS;
-                run_code(final, pathJS(path).dir, path.split('\\').pop());
+                run_code(final, pathJS(path).dir/*, path.split('\\').pop()*/);
                 process.exit();
             }
-            let wrote = writeFile(path, fileName, content.result, content.extension, run ? true : false, env);
+            let wrote = writeFile(path, fileName, content.result, run ? true : false, env);
             if (wrote !== void 0 || wrote !== false || wrote !== null) {
                 if (!run) {
                     console.log('Compiled in ' + (Date.now() - date) + 'ms');

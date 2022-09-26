@@ -1,0 +1,22 @@
+// include built in functionality for complex procedures
+#include <builtins>
+
+// this creates a function that returns a float
+// and takes a floats a and b as an argument
+Float add (Float a, Float b) {
+    return a + b
+}
+
+// print the result of the add function
+print add(5, 6.5) // outputs 11.5
+
+// use array of types
+
+// accepts an array of integers, and an integer
+// pushes the integer to the end of the array
+function pushToArray(Int[] a, Int b) {
+    a.push(b)
+    return a
+}
+
+print pushToArray([1, 2, 3], 4) // outputs [1, 2, 3, 4]

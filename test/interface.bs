@@ -1,5 +1,6 @@
 // You can run the file and see the output from here using:
 // node ../cli --file interface.bs --run
+// or bsc -f interface.bs -r
 
 interface Person {
     name: String
