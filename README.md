@@ -9,7 +9,7 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/issues) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.1.46-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.1.48-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
@@ -45,6 +45,9 @@ This page represents the simple to follow documentation of the language.
  - [try|catch|finally statement](#-trycatchfinally-statement)
  - [Switch cases](#-switch-cases)
  - [Strict mode](#%EF%B8%8F-strict-mode)
+ - [Interfaces](#interfaces)
+ - [Operators](#operators)
+ - [Custom Operators](#custom-operators)
 
 ## ▶️ Getting started
 
@@ -76,7 +79,7 @@ npm install -g ./
 
 > Include built-in functionality in .bs files
 
-> If you already have it in the main file, connected files won't need it
+> If you already have it in the main file, connected files won't need it (as well as with -r flag)
 
 ```cpp
 #include <builtins>
@@ -353,11 +356,14 @@ random > some_number && random > other_number && random > 20
 // it needs to be at least more, than 20
 ```
 
-> ↔️ If statement without else
+> ↔️ Ternary if
 
 ```javascript
-num > 0
-num > 0 and num < 5 or num == undefined
+num if num > 0
+num if num > 0 and num < 5 else num == undefined
+
+num ? num > 0
+num ? num > 0 and num < 5 : num == undefined
 ```
 
 ## 🚸 If else statements
@@ -553,6 +559,100 @@ while (isTrue):
 ```javascript
 'use strict'
 // learn more at https://www.w3schools.com/js/js_strict.asp
+```
+
+## Interfaces
+
+> Declaration
+
+```javascript
+interface Person {
+    name: String,
+    age: Int,
+    children: Person[] | Null
+}
+```
+
+> Usage
+
+```javascript
+let people = []
+function addToArray(Person person) {
+    people.push(person)
+}
+addToArray({
+    name: 'John',
+    age: 19,
+    children: null
+})
+```
+
+##  Operators
+
+> Arithmetic Operators
+
+```javascript
++ Plus
+- Minus
+* Multiply
+/ Divide
+% Modulus
+** Exponentiation
+++ Increment
+-- Decrement
+```
+
+> Logical Operators
+
+```javascript
+&& Logical and
+|| Logical or
+!  Logical not
+```
+
+> Bitwise operators
+
+```javascript
+&   AND
+|   OR
+~   NOT
+^   XOR
+<<  Left shift
+>>  Right shift
+>>> Unsigned right shift
+```
+
+> Type And Size Operators
+
+```javascript
+typeof // describes the type of the object
+sizeof // describes the size of the object, or returns null
+instanceof
+```
+
+> Pipe Forward And Pipe Back Operators
+
+```javascript
+|> Pipe forward
+<| Pipe back
+// example
+// pipe forward
+num + 5 |> Array // Same as Array(num + 5)
+num + 5 |> Array(0, 1) // Same as Array(num + 5, 0, 1)
+num + 5 |> Array(0, 1, .) // Same as Array(0, 1, num + 5)
+
+'  How\'s it going?   '
+    |> escape
+    |> trim
+    |> write('file.txt', .)
+
+// pipe back
+
+write('file.txt', .)
+    <| trim
+    <| escape
+    <| '  How\'s it going?   '
+
 ```
 
 ## 📏 Custom operators

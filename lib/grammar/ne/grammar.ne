@@ -27,8 +27,8 @@ const lexer = moo.compile({
         'if', 'else', 'import', 'from', 'let', 'const', 'null', 'of', 'default', 'caseof', 'switch', 'with', 'for', 'case', 'default', 'elif',
         'debugger', 'or', 'and', 'return', 'new', 'is', 'not', 'throw', 'break', 'continue', 'when'].map(i => new RegExp(`\\b${i}\\b`)),
     //regexp: /\/((?![*+?])(?:[^\r\n\[/\\]|\\.|\[(?:[^\r\n\]\\]|\\.)*\])+)\/((?:g(?:im?|mi?)?|i(?:gm?|mg?)?|m(?:gi?|ig?)?)?)/,
-    regexp: /\/(?:\\[ \/><bBfFnNrRtTvVxXuUsSwWdD.+*^$[\]{}|?:\\]|[^><\n\/\\])*?\//,
-    operator: ['+', '-', '/', '**', '*', '%'],
+    regexp: /\/(?:\\[ \/><bBfFnNrRtTvVxXuUsSwWdD.+\-!@#&()*^$[\]{}|?:\\]|[^><\n\/\\])*?\//,
+    operator: ['++', '--', '+', '-', '/', '**', '*', '%'],
     // ! is not tested
     bigInt: /(?:\+|-)?(?:[0-9]+(?:_?[0-9]+)*)n/,
     number: /(?:\+|-)?(?:[0-9]+(?:_?[0-9]+)*)(?:\.[0-9]+)?/,
@@ -51,7 +51,7 @@ const lexer = moo.compile({
     import: '@import',
     '@text': '@text',
     decorator: [/*'@php', */'@js'],
-    literal: ['#', '@', '[', ']', '{', '}', '(', ')', '...', '..', '.', '\\', ',', ';', '::', ':', '??', '?.', '?', '!', '!=', '!==', '==', '===', '>=', '<=', '>', '<', '&&', '&', '|', '||', '+=', '-=', '*=', '/=', '%=', '**=', '++', '--', '='],
+    literal: ['|>', '<|', '#', '@', '>>>', '>>', '<<', '^', '[', ']', '{', '}', '(', ')', '...', '..', '.', '\\', ',', ';', '::', ':', '??', '?.', '?', '!', '!=', '!==', '==', '===', '>=', '<=', '>', '<', '&&', '&', '||', '|', '+=', '-=', '*=', '/=', '%=', '**=', '='],
 });
 %}
 @lexer lexer
@@ -68,11 +68,12 @@ single_include -> "#include" _nbsp "<" (identifier | keyword) ">" {% v => {
         col: v[0].col
     }
 } %}
-| "#include" __nbsp string {% v => ({
+| "#include" __nbsp string (__ "as" __ identifier):? {% v => ({
     type: "include",
     value: v[2].value,
     line: v[0].line,
-    col: v[0].col
+    col: v[0].col,
+    name: v[3] ? v[3][3].value : null
 }) %}
 
 includes -> includes EOL single_include {% (v, l, reject) =>
@@ -139,7 +140,7 @@ statement -> blocks {% id %}
 	| class_declaration {% id %}
 	#| with {% id %} # ! deprecated
 	| "debugger" {% statement.debugger %}
-    | "delete" _nbsp value {% statement.delete %}
+    #| "delete" _nbsp value {% statement.delete %}
 	| return {% id %}
 	| "throw" __ value {% statement.throw %}
 	| ("break" | "continue") {% statement.break_continue %}
@@ -221,6 +222,9 @@ operator -> "#" [A-Za-z0-9_\/*+-.&|$@!^#~]:+ {% v => ({
 operator_declaration -> "operator" __ operator _ arguments_with_types statements_block {% v => {
     if (v[4].value.length < 2 && v[4].value.length > 2) {
         throw new Error(`Operator declaration requires two argument`)
+    }
+    if (v[2].value == 'include') {
+        throw new Error(`Operator name 'include' is reserved.`)
     }
     return assign(v[0], {
         type: 'operator_declaration',
@@ -323,24 +327,23 @@ key -> string {% id %}
 
 # strings
 string_concat -> %string {% v => {
-        if (v[0].value.startsWith('"')) {
-            v[0].quoteType = '"'
-            v[0].value = v[0].value.slice(1, -1)
-        } else if (v[0].value.startsWith("'")) {
-            v[0].quoteType = "'"
-            v[0].value = v[0].value.slice(1, -1)
-        } else {
-            v[0].quoteType = '`'
-            v[0].value = JSON.stringify(v[0].value).slice(2, -2)
-        }
-        return {
-            quoteType: v[0].quoteType,
-            type: 'string',
-            value: v[0].value,
-            line: v[0].line, col: v[0].col, offset: v[0].offset,
-        }
+    if (v[0].value.startsWith('"')) {
+        v[0].quoteType = '"'
+        v[0].value = v[0].value.slice(1, -1)
+    } else if (v[0].value.startsWith("'")) {
+        v[0].quoteType = "'"
+        v[0].value = v[0].value.slice(1, -1)
+    } else {
+        v[0].quoteType = '`'
+        v[0].value = JSON.stringify(v[0].value).slice(2, -2)
     }
- %}
+    return {
+        quoteType: v[0].quoteType,
+        type: 'string',
+        value: v[0].value,
+        line: v[0].line, col: v[0].col, offset: v[0].offset,
+    }
+} %}
     #| string_concat _ "+" _ %string {% string_concat %}
 
 # regexp
@@ -404,22 +407,17 @@ Var ->
     # ! needs more tests, though works
 	_base _nbsp "[" _ "]" {% v => ({
         type: 'item_retraction_last',
-        //arguments: v[7] ? v[7][1] : null,
         from: v[0],
         line: v[0].line,
         col: v[0].col
-        //value: v[4]
-        //identifier: v[0].value
 	}) %}
 	| _base _ "[" (_ value) _ ":" (_ value):? (_ ":" _ value):? _ "]" {% array.slice %}
 	| _base _nbsp "[" _ value _ "]" {% v => ({
         type: 'item_retraction',
-        //arguments: v[7] ? v[7][1] : null,
         from: v[0],
         value: v[4],
         line: v[0].line,
         col: v[0].col
-        //identifier: v[0].value
 	}) %}
 	| _base _ "." _ (%keyword | identifier) {% (v, l, reject) => {
         if (v[0].type == 'annonymous_function') return reject
@@ -455,7 +453,9 @@ Var ->
         col: v[0].col
 	}) %}
     | function_call {% id %}
-    | identifier {% id %}switch -> "caseof" _ value _ "{" (_ case_single_valued):* _ "}" {% v => assign(v[0], {
+    | identifier {% id %}
+
+switch -> "caseof" _ value _ "{" (_ case_single_valued):* _ "}" {% v => assign(v[0], {
 	type: 'switch*',
 	value: v[2],
 	cases: v[5] ? v[5].map(i => i[1]) : []
@@ -493,7 +493,6 @@ case_default -> "default" _ ":" statements (_ ";"):? {% v => assign(v[0], {
 		type: 'case_default',
 		value: v[3]
 	}) %}
-
 # classes
 class_declaration -> "class" _ identifier _ "{" _ construct (_ es6_key_value {% v => v[1] %}):* _ "}" {% classes.parse %}
 construct -> "constructor" _ arguments_with_types statements_block {% classes.construct %}
@@ -687,7 +686,14 @@ var_reassign -> identifier _ "=" _ value {% v => {
 	}
 } %}
 
-value_addition ->
+value_addition -> base _ ("+=" | "-=" | "*=" | "/=" | "%=" | "**=" | "<<=" | ">>=" | ">>>=" | "&=" | "^=" | "|=") _ value {% (v, l, reject) => assign(v[0], {
+        type: 'expression_short_equation',
+        left: v[0],
+        right: v[4],
+        operator: v[2][0].value
+    }) %}
+
+value_addition2 ->
     prefixExp _nbsp ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ sum {% (v, l, reject) => {
         if (v[0].type == 'string' || v[0].type == 'number' || v[0].type == 'boolean' || v[0].type == 'null') {
             throw new Error(`Unexpected assignment at line ${v[2][0].line}, col ${v[2][0].col}`)
@@ -801,7 +807,21 @@ function_call -> _base _nbsp arguments {% (v, l, reject) => {
 
 # arguments
 arguments -> "(" _ ")" {% args.empty %}
-	| "(" _ value (_ "," _ value):* (_ ","):? _ ")" {% args.extract %}
+	| "(" _ argument (_ "," _ argument):* (_ ","):? _ ")" {% args.extract %}
+
+argument -> value {% id %}
+    | "." {% v => ({
+        type: 'placeholder',
+        value: null,
+        line: v[0].line,
+        col: v[0].col
+    }) %}
+    #| "..." {% v => ({
+    #    type: 'argument',
+    #    value: v[0][0].value,
+    #    line: v[0][0].line,
+    #    col: v[0][0].col
+    #}) %}
 
 arguments_with_types -> "(" _ ")" {% args.empty_arguments_with_types %}
 	| "(" _ argument_identifier_and_value (_ "," _ argument_identifier_and_value):* (_ ","):? _ ")" {% args.arguments_with_types %}
@@ -879,9 +899,6 @@ condition -> condition (__ "and" __ | __ "or" __ | _ "&&" _ | _ "||" _) _value {
         value: v[4],
     }) %}
     | _value {% condition.value %}
-
-statement_condition -> _ condition {% v => v[1] %}
-	#| _ "(" _ condition _ ")" {% v => v[3] %}
 
 debugging -> ("LOG" | "print") (__ "if"):? debugging_body {% v => ({
 	type: 'debugging',
@@ -970,30 +987,298 @@ array_interactions ->
 
 # expressions
 
-bitwise -> bitwise _nbsp ("|" | "&" | ">>>" | "<<" | ">>" | "^") _ base {% v => ({
-        type: 'bitwise_middle',
-        left: v[0],
-        operator: v[2][0].value,
-        right: v[4],
-    }) %}
-    | new_statement {% id %}
+# presedence (most important to least important)
+# 1. Grouping () n/a
+# 2. Member access (.) left to right
+    # | computed member access ([]) n/a
+    # | function call (()) n/a
+    # | new with argument list (new) n/a # unused
+    # | optional chain (?.) left to right
+# 3. new without argument list (new) n/a
+# 4. postfix increment (++) n/a
+    # | postfix decrement (--) n/a
+# 5. logical not (!) n/a
+    # | bitwise not (~) n/a
+    # | unary plus (+) n/a
+    # | unary negation (-) n/a
+    # | prefix increment (++) n/a
+    # | prefix decrement (--) n/a
+    # | typeof n/a
+    # | sizeof n/a
+    # | defined n/a
+    # | void n/a
+    # | delete n/a
+    # | await n/a
+# 6. exponentiation (**) right to left
+# 7. multiplication (*) left to right
+    # | division (/) left to right
+    # | remainder (%) left to right
+# 8. addition (+) left to right
+    # | subtraction (-) left to right
+# 9. left shift (<<) left to right
+    # | right shift (>>) left to right
+    # | unsigned right shift (>>>) left to right
+# 10. less than (<) left to right
+    # | greater than (>) left to right
+    # | less than or equal (<=) left to right
+    # | greater than or equal (>=) left to right
+    # | in left to right
+    # | instanceof left to right
+# 11. equality (==) left to right
+    # | inequality (!=) left to right
+    # | strict equality (===) left to right
+    # | strict inequality (!==) left to right
+# 12. bitwise AND (&) left to right
+# 13. bitwise XOR (^) left to right
+# 14. bitwise OR (|) left to right
+# 15. logical AND (&&) left to right
+# 16. logical OR (||) left to right
+    # | nullish coalescing (??) left to right
+# 17. conditional (?:) right to left
+# 18. arrow function (=>) n/a
+    # | yield n/a
+    # | yield* n/a
+    # | spread (...) n/a
+# 19. pipe forward (|>) right to left
+# 20. pipe backward (<|) right to left
+# 21. assignment(=) right to left
+    # | assignment, any compound (+= || -= || *= || /= || %= || **= || <<= || >>= || >>>= || &= || ^= || |= || #customOperator=) right to left
+    # | assignment, any compound (||= || &&= || ??=) right to left
+# 22. comma (,) left to right # unused
 
-new_statement -> ("new" | "await" | "yield") __ base {% (v, l, reject) => {
-    if (['new', 'await', 'yield'].includes(v[2].type)) return reject;
-		return assign(v[0][0], {
-			type: v[0][0].text,
-			value: v[2]
-		})
-	} %}
+new_statement2 -> "new" __ base {% (v, l, reject) => {
+    if ('new' == v[2].type) return reject;
+    return ({
+        type: 'new',
+        value: v[2]
+    }) } %}
     | base {% id %}
 
+postfix -> base _nbsp ("++" | "--") {% (v, l, reject) => {
+    //if (['item_retraction_last', 'item_retraction', 'dot_retraction_v2', 'namespace_retraction', 'function_call', 'identifier'].includes(v[0].type))
+    //    throw new SyntaxError('Invalid left-hand side expression in postfix operation');
+    return ({
+        type: 'postfix',
+        value: v[0],
+        operator: v[2][0].value
+    }) } %}
+    | new_statement2 {% id %}
+
+unary2 -> ("!" _ #| "not" __
+) unary2 {% (v, l, reject) => ({
+        type: 'reversed_unary',
+        value: v[1],
+        operator: '!',
+        reject: v[0][0].value === 'not'
+    }) %}
+    | "~" _ unary2 {% (v, l, reject) => {
+        return ({
+            type: 'bitwise_not_unary',
+            value: v[1],
+            operator: '~'
+        })
+    } %}
+    | ("++" | "--") _nbsp base {% (v, l, reject) => {
+        //if (['item_retraction_last', 'item_retraction', 'dot_retraction_v2', 'namespace_retraction', 'function_call', 'identifier'].includes(v[2].type))
+        //    throw new SyntaxError('Invalid left-hand side expression in prefix operation');
+        return ({
+            type: 'prefix',
+            value: v[2],
+            operator: v[0][0].value
+        })
+    } %}
+    | "typeof" _ unary2 {% (v, l, reject) => {
+        if (v[2].type != 'expression_with_parenthesis' && v[1].length == 0) return reject;
+        return ({
+            type: 'typeof',
+            value: v[2],
+        }) } %}
+    | "sizeof" _ unary2 {% (v, l, reject) => {
+        if (v[2].type != 'expression_with_parenthesis' && v[1].length == 0) return reject;
+        return ({
+            type: 'sizeof',
+            value: v[2],
+        }) } %}
+    | "void" _ unary2 {% (v, l, reject) => {
+        if (v[2].type != 'expression_with_parenthesis' && v[1].length == 0) return reject;
+        return ({
+            type: 'void_unary',
+            value: v[2],
+        }) } %}
+    #| "defined" _ unary2 {% (v, l, reject) => {
+    #    if (v[2].type != 'expression_with_parenthesis' && v[1].length == 0) return reject;
+    #    return ({
+    #        type: 'defined',
+    #        value: v[2],
+    #    }) } %}
+    | "delete" _ unary2 {% (v, l, reject) => {
+        if (v[2].type != 'expression_with_parenthesis' && v[1].length == 0) return reject;
+        return ({
+            type: 'delete_unary',
+            value: v[2],
+        }) } %}
+    | "await" _ unary2 {% (v, l, reject) => {
+        if (v[2].type != 'expression_with_parenthesis' && v[1].length == 0) return reject;
+        return ({
+            type: 'await_unary',
+            value: v[2],
+        }) } %}
+    | postfix {% id %}
+
+exponentiation -> unary2 _ "**" _ exponentiation {% (v, l, reject) => ({
+        type: 'exponentiation',
+        left: v[0],
+        right: v[4]
+    }) %}
+    | unary2 {% id %}
+
+multiplicative -> multiplicative _ ("*" | "/" | "%") _ exponentiation {% (v, l, reject) => ({
+        type: 'multiplicative',
+        left: v[0],
+        right: v[4],
+        operator: v[2][0].value
+    }) %}
+    | exponentiation {% id %}
+
+additive -> additive _ ("+" | "-") _ multiplicative {% (v, l, reject) => ({
+        type: 'additive',
+        left: v[0],
+        right: v[4],
+        operator: v[2][0].value
+    }) %}
+    | multiplicative {% id %}
+
+shift -> shift _ ("<<" | ">>" | ">>>") _ additive {% (v, l, reject) => ({
+        type: 'shift',
+        left: v[0],
+        right: v[4],
+        operator: v[2][0].value
+    }) %}
+    | additive {% id %}
+
+relational -> relational _ ("<" | ">" | "<=" | ">=" | "in" | "instanceof") _ shift {% (v, l, reject) => ({
+        type: 'relational',
+        left: v[0],
+        right: v[4],
+        operator: v[2][0].value
+    }) %}
+    | shift {% id %}
+
+equality -> equality _ ("==" | "!=" | "===" | "!==" | "is" | "is" _ "not") _ relational {% (v, l, reject) => {
+    //console.log(v[4])
+    //if (v[4].type == 'reversed_unary' && v[4].reject) return reject;
+    let operator = v[2][0].value;
+    if (operator == 'is' && v[2][3] === 'not') operator = '!==';
+    else if (operator == 'is') operator = '===';
+    return ({
+        type: 'equality',
+        left: v[0],
+        right: v[4],
+        operator: operator
+    }) } %}
+    | relational {% id %}
+
+bitwise_and -> bitwise_and _ "&" _ equality {% (v, l, reject) => ({
+        type: 'bitwise_and',
+        left: v[0],
+        right: v[4]
+    }) %}
+    | equality {% id %}
+
+bitwise_xor -> bitwise_xor _ "^" _ bitwise_and {% (v, l, reject) => ({
+        type: 'bitwise_xor',
+        left: v[0],
+        right: v[4]
+    }) %}
+    | bitwise_and {% id %}
+
+bitwise_or -> bitwise_or _ "|" _ bitwise_xor {% (v, l, reject) => ({
+        type: 'bitwise_or',
+        left: v[0],
+        right: v[4]
+    }) %}
+    | bitwise_xor {% id %}
+
+logical_and -> logical_and _ ("&&" | "and") _ bitwise_or {% (v, l, reject) => ({
+        type: 'logical_and',
+        left: v[0],
+        right: v[4]
+    }) %}
+    | bitwise_or {% id %}
+
+logical_or -> logical_or _ ("||" | "or") _ logical_and {% (v, l, reject) => ({
+        type: 'logical_or',
+        left: v[0],
+        right: v[4]
+    }) %}
+    #! ?? operator
+    | logical_or _ "??" _ logical_and {% v => ({
+        type: 'nullish_check',
+        condition: v[0],
+        value: v[4],
+    }) %}
+    | logical_and {% id %}
+
+conditional -> logical_or _ "?" _ conditional _ ":" _ conditional {% (v, l, reject) => ({
+        type: 'conditional',
+        condition: v[0],
+        true: v[4],
+        false: v[6]
+    }) %}
+    | logical_or _ "?" _ conditional {% (v, l, reject) => ({
+        type: 'conditional',
+        condition: v[0],
+        true: v[4],
+        false: null
+    }) %}
+    | logical_or _nbsp "if" _ conditional _ "else" _ conditional {% (v, l, reject) => ({
+        type: 'conditional',
+        condition: v[4],
+        true: v[0],
+        false: v[8]
+    }) %}
+    # ! must be tested
+    | logical_or _nbsp "if" _ conditional {% (v, l, reject) => ({
+        type: 'conditional',
+        condition: v[4],
+        true: v[0],
+        false: null
+    }) %}
+    | logical_or {% id %}
+
+spread -> "..." _ conditional {% (v, l, reject) => ({
+        type: 'spread',
+        value: v[2]
+    }) %}
+    | conditional {% id %}
+
+pipeback -> spread _ "<|" _ pipeback {% (v, l, reject) => ({
+        type: 'pipeback',
+        left: v[0],
+        right: v[4]
+    }) %}
+    | spread {% id %}
+
+pipeforward -> pipeback _ "|>" _ pipeforward {% (v, l, reject) => ({
+        type: 'pipeforward',
+        left: v[0],
+        right: v[4]
+    }) %}
+    | pipeback {% id %}
+
+
+statement_condition -> _ conditional {% v => v[1] %}
+	#| _ "(" _ condition _ ")" {% v => v[3] %}
 base -> parenthesized {% id %}
     | Var {% id %}
+	| annonymous_function {% id %}
+	| regexp {% id %}
+	| boolean {% id %}
 	| string {% id %}
 	| bigInt {% id %}
 	| number {% id %}
 	| array {% id %}
-    | convert {% id %}
+    #| convert {% id %}
 	| object {% id %}
     | "safeValue" _ arguments {% v => ({
         type: 'safeValue',
@@ -1001,114 +1286,11 @@ base -> parenthesized {% id %}
         line: v[0].line,
         col: v[0].col
     }) %}
-	#| boolean {% id %}
+	#| boolean {% id %}
 
-sum -> sum _nbsp ("+" | "-") _ product {% v => ({
-    type: 'sum',
-    left: v[0],
-    right: v[4],
-    operator: v[2][0].value,
-    value: (function (v) {
-        if (v[0].type == 'number' && v[4].type == 'number') {
-            if (v[2][0].value == '+') {
-                return v[0].value + v[4].value
-            } else {
-                return v[0].value - v[4].value
-            }
-        } else {
-            return null
-        }
-    })(v),
-    line: v[0].line,
-    col: v[0].col
-}) %}
-    | product {% id %}
+value -> pipeforward {% id %}
 
-product -> product _nbsp ("*" | "/") _ unary {% v => ({
-    type: 'product',
-    left: v[0],
-    right: v[4],
-    operator: v[2][0].value,
-    value: (function (v) {
-        if (v[0].type == 'number' && v[4].type == 'number') {
-            if (v[2][0].value == '*') {
-                return v[0].value * v[4].value
-            } else {
-                return v[0].value / v[4].value
-            }
-        } else {
-            return null
-        }
-    })(v),
-    line: v[0].line,
-    col: v[0].col
-}) %}
-    | unary {% id %}
-
-unary -> "-" _nbsp unary {% v => {
-    return {
-        type: 'number_negative',
-        value: v[2],
-        line: v[0].line,
-        col: v[0].col
-    }} %}
-    | "..." _nbsp unary {% v => {
-        return {
-            type: 'array_interactions',
-            method: 'spread',
-            value: v[2],
-            line: v[0].line,
-            col: v[0].col
-        }} %}
-    | "typeof" __ unary {% v => ({
-        type: 'typeof',
-        value: v[2]
-    }) %}
-    | "sizeof" __ unary {% v => ({
-        type: 'sizeof',
-        value: v[2]
-    }) %}
-    | "~":+ _nbsp pow {% v => ({
-        type: 'bitwise_not',
-        operator: v[0].map(i => i.value).join(''),
-        value: v[2],
-        line: v[0].line,
-        col: v[0].col
-    }) %}
-    | pow {% id %}
-
-pow -> pow _nbsp ("**" | "%") _ unary {% v => ({
-    type: 'pow',
-    left: v[0],
-    right: v[4],
-    operator: v[2][0].value,
-    value: (function (v) {
-        if (v[0].type == 'number' && v[4].type == 'number') {
-            if (v[2][0].value == '**') {
-                return v[0].value ** v[4].value
-            } else {
-                return v[0].value % v[4].value
-            }
-        } else {
-            return null
-        }
-    })(v),
-    line: v[0].line,
-    col: v[0].col
-}) %}
-| pow _nbsp operator __ unary {% v => ({
-    type: 'pow',
-    left: v[0],
-    right: v[4],
-    operator: v[2].value,
-    value: null,
-    line: v[0].line,
-    col: v[0].col
-}) %}
-    | bitwise {% id %}
-
-
-value -> condition {% id %}
+value2 -> condition {% id %}
     | ternary {% id %}
 
 _value ->
@@ -1136,14 +1318,25 @@ _value ->
         line: v[0].line,
         col: v[0].col
     }) %}
-    | "void" _nbsp arguments {% v => ({
-        type: 'void',
-        value: v[2],
-        line: v[0].line,
-        col: v[0].col
-    }) %}
+    #| "void" _nbsp arguments {% v => ({
+    #    type: 'void',
+    #    value: v[2],
+    #    line: v[0].line,
+    #    col: v[0].col
+    #}) %}
+
+pipeline -> value (_ "|>" _ value):+ {% v => ({
+    type: 'pipeline',
+    left: v[0],
+    right: v[4],
+    line: v[0].line,
+    col: v[0].col
+}) %}
+
 prefixExp ->
 #parenthesized {% id %}
+    #pipeline {% id %}=
+    #|
     sum {% id %}
     #| Var {% id %}
 	| annonymous_function {% id %}
@@ -1658,8 +1851,14 @@ function boolean ([v]) {
     return assign(v[0], {type: 'boolean', value: v[0].value })
 }
 function extractPair (kv, output) {
+    //debugger
     if (kv[0]) {
-        output[kv[0]] = kv[1];
+        if (typeof kv[0] == 'string') {
+            output[kv[0]] = kv[1];
+        }
+        else {
+            output[kv[0].value] = kv[1];
+        }
     } else {
         output[kv.text] = kv;
     }
