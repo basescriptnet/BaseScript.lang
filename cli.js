@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 const path_applied = process.cwd();
 const pathLib = require('path');
 
@@ -60,8 +59,14 @@ const commands = [
     '\t--env\t\t      ' + 'Node env directive.' + '\t\t' + '[boolean]\r',
     '\t--file\t\t      ' + 'File to compile.' + '\t\t\t' + '[string]\r',
     '\t--out\t\t      ' + 'Output file.' + '\t\t\t' + '[string]\r',
+    '\t--js\t\t      ' + 'Parse JS.' + '\t\t\t' + '[boolean]\r',
     //'\t--args\t\t      ' + 'Node arguments' + '\t\t\t' + '[string]\n',
 ];
+
+module.exports = {
+    utils
+}
+
 function showCommands () {
     console.log(usage);
     for (let i = 0; i < commands.length; i++) {
@@ -101,6 +106,12 @@ const options = yargs
         alias: "args",
         describe: "Node arguments",
         type: "string",
+        demandOption: false
+    })
+    .option("js", {
+        alias: "js",
+        describe: "Parse and print as JS",
+        type: "boolean",
         demandOption: false
     })
     .alias('env', 'e')
@@ -156,7 +167,10 @@ if (!fs.existsSync(dir)) {
     console.error(new Error('Provided location doesn\'t exist'))
     process.exit()
 }
-if (options.run) {
+if (options.js) {
+    module.exports = utils.fromString(dir, arg0, '', true, false, options.out, CLIArguments, options.env);
+    process.exit();
+} else if (options.run) {
     utils.parse(dir, arg0, '', false, true, options.out, CLIArguments, options.env);
     process.exit();
 } else if (!options.watch) {

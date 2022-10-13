@@ -1,19 +1,24 @@
 @{%
-    const assign = Object.assign.bind(Object);
-    let HTML_ALLOWED = false;
+    const assign = Object.assign.bind(Object)
+    let HTML_ALLOWED = false
     const moo = require('moo');
 const lexer = moo.compile({
     string: [
         {
-            match: /"(?:\\["'`bfnrtvxu$\\]|[^"\\])*"/, quoteType: '\"'
+            match: /"(?:\\["'`bfnrtvxu$\\/]|[^"\\])*"/, quoteType: '\"'
         },
         {
-            match: /'(?:\\["'`bfnrtvxu$\\]|[^'\\])*'/, quoteType: '\''
+            match: /'(?:\\["'`bfnrtvxu$\\/]|[^'\\])*'/, quoteType: '\''
         },
         {
-            match: /`(?:\\["'`bfnrtvxu$\\]|[^`\\])*`/, lineBreaks: true, quoteType: '\`'
+            match: /`(?:\\["'`bfnrtvxu$\\/]|[^`\\])*`/, lineBreaks: true, quoteType: '\`'
         },
     ],
+    //template_body: {
+    //    match: /(?:\\[bfnrtvxu$\\]|[^`\\$])+/,
+    //    lineBreaks: true,
+    //},
+    //template_quote: '`',
     space: {
         match: /(?:\s+|\/\/[^\n\r]*(?:\n+\s*)?)+/,
         lineBreaks: true,
@@ -28,12 +33,12 @@ const lexer = moo.compile({
         'debugger', 'or', 'and', 'return', 'new', 'is', 'not', 'throw', 'break', 'continue', 'when'].map(i => new RegExp(`\\b${i}\\b`)),
     //regexp: /\/((?![*+?])(?:[^\r\n\[/\\]|\\.|\[(?:[^\r\n\]\\]|\\.)*\])+)\/((?:g(?:im?|mi?)?|i(?:gm?|mg?)?|m(?:gi?|ig?)?)?)/,
     regexp: /\/(?:\\[ \/><bBfFnNrRtTvVxXuUsSwWdD.+\-!@#&()*^$[\]{}|?:\\]|[^><\n\/\\])*?\//,
-    operator: ['++', '--', '+', '-', '/', '**', '*', '%'],
+    operator: ['++', '--', /*'+', '-', '/', '**', '*', '%'*/],
     // ! is not tested
     bigInt: /(?:\+|-)?(?:[0-9]+(?:_?[0-9]+)*)n/,
     number: /(?:\+|-)?(?:[0-9]+(?:_?[0-9]+)*)(?:\.[0-9]+)?/,
     boolean: ['true', 'false'],
-    fat_arrow: '=>',
+    //fat_arrow: '=>',
     //constant: 'const',
     identifier: [
         {
@@ -51,7 +56,7 @@ const lexer = moo.compile({
     import: '@import',
     '@text': '@text',
     decorator: [/*'@php', */'@js'],
-    literal: ['|>', '<|', '#', '@', '>>>', '>>', '<<', '^', '[', ']', '{', '}', '(', ')', '...', '..', '.', '\\', ',', ';', '::', ':', '??', '?.', '?', '!', '!=', '!==', '==', '===', '>=', '<=', '>', '<', '&&', '&', '||', '|', '+=', '-=', '*=', '/=', '%=', '**=', '='],
+    literal: ['|>', '<|', '#', '@', '>>>', '>>', '<<', '^', '[', ']', '{', '}', '(', ')', '...', '..', '.', '\\', ',', ';', '::', ':', '??', '?.', '?', '!', '!=', '!==', '==', '===', '>=', '<=', '>', '<', '&&', '&', '||', '|', '+=', '-=', '*=', '/=', '%=', '**=', '=', '+', '-', '/', '*', '%'],
 });
 %}
 @lexer lexer
@@ -369,7 +374,8 @@ boolean -> (%boolean) {% boolean %}
 	# | condition {% condition.value %}
 
 # strings
-string -> string_concat {% id %}
+string -> string_concat {% id %}
+    #| template {% id %}
 	#| "typeof" _ "(" _ value _ ")" {% v => ({
 	#	type: 'typeof',
 	#	value: v[4],
@@ -377,6 +383,71 @@ string -> string_concat {% id %}
     #    col: v[0].col
 	#}) %}
 
+template -> "`" template_body "`" {% v => {
+    return {
+        type: 'template',
+        value: v[1],
+        line: v[0].line, col: v[0].col, offset: v[0].offset,
+    }
+} %}
+#"`" template_body "`" {% v => {
+#    return {
+#        type: 'template',
+#        value: v[1],
+#        line: v[0].line, col: v[0].col, offset: v[0].offset,
+#    }
+#} %}
+
+tempalte_body -> template_string {% v => {
+    return {
+        type: 'template_string',
+        value: v[0],
+        line: v[0].line, col: v[0].col, offset: v[0].offset,
+    }
+} %}
+    | template_string _ "{" _ value _ "}" {% v => {
+        return {
+            type: 'template_expression',
+            value: v[4],
+            line: v[0].line, col: v[0].col, offset: v[0].offset,
+        }
+    } %}
+
+
+# use regexp
+template_string -> [A-Za-z0-9\s]:* {% v => {
+    return {
+        type: 'template_string',
+        value: v[0],
+        line: v[0].line, col: v[0].col, offset: v[0].offset,
+    }
+} %}
+
+template_body2 -> template_body template_body_part {% v => {
+        return [
+            ...v[0],
+            v[1]
+        ]
+    } %}
+    | template_body_part {% v => [v[0]] %}
+
+template_body_part -> "$" "{" _ value _ "}" {% v => {
+        return {
+            type: 'template_body_part',
+            value: v[3],
+            line: v[0].line,
+            col: v[0].col
+        }
+    } %}
+    | [^`\\$]:* {% v => {
+        console.log(v[0][0])
+        return {
+            type: 'template_body_part',
+            value: v[0][0],
+            line: v[0].line,
+            col: v[0].col
+        }
+    } %}
 # numbers
 # ! is not tested
 bigInt -> %bigInt {% number.bigInt %}
@@ -686,7 +757,7 @@ var_reassign -> identifier _ "=" _ value {% v => {
 	}
 } %}
 
-value_addition -> base _ ("+=" | "-=" | "*=" | "/=" | "%=" | "**=" | "<<=" | ">>=" | ">>>=" | "&=" | "^=" | "|=") _ value {% (v, l, reject) => assign(v[0], {
+value_addition -> value _ ("+=" | "-=" | "*=" | "/=" | "%=" | "**=" | "<<=" | ">>=" | ">>>=" | "&=" | "^=" | "|=") _ value {% (v, l, reject) => ({
         type: 'expression_short_equation',
         left: v[0],
         right: v[4],
@@ -1278,7 +1349,8 @@ base -> parenthesized {% id %}
 	| bigInt {% id %}
 	| number {% id %}
 	| array {% id %}
-    #| convert {% id %}
+    | myNull {% id %}
+    | convert {% id %}
 	| object {% id %}
     | "safeValue" _ arguments {% v => ({
         type: 'safeValue',

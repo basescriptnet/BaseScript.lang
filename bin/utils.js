@@ -11,7 +11,7 @@ let writeFile = (path, fileName, content, silent = false, env) => {
     if (!fileName) {
         return console.warn('Filename cannot be empty');
     }
-    try {
+    try {
         // this is pretty fast. Max was 3ms for regular file
         var tmp = ast_to_js(content, pathJS(path).dir);
 
