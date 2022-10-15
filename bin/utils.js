@@ -42,7 +42,7 @@ let writeFile = (path, fileName, content, silent = false, env) => {
 };
 
 module.exports = {
-    parse(dir, arg0 = '', path, watch = false, run = false, to = '', args = [], env = false) {
+    async parse(dir, arg0 = '', path, watch = false, run = false, to = '', args = [], env = false) {
         console.clear()
         let date = Date.now();
         if (!watch) {
@@ -96,7 +96,13 @@ module.exports = {
                     builtins = fs.readFileSync(pathJS(__dirname).add(internalPaths.built_in_from_utils), 'utf8');
                 }
                 let final = builtins + dirs + includes + '\n' + contentJS;
-                run_code(final, pathJS(path).dir/*, path.split('\\').pop()*/);
+                try {
+                    let result = await run_code(final, pathJS(path).dir/*, path.split('\\').pop()*/);
+                    console.log('Returned: ' +result);
+                } catch (err) {
+                    console.error(err);
+                    console.log('exit')
+                }
                 process.exit();
             }
             let wrote = writeFile(path, fileName, content.result, run ? true : false, env);

@@ -1,6 +1,6 @@
 {
     "name": "basescript.js",
-    "version": "0.1.49",
+    "version": "0.1.50",
     "description": "A scritpting language powered with Node.js and Nearley, that compiles down to JavaScript, and has the possibility for even more!",
     "main": "./index.js",
     "scripts": {
@@ -8,9 +8,6 @@
     },
     "bin": {
         "bsc": "./cli.js"
-    },
-    "publishConfig": {
-        "access": "public"
     },
     "repository": {
         "type": "git",
@@ -30,7 +27,11 @@
         "typescript",
         "less code"
     ],
-    "author": "basescript.net <basescriptnet@gmail.com> (https://basescript.net)",
+    "author": {
+        "name": "basescript.net",
+        "email": "basescriptnet@gmail.com",
+        "url": "https://basescript.net"
+    },
     "license": "MIT",
     "isDevelopment": false,
     "bugs": {
@@ -39,14 +40,9 @@
     "homepage": "https://github.com/basescriptnet/basescript.lang#readme",
     "dependencies": {
         "moo": "^0.5.1",
-        "vm2": "^3.9.11",
         "yargs": "^17.3.1"
     },
     "devDependencies": {
         "js-beautify": "^1.14.6"
-    },
-    "directories": {
-        "lib": "lib",
-        "test": "test"
     }
 }

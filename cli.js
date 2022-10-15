@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const path_applied = process.cwd();
 const pathLib = require('path');
 
@@ -169,33 +170,32 @@ if (!fs.existsSync(dir)) {
 }
 if (options.js) {
     module.exports = utils.fromString(dir, arg0, '', true, false, options.out, CLIArguments, options.env);
-    process.exit();
+    //process.exit();
 } else if (options.run) {
     utils.parse(dir, arg0, '', false, true, options.out, CLIArguments, options.env);
-    process.exit();
+    //process.exit();
 } else if (!options.watch) {
     baseUrl.filename = options.file;
     utils.parse(dir, arg0, '', false, false, options.out, CLIArguments, options.env);
-    process.exit();
+    //process.exit();
 }
-const exec = require("child_process").execSync;
-function execute(command) {
-    exec(command, (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`);
-            return;
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-        }
-        if (stdout)
-            console.log(`stdout: ${stdout}`);
-    });
-}
-
 // Watch directory
 if (options.watch) {
+    const exec = require("child_process").execSync;
+    function execute(command) {
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                console.log(`error: ${error.message}`);
+                return;
+            }
+            if (stderr) {
+                console.log(`stderr: ${stderr}`);
+                return;
+            }
+            if (stdout)
+                console.log(`stdout: ${stdout}`);
+        });
+    }
     let lastChange = 0;
     let lastFile = '';
     let actionDone = {};
