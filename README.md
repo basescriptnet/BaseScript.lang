@@ -9,7 +9,7 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/issues) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.1.51-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.1.52-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About

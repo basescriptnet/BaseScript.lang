@@ -2,6 +2,13 @@
     const assign = Object.assign.bind(Object)
     let HTML_ALLOWED = false
     const moo = require('moo');
+const numberify = function (v, radix) {
+    if (v.endsWith('n'))
+        v = v.slice(0, -1);
+    if (v[0] === '-' || v[0] === '+')
+        return parseInt(v.slice(3), radix) * (v[0] === '-' ? -1 : 1);
+    return parseInt(v.slice(2).replace(/_/g, ''), radix)
+}
 const lexer = moo.compile({
     string: [
         {
@@ -20,18 +27,52 @@ const lexer = moo.compile({
         value: v => v.replace(/\/\/[^-\n\r]?[^\n\r]*/g, '')
     },
     //'@constructor': 'constructor',
-    keyword: ['interface', 'void', 'defined', 'safeValue', 'swap', 'namespace', 'Boolean', 'Number', 'String', 'Array', 'Object', 'unless', 'than', 'constructor', 'null', 'const', 'print', 'var',
+    keyword: ['class', 'interface', 'void', 'defined', 'safeValue', 'swap', 'namespace', 'Boolean', 'Number', 'String', 'Array', 'Object', 'unless', 'than', 'constructor', 'null', 'const', 'print', 'var',
         'sizeof', 'Infinity', 'NaN', 'undefined', 'globalThis', 'through', 'delete', 'THAT', 'DELETE', 'SAVE', 'LOG', 'ERROR', 'WRITE', 'INTO', 'PUSH',
         'POP', 'SHIFT', 'UNSHIFT', 'FROM', 'Int', 'Float', 'BEGIN', 'END', 'SET', 'TO', 'typeof', 'instanceof', 'in', 'of', 'type', 'super',
         'extends', 'function', 'def', 'this', 'echo', 'export', 'as', 'JSON', 'yield', 'async', 'try', 'catch', 'finally', 'static', 'while',
         'if', 'else', 'import', 'from', 'let', 'const', 'null', 'of', 'default', 'caseof', 'switch', 'with', 'for', 'case', 'default', 'elif',
-        'debugger', 'or', 'and', 'return', 'new', 'is', 'not', 'throw', 'break', 'continue', 'when'].map(i => new RegExp(`\\b${i}\\b`)),
+        'debugger', 'or', 'and', 'return', 'new', 'is', 'not', 'throw', 'break', 'continue', 'when', 'exit'].map(i => new RegExp(`\\b${i}\\b`)),
     //regexp: /\/((?![*+?])(?:[^\r\n\[/\\]|\\.|\[(?:[^\r\n\]\\]|\\.)*\])+)\/((?:g(?:im?|mi?)?|i(?:gm?|mg?)?|m(?:gi?|ig?)?)?)/,
     regexp: /\/(?:\\[ \/><bBfFnNrRtTvVxXuUsSwWdD.+\-!@#&()*^$[\]{}|?:\\]|[^><\n\/\\])*?\//,
     operator: ['++', '--', /*'+', '-', '/', '**', '*', '%'*/],
     // ! is not tested
-    bigInt: /(?:\+|-)?(?:[0-9]+(?:_?[0-9]+)*)n/,
-    number: /(?:\+|-)?(?:[0-9]+(?:_?[0-9]+)*)(?:\.[0-9]+)?/,
+    bigInt: [
+        {
+            match: /(?:\+|-)?0[xX](?:[0-9A-Fa-f]+(?:_?[0-9A-Fa-f]+)*)n/,
+            value: v => numberify(v, 16) + 'n'
+        },
+        {
+            match: /(?:\+|-)?0[oO](?:[0-7]+(?:_?[0-7]+)*)n/,
+            value: v => numberify(v, 8) + 'n'
+        },
+        {
+            match: /(?:\+|-)?0[bB](?:[01]+(?:_?[01]+)*)n/,
+            value: v => numberify(v, 2) + 'n'
+        },
+        {
+            match: /(?:\+|-)?(?:[0-9]+(?:_?[0-9]+)*)n/,
+            value: v => parseFloat(v.replace(/_/g, '')) + 'n'
+        },
+    ],
+    number: [
+        {
+            match: /(?:\+|-)?0[xX](?:[0-9A-Fa-f]+(?:_?[0-9A-Fa-f]+)*)/,
+            value: v => numberify(v, 16)
+        },
+        {
+            match: /(?:\+|-)?0[oO](?:[0-7]+(?:_?[0-7]+)*)/,
+            value: v => numberify(v, 8)
+        },
+        {
+            match: /(?:\+|-)?0[bB](?:[01]+(?:_?[01]+)*)/,
+            value: v => numberify(v, 2)
+        },
+        {
+            match: /(?:\+|-)?(?:[0-9]+(?:_?[0-9]+)*)(?:\.[0-9]+)?/,
+            value: v => parseFloat(v.replace(/_/g, ''))
+        },
+    ],
     boolean: ['true', 'false'],
     //fat_arrow: '=>',
     //constant: 'const',
@@ -382,7 +423,22 @@ string -> string_concat {% id %}
 # ! is not tested
 bigInt -> %bigInt {% number.bigInt %}
 
-number -> %number {% number.float %}
+number ->
+#("+" | "-"):? "0" [xX] [0-9A-Fa-f]:+ ("_":? [0-9A-Fa-f]:+):* {% v => {
+#        let n = v[0].value ? v[0].value : '';
+#        n += v[1].value + v[2].value;
+#        v[3].forEach(i => {
+#            n += i.value;
+#        });
+
+#        return {
+#            type: 'number',
+#            value: parseInt(n, 16),
+#            line: v[0].line, col: v[0].col, offset: v[0].offset,
+#        }
+#    } %}
+#    |
+    %number {% number.float %}
     #| "sizeof" _ "(" _ value _ ")" {% v => ({
 	#	type: 'sizeof',
 	#	value: v[4],
@@ -1180,10 +1236,8 @@ pipeforward -> pipeforward _ "|>" _ pipeback {% (v, l, reject) => ({
     }) %}
     | pipeback {% id %}
 
-
-statement_condition -> _ superValue {% v => v[1] %}
-	#| _ "(" _ condition _ ")" {% v => v[3] %}
-base -> parenthesized {% id %}
+statement_condition -> _ superValue {% v => v[1] %}
+base -> parenthesized {% id %}
     | Var {% id %}
 	| annonymous_function {% id %}
 	| regexp {% id %}
@@ -1729,7 +1783,7 @@ const object = {
 }
 const number = {
     float: v => assign(v[0], {
-        value: v[0].value.replace(/_/g, '')
+        value: v[0].value
     }),
     bigInt: v => assign(v[0], {
         type: 'bigInt',

@@ -7,7 +7,7 @@
 
 [BaseScript.net](https://BaseScript.net)
 
-<b><img src="https://img.shields.io/badge/version-0.1.51-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.1.52-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
