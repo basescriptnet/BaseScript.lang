@@ -94,7 +94,8 @@ module.exports = async function run_code (content, path) {
     // make the code wait for the promise to resolve
 
     return await new Promise(async resolve => {
-        script = new vm.createScript((`(function () {${content}; return 0;})();`));
+        script = new vm.createScript((
+`(function () {try{${content};} catch (err) { console.error(err); } finally { return 0 }})();`));
         // run in new context
         let result = script.runInNewContext(sandbox);
 

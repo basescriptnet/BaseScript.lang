@@ -1,0 +1,34 @@
+// pipe forward operator
+let file = 'a/very/long/path/to/a/file.js'
+    |> require // automatically calls require
+
+// example 2
+let number = -5.5
+    |> Math.abs
+    |> Math.round
+    |> Math.max(0, 2, ., 8)
+
+
+// . is a placeholder for the value of the previous pipe, otherwise null
+
+// is no pipe forward, you would have to write
+let number = Math.max(0, 2, Math.round(Math.abs(-5.5)), 8)
+
+// with the same logic, you can use the pipe backwards operator
+
+let number = Math.max(0, 2, ., 8)
+    <| Math.round
+    <| Math.abs
+    <| -5.5
+
+// write the main idea your expression, then pipe it
+
+// example 3
+// pipe forward and backward mixed
+let number = Math.abs
+    <| -2.5 + -3
+    |> Math.floor
+
+// we take the absolute value of -5.5, then we floor it
+// same as
+let number = Math.floor(Math.abs(-2.5 + -3))

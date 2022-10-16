@@ -14,11 +14,6 @@ const lexer = moo.compile({
             match: /`(?:\\["'`bfnrtvxu$\\/]|[^`\\])*`/, lineBreaks: true, quoteType: '\`'
         },
     ],
-    //template_body: {
-    //    match: /(?:\\[bfnrtvxu$\\]|[^`\\$])+/,
-    //    lineBreaks: true,
-    //},
-    //template_quote: '`',
     space: {
         match: /(?:\s+|\/\/[^\n\r]*(?:\n+\s*)?)+/,
         lineBreaks: true,
@@ -56,7 +51,7 @@ const lexer = moo.compile({
     import: '@import',
     '@text': '@text',
     decorator: [/*'@php', */'@js'],
-    literal: ['|>', '<|', '#', '@', '>>>', '>>', '<<', '^', '[', ']', '{', '}', '(', ')', '...', '..', '.', '\\', ',', ';', '::', ':', '??', '?.', '?', '!', '!=', '!==', '==', '===', '>=', '<=', '>', '<', '&&', '&', '||', '|', '+=', '-=', '*=', '/=', '%=', '**=', '=', '+', '-', '/', '*', '%'],
+    literal: ['|>', '<|', '#', '@', '~', '>>>', '>>', '<<', '^', '[', ']', '{', '}', '(', ')', '...', '..', '.', '\\', ',', ';', '::', ':', '??', '?.', '?', '!', '!=', '!==', '==', '===', '>=', '<=', '>', '<', '&&', '&', '||', '|', '+=', '-=', '*=', '/=', '%=', '**=', '=', '+', '-', '/', '*', '%'],
 });
 %}
 @lexer lexer
@@ -89,8 +84,8 @@ includes -> includes EOL single_include {% (v, l, reject) =>
 group_include -> (_ includes):? {% v => v[0] ? v[0][1] : [] %}
 decorated_statements -> _ %decorator group_include statements {% v => ({
 	type: 'decorator',
-	line: v[3].line,
-	col: v[3].col,
+	line: v[3] ? v[3].line : v[4].line,
+	col: v[3] ? v[3].col : v[4].col,
 	offset: v[3].offset,
 	decorator: v[1].value,
 	includes: v[2],
@@ -102,8 +97,10 @@ decorated_statements -> _ %decorator group_include statements {% v => ({
 		type: 'decorator',
 		includes: v[0],
 		value: v[1],
-        line: v[0] ? v[0].line : v[1].line,
-        col: v[0] ? v[0].col : v[1].col
+        line: 1,
+        col: 0
+        //line: v[0].length ? v[0].line : v[1].length ? v[1][0].line : 1,
+        //col: v[0].length ? v[0].col : v[1].length ? v[1][0].col : 0
 	})} %}
 
 ### statements ###
@@ -147,14 +144,14 @@ statement -> blocks {% id %}
 	| "debugger" {% statement.debugger %}
     #| "delete" _nbsp value {% statement.delete %}
 	| return {% id %}
-	| "throw" __ value {% statement.throw %}
+	| "throw" __ superValue {% statement.throw %}
 	| ("break" | "continue") {% statement.break_continue %}
-    | "swap" __ value _ "," _ value {% statement.swap %}
+    | "swap" __ superValue _ "," _ superValue {% statement.swap %}
 	| var_assign {% id %}
 	| value_reassign {% statement.value_reassign %}
     #| value_addition {% statement.value_addition %}
-	| value {% statement.value %}
-    | "namespace" __ value {% statement.namespace %}
+	| superValue {% statement.value %}
+    | "namespace" __ superValue {% statement.namespace %}
 
 blocks ->
 	if_block {% id %}
@@ -374,80 +371,13 @@ boolean -> (%boolean) {% boolean %}
 	# | condition {% condition.value %}
 
 # strings
-string -> string_concat {% id %}
-    #| template {% id %}
+string -> string_concat {% id %}
 	#| "typeof" _ "(" _ value _ ")" {% v => ({
 	#	type: 'typeof',
 	#	value: v[4],
     #    line: v[0].line,
     #    col: v[0].col
-	#}) %}
-
-template -> "`" template_body "`" {% v => {
-    return {
-        type: 'template',
-        value: v[1],
-        line: v[0].line, col: v[0].col, offset: v[0].offset,
-    }
-} %}
-#"`" template_body "`" {% v => {
-#    return {
-#        type: 'template',
-#        value: v[1],
-#        line: v[0].line, col: v[0].col, offset: v[0].offset,
-#    }
-#} %}
-
-tempalte_body -> template_string {% v => {
-    return {
-        type: 'template_string',
-        value: v[0],
-        line: v[0].line, col: v[0].col, offset: v[0].offset,
-    }
-} %}
-    | template_string _ "{" _ value _ "}" {% v => {
-        return {
-            type: 'template_expression',
-            value: v[4],
-            line: v[0].line, col: v[0].col, offset: v[0].offset,
-        }
-    } %}
-
-
-# use regexp
-template_string -> [A-Za-z0-9\s]:* {% v => {
-    return {
-        type: 'template_string',
-        value: v[0],
-        line: v[0].line, col: v[0].col, offset: v[0].offset,
-    }
-} %}
-
-template_body2 -> template_body template_body_part {% v => {
-        return [
-            ...v[0],
-            v[1]
-        ]
-    } %}
-    | template_body_part {% v => [v[0]] %}
-
-template_body_part -> "$" "{" _ value _ "}" {% v => {
-        return {
-            type: 'template_body_part',
-            value: v[3],
-            line: v[0].line,
-            col: v[0].col
-        }
-    } %}
-    | [^`\\$]:* {% v => {
-        console.log(v[0][0])
-        return {
-            type: 'template_body_part',
-            value: v[0][0],
-            line: v[0].line,
-            col: v[0].col
-        }
-    } %}
+	#}) %}
 # numbers
 # ! is not tested
 bigInt -> %bigInt {% number.bigInt %}
@@ -469,28 +399,28 @@ regexp -> %regexp (regexp_flags):* {% regexp.parse %}
 
 ### END primitives ###
 
-_base -> base {% id %}
-    #| array {% id %}
-	| regexp {% id %}
-    #| object {% id %}
+#_base -> base {% id %}
+#    #| array {% id %}
+#	| regexp {% id %}
+#    #| object {% id %}
 
 Var ->
     # ! needs more tests, though works
-	_base _nbsp "[" _ "]" {% v => ({
+	base _nbsp "[" _ "]" {% (v, l, reject) => assure(v, l, reject, {
         type: 'item_retraction_last',
         from: v[0],
         line: v[0].line,
         col: v[0].col
 	}) %}
-	| _base _ "[" (_ value) _ ":" (_ value):? (_ ":" _ value):? _ "]" {% array.slice %}
-	| _base _nbsp "[" _ value _ "]" {% v => ({
+	| base _ "[" (_ superValue) _ ":" (_ superValue):? (_ ":" _ superValue):? _ "]" {% array.slice %}
+	| base _nbsp "[" _ superValue _ "]" {% v => ({
         type: 'item_retraction',
         from: v[0],
         value: v[4],
         line: v[0].line,
         col: v[0].col
 	}) %}
-	| _base _ "." _ (%keyword | identifier) {% (v, l, reject) => {
+	| base _ "." _ (%keyword | identifier) {% (v, l, reject) => {
         if (v[0].type == 'annonymous_function') return reject
         return {
             type: 'dot_retraction_v2',
@@ -509,7 +439,7 @@ Var ->
             col: v[1][0].col
         }
     } %}
-    | "::" "[" _ value _ "]" {% v => ({
+    | "::" "[" _ superValue _ "]" {% v => ({
         type: 'namespace_retraction',
         retraction_type: 'item_retraction',
         value: v[3],
@@ -526,14 +456,14 @@ Var ->
     | function_call {% id %}
     | identifier {% id %}
 
-switch -> "caseof" _ value _ "{" (_ case_single_valued):* _ "}" {% v => assign(v[0], {
+switch -> "caseof" _ superValue _ "{" (_ case_single_valued):* _ "}" {% v => assign(v[0], {
 	type: 'switch*',
 	value: v[2],
 	cases: v[5] ? v[5].map(i => i[1]) : []
 }) %}
 
 # switch case addons
-case_single_valued -> "|" _ value _ ":" _ (value EOL):? {% v => assign(v[0], {
+case_single_valued -> "|" _ superValue _ ":" _ (superValue EOL):? {% v => assign(v[0], {
     type: 'case_with_break',
     value: v[2],
     statements: v[6] ? v[6][0] : []
@@ -548,13 +478,13 @@ case_single_valued -> "|" _ value _ ":" _ (value EOL):? {% v => assign(v[0], {
     value: v[4] ? v[4][0] : [null],
 }) %}
 
-switch_multiple -> "switch" __ value _ "{" (_ case_multiline):* (_ case_default):? _ "}" {% v => assign(v[0], {
+switch_multiple -> "switch" __ superValue _ "{" (_ case_multiline):* (_ case_default):? _ "}" {% v => assign(v[0], {
 	type: 'switch',
 	value: v[2],
 	cases: v[5] ? v[5].map(i => i[1]) : [],
     default: v[6] ? v[6][1] : null
 }) %}
-case_multiline -> "case" __ value _ ":" statements (_ ";"):? {% v => assign(v[0], {
+case_multiline -> "case" __ superValue _ ":" statements (_ ";"):? {% v => assign(v[0], {
 		type: 'case',
 		value: v[2],
 		statements: v[5]
@@ -598,29 +528,13 @@ if_block -> "if" statement_condition statements_block {% v => {
 	}
 } %}
 else_block ->
-#"else" __ statement {% (v, l, reject) => {
-#    //if (v[2].type == 'if') return reject;
-#    if (v[2].type == 'statement_value' && v[2].value.type == 'value' && v[2].value.value.type == 'object') return reject
-#    //if (v[2].type == 'value' && v[2].value.type == 'object') debugger
-#	return assign(v[0], {
-#		type: 'else',
-#		value: [v[2]],
-#	});
-#} %}
-#	|
     "else" statements_block {% v => {
     //if (v[1].type == 'value' && v[1].value.type == 'object') debugger
     return assign(v[0], {
 		type: 'else',
 		value: v[1],
 	});
-} %}
-
-ternary -> condition _ "?" _ value (_ ":" _ value) {% condition.ternary %}
-    | value __nbsp "if" _ condition (__nbsp "else" _nbsp value) {% condition.ternary_with_if %}
-    #| value __nbsp "if" _nbsp condition {% condition.ternary_with_if %}
-    #| value __nbsp "when" _nbsp condition {% condition.ternary_with_if %}
-# try catch finally
+} %}# try catch finally
 try_catch_finally -> try_catch (_ finally):? {% v => ({
 	type: 'try_catch_finally',
 	value: v[0],
@@ -683,17 +597,17 @@ finally -> "finally" statements_block {% v => {
 left_assign -> Var {% id %}
     | function_call {% id %}
 # value assignment
-value_reassign -> left_assign _ "=" _ (value) {% v => {
+value_reassign -> left_assign _ "=" _ superValue {% v => {
 	return {
 		type: 'var_reassign',
 		identifier: v[0],
 		line: v[0].line,
 		col: v[0].col,
-		value: v[4][0],
+		value: v[4],
 		offset: v[0].offset
 	}
 } %}
-	| "SET" _ value _ "TO" _ (switch | value) {% v => {
+	| "SET" _ superValue _ "TO" _ (switch | superValue) {% v => {
 	return {
 		type: 'var_reassign',
 		identifier: v[2],
@@ -707,7 +621,7 @@ value_reassign -> left_assign _ "=" _ (value) {% v => {
 
 var_assign -> assign_type var_assign_list {% vars.assign %}
     #| assign_type var_assign_list {% vars.assign %}
-	| "ASSIGN" _ (switch | value) _ "TO" _  identifier {% v => {
+	| "ASSIGN" _ (switch | superValue) _ "TO" _  identifier {% v => {
 	return {
 		type: 'var_assign',
 		use_let: true,
@@ -730,7 +644,7 @@ assign_type ->
 
 var_assign_list -> var_reassign (_ "," _ var_reassign {% v => v[3] %}):* {% vars.var_assign_list %}
 
-var_reassign -> identifier _ "=" _ value {% v => {
+var_reassign -> identifier _ "=" _ superValue {% v => {
 	return {
 		type: 'var_reassign',
 		identifier: v[0],
@@ -746,7 +660,7 @@ var_reassign -> identifier _ "=" _ value {% v => {
         line: v[0].line,
         col: v[0].col,
     }) %}
-	| "SET" _ identifier _ "TO" _ (switch | value) {% v => {
+	| "SET" _ identifier _ "TO" _ (switch | superValue) {% v => {
 	return {
 		type: 'var_reassign',
 		identifier: v[0],
@@ -757,25 +671,12 @@ var_reassign -> identifier _ "=" _ value {% v => {
 	}
 } %}
 
-value_addition -> value _ ("+=" | "-=" | "*=" | "/=" | "%=" | "**=" | "<<=" | ">>=" | ">>>=" | "&=" | "^=" | "|=") _ value {% (v, l, reject) => ({
+value_addition -> value _ ("+=" | "-=" | "*=" | "/=" | "%=" | "**=" | "<<=" | ">>=" | ">>>=" | "&=" | "^=" | "|=") _ superValue {% (v, l, reject) => ({
         type: 'expression_short_equation',
         left: v[0],
         right: v[4],
         operator: v[2][0].value
-    }) %}
-
-value_addition2 ->
-    prefixExp _nbsp ("+" "=" | "-" "=" | "*" "=" | "/" "=") _ sum {% (v, l, reject) => {
-        if (v[0].type == 'string' || v[0].type == 'number' || v[0].type == 'boolean' || v[0].type == 'null') {
-            throw new Error(`Unexpected assignment at line ${v[2][0].line}, col ${v[2][0].col}`)
-        }
-        // console.log(v[4])
-        return ({
-            type: 'expression_short_equation',
-            value: [v[0], assign(v[2][0], {value: v[2][0].value}), v[4]]
-        })
-    } %}
-# loops
+    }) %}# loops
 while_block -> "while" statement_condition statements_block {%  v => {
 	return assign(v[0], {
 		type: 'while',
@@ -783,7 +684,7 @@ while_block -> "while" statement_condition statements_block {%  v => {
 		value: v[2],
 	});
 } %}
-for_block -> "for" __ identifier __ ("in" | "of") __ value statements_block {%  v => {
+for_block -> "for" __ identifier __ ("in" | "of") __ superValue statements_block {%  v => {
 	return assign(v[0], {
 		type: 'for_' + v[4][0],
 		condition: v[1],
@@ -792,7 +693,7 @@ for_block -> "for" __ identifier __ ("in" | "of") __ value statements_block {%  
 		value: v[7],
 	});
 } %}
-for_block -> "for" _ "(" _ identifier __ ("in" | "of") __ value _ ")" statements_block {%  v => {
+for_block -> "for" _ "(" _ identifier __ ("in" | "of") __ superValue _ ")" statements_block {%  v => {
 	return assign(v[0], {
 		type: 'for_' + v[6][0],
 		//condition: v[4],
@@ -801,7 +702,7 @@ for_block -> "for" _ "(" _ identifier __ ("in" | "of") __ value _ ")" statements
 		value: v[11],
 	});
 } %}
-	| "for" __ identifier __ "from" __ value _ ("through" | "till") _ value statements_block {%  v => {
+	| "for" __ identifier __ "from" __ superValue _ ("through" | "till") _ superValue statements_block {%  v => {
 	return assign(v[0], {
 		type: 'for_loop',
 		identifier: v[2],
@@ -811,7 +712,7 @@ for_block -> "for" _ "(" _ identifier __ ("in" | "of") __ value _ ")" statements
 		value: v[11],
 	});
 } %}
-	| "for" _ "(" _ identifier __ "from" __ value _ ("through" | "till") _ value _ ")" statements_block {%  v => {
+	| "for" _ "(" _ identifier __ "from" __ superValue _ ("through" | "till") _ superValue _ ")" statements_block {%  v => {
 	return assign(v[0], {
 		type: 'for_loop',
 		identifier: v[4],
@@ -820,10 +721,7 @@ for_block -> "for" _ "(" _ identifier __ ("in" | "of") __ value _ ")" statements
 		include: v[10][0].text == 'till' ? false : true,
 		value: v[15],
 	});
-} %}
-for_loop_changes -> value_reassign {% statement.value_reassign %}
-	| value {% statement.value %}
-# functions
+} %}# functions
 annonymous_function ->
     # | ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
 	("async" __):? value_type (__ identifier):? _ arguments_with_types statements_block {% functions.annonymous %}
@@ -854,12 +752,13 @@ _value_type -> (identifier) (_nbsp "[" _ "]"):? {% v => ({
         col: v[0].col
     }) %}
 
-return -> "return" __nbsp value {% returns.value %}
+return -> "return" __nbsp superValue {% returns.value %}
     | "return" {% returns.empty %}
-    | "=>" _nbsp value {% returns.value %}
+    | "=>" _nbsp superValue {% returns.value %}
 
-function_call -> _base _nbsp arguments {% (v, l, reject) => {
+function_call -> base _nbsp arguments {% (v, l, reject) => {
     if (v[0].type == 'annonymous_function') return reject
+    //console.log(v[2].type)
 	return ({
 		type: 'function_call',
         //check: v[1] ? true : false,
@@ -909,69 +808,7 @@ argument_identifier_and_value -> (_value_type __):? identifier (_ "=" _ value):?
 } %}
 argument_type -> _value_type __ {% v => {
 	return v[0];
-} %}comparision_operators ->
-	"is" _ "not" __ {% v => assign(v[0], {type: 'comparision_operator', value: '!==' }) %}
-	| "is" __ {% v => assign(v[0], {type: 'comparision_operator', value: '===' }) %}
-	| "===" _ {% v => assign(v[0], {type: 'comparision_operator', value: '===' }) %}
-	| "!==" _ {% v => assign(v[0], {type: 'comparision_operator', value: '!==' }) %}
-	| "==" _ {% v => assign(v[0], {type: 'comparision_operator', value: '==' }) %}
-	| "!=" _ {% v => assign(v[0], {type: 'comparision_operator', value: '!=' }) %}
-	| ">=" _ {% v => assign(v[0], {type: 'comparision_operator', value: '>=' }) %}
-	| "<=" _ {% v => assign(v[0], {type: 'comparision_operator', value: '<=' }) %}
-	| "<" _ {% v => assign(v[0], {type: 'comparision_operator', value:  '<' }) %}
-	| ">" _ {% v => assign(v[0], {type: 'comparision_operator', value:  '>' }) %}
-
-condition -> condition (__ "and" __ | __ "or" __ | _ "&&" _ | _ "||" _) _value {% v => {
-	return {
-		type: 'condition_group',
-		value: [v[0], v[2]],
-		separator: ' ' + v[1][1] + ' ',
-		line: v[0].line,
-		lineBreaks: v[0].lineBreaks,
-		offset: v[0].offset,
-		col: v[0].col,
-	}
-} %}
-| condition _ comparision_operators _value {% v => {
-    return {
-        type: 'value',
-        left: v[0],
-        right: v[3],
-        value: v[2].value,
-        line: v[0].line,
-        lineBreaks: v[0].lineBreaks,
-        offset: v[0].offset,
-        col: v[0].col,
-    }
-} %}
-| condition _ comparision_operators arguments {% (v, l, reject) => {
-    if (v[3].value.length < 2) return reject;
-    return {
-        type: 'condition_destructive',
-        left: v[0],
-        right: v[3],
-        value: v[2].value,
-        line: v[0].line,
-        lineBreaks: v[0].lineBreaks,
-        offset: v[0].offset,
-        col: v[0].col,
-    }
-} %}
-    | _value _ "in" _ _value {% v => {
-		return {
-			type: 'in',
-			from: v[4],
-			value: v[0]
-		}
-	} %}
-    | _value _ "??" _ _value {% v => ({
-        type: 'nullish_check',
-        condition: v[0],
-        value: v[4],
-    }) %}
-    | _value {% condition.value %}
-
-debugging -> ("LOG" | "print") (__ "if"):? debugging_body {% v => ({
+} %}debugging -> ("LOG" | "print") (__ "if"):? debugging_body {% v => ({
 	type: 'debugging',
 	method: 'log',
     conditional: v[1],
@@ -987,7 +824,7 @@ debugging -> ("LOG" | "print") (__ "if"):? debugging_body {% v => ({
     line: v[0].line,
     col: v[0].col
 }) %}
-debugging_body -> __ value {% v => v[1] %}
+debugging_body -> __ superValue {% v => v[1] %}
     | _nbsp arguments {% v => ({
         type: 'arguments',
         value: v[1],
@@ -1016,20 +853,14 @@ html_content -> html_string {% v => ({
 	| html {% v => v[0] %}
 
 html_string -> string {% v => {
-	// debugger
 	return v
-} %}
-#html_string -> [^<]:+ {% v => {
-#	// debugger
-#	return v.flat()
-#} %}
-	# | [^<] {% id %}
+} %}
 attrubutes -> var_reassign (__ var_reassign):* {% html.attributes %}
 
 # arrays
 array -> "[" _ "]" {% array.empty %}
 	| "[" _ value (_ "," _ value):* (_ ","):? _ "]" {% array.extract %}
-	| "[" _ value _ "through" _ value _ "]" {% array.loop %}
+	| "[" _ superValue _ "through" _ superValue _ "]" {% array.loop %}
 
 array_interactions ->
 #("PUSH" | "UNSHIFT") _ value _ "INTO" _ prefixExp {% v => ({
@@ -1048,7 +879,7 @@ array_interactions ->
 #		col: v[0].col
 #	}) %}
 #	|
-    "..." _ prefixExp {% v => ({
+    "..." _ base {% v => ({
 		type: 'array_interactions',
 		method: 'spread',
 		value: v[2],
@@ -1110,7 +941,7 @@ array_interactions ->
     # | yield n/a
     # | yield* n/a
     # | spread (...) n/a
-# 19. pipe forward (|>) right to left
+# 19. pipe forward (|>) left to right
 # 20. pipe backward (<|) right to left
 # 21. assignment(=) right to left
     # | assignment, any compound (+= || -= || *= || /= || %= || **= || <<= || >>= || >>>= || &= || ^= || |= || #customOperator=) right to left
@@ -1126,6 +957,7 @@ new_statement2 -> "new" __ base {% (v, l, reject) => {
     | base {% id %}
 
 postfix -> base _nbsp ("++" | "--") {% (v, l, reject) => {
+    if (['function_call'].includes(v[0].type)) return reject;
     //if (['item_retraction_last', 'item_retraction', 'dot_retraction_v2', 'namespace_retraction', 'function_call', 'identifier'].includes(v[0].type))
     //    throw new SyntaxError('Invalid left-hand side expression in postfix operation');
     return ({
@@ -1145,7 +977,7 @@ unary2 -> ("!" _ #| "not" __
     | "~" _ unary2 {% (v, l, reject) => {
         return ({
             type: 'bitwise_not_unary',
-            value: v[1],
+            value: v[2],
             operator: '~'
         })
     } %}
@@ -1227,12 +1059,24 @@ shift -> shift _ ("<<" | ">>" | ">>>") _ additive {% (v, l, reject) => ({
     }) %}
     | additive {% id %}
 
-relational -> relational _ ("<" | ">" | "<=" | ">=" | "in" | "instanceof") _ shift {% (v, l, reject) => ({
-        type: 'relational',
-        left: v[0],
-        right: v[4],
-        operator: v[2][0].value
-    }) %}
+relational -> relational _ ("<" | ">" | "<=" | ">=" | "in" | "instanceof"
+        | ("not" _ "in" | "!" _ "in")
+        | ("not" _ "instanceof" | "!" _ "instanceof")
+    ) _ shift {% (v, l, reject) => {
+        let reversed = false;
+        let o = v[2][0].value;
+        if (v[2][0] instanceof Array && (v[2][0][0].value == 'not' || v[2][0][0].value == '!')) {
+            reversed = true;
+            o = v[2][0][2].value;
+        }
+        return {
+            type: 'relational',
+            left: v[0],
+            right: v[4],
+            operator: o,
+            reversed
+        }
+    } %}
     | shift {% id %}
 
 equality -> equality _ ("==" | "!=" | "===" | "!==" | "is" | "is" _ "not") _ relational {% (v, l, reject) => {
@@ -1322,7 +1166,6 @@ spread -> "..." _ conditional {% (v, l, reject) => ({
         value: v[2]
     }) %}
     | conditional {% id %}
-
 pipeback -> spread _ "<|" _ pipeback {% (v, l, reject) => ({
         type: 'pipeback',
         left: v[0],
@@ -1330,7 +1173,7 @@ pipeback -> spread _ "<|" _ pipeback {% (v, l, reject) => ({
     }) %}
     | spread {% id %}
 
-pipeforward -> pipeback _ "|>" _ pipeforward {% (v, l, reject) => ({
+pipeforward -> pipeforward _ "|>" _ pipeback {% (v, l, reject) => ({
         type: 'pipeforward',
         left: v[0],
         right: v[4]
@@ -1338,7 +1181,7 @@ pipeforward -> pipeback _ "|>" _ pipeforward {% (v, l, reject) => ({
     | pipeback {% id %}
 
 
-statement_condition -> _ conditional {% v => v[1] %}
+statement_condition -> _ superValue {% v => v[1] %}
 	#| _ "(" _ condition _ ")" {% v => v[3] %}
 base -> parenthesized {% id %}
     | Var {% id %}
@@ -1357,33 +1200,34 @@ base -> parenthesized {% id %}
         value: v[2],
         line: v[0].line,
         col: v[0].col
-    }) %}
-	#| boolean {% id %}
+    }) %}
+superValue -> value {% id %}
+    | base __nbsp spread (_ "," _ spread):* {% (v, l, reject) => {
+        let rejectables = ['expression_with_parenthesis'];
 
-value -> pipeforward {% id %}
-
-value2 -> condition {% id %}
-    | ternary {% id %}
-
-_value ->
-	prefixExp {% id %}
-    |
-    "!" _ prefixExp {% v => {
-        return {
-            type: 'boolean_reversed',
-            value: v[2],
-            line: v[0].line,
-            col: v[0].col
+        if (v[0].type == 'annonymous_function') return reject
+        if (rejectables.includes(v[2].type)) return reject
+        //if (done.includes(l)) return reject;
+        //done.push(l);
+        for (let i in v[3]) {
+            if (rejectables.includes(v[3][i][3].type)) {
+                return reject
+            }
         }
+        return ({
+            type: 'function_call',
+            value: v[0],
+            arguments: args.extract_with_no_parenthesis([v[2], v[3]])
+        })
     } %}
-	#| "@text" __ value {% html.value_to_string %}
-	| prefixExp __ "instanceof" __ prefixExp {% v => ({
-		type: 'instanceof',
-		left: v[0],
-		value: v[4],
-        line: v[0].line,
-        col: v[0].col
-	}) %}
+    | html {% (v, l, reject) => {
+        if (!HTML_ALLOWED) {
+            throw new ReferenceError('HTML syntax is not imported. Use #include <HTML> first.')
+        }
+        return v[0];
+    } %}
+
+value -> pipeforward {% id %}
 	| myNull {% id %}
     | "new" _ "." _ "target" {% v => ({
         type: 'new.target',
@@ -1404,25 +1248,8 @@ pipeline -> value (_ "|>" _ value):+ {% v => ({
     line: v[0].line,
     col: v[0].col
 }) %}
-
-prefixExp ->
-#parenthesized {% id %}
-    #pipeline {% id %}=
-    #|
-    sum {% id %}
-    #| Var {% id %}
-	| annonymous_function {% id %}
-	#| function_call {% id %}
-	| regexp {% id %}
-	| boolean {% id %}
-	| html {% (v, l, reject) => {
-        if (!HTML_ALLOWED) {
-            throw new ReferenceError('HTML syntax is not imported. Use #include <HTML> first.')
-        }
-        return v[0];
-    } %}
-
-parenthesized -> "(" _ value _ ")" {% (v, l, reject) => {
+#@out
+parenthesized -> "(" _ superValue _ ")" {% (v, l, reject) => {
     //if (v[2].type == 'convert') return reject;
     return {
         type: 'expression_with_parenthesis',
@@ -1695,6 +1522,17 @@ const args = {
         type: 'arguments',
         value: []
     }),
+    extract_with_no_parenthesis: v => {
+        let output = [v[0]];
+        for (let i in v[1]) {
+            output.push(v[1][i][3]);
+        }
+        //console.log(v[0])
+        return ({
+            type: 'arguments',
+            value: output
+        });
+    },
     extract: v => {
         let output = [v[2]];
         for (let i in v[3]) {
@@ -1769,14 +1607,15 @@ const statement = {
         type: '@include',
         value: v[3]
     }),
-    value: v => ({
-        type: 'statement_value',
-        value: v[0],
-        line: v[0].line,
-        col: v[0].col,
-        lineBreak: v[0].lineBreak,
-        offset: v[0].offset,
-    }),
+    value: v => {
+        return ({
+            type: 'statement_value',
+            value: v[0],
+            line: v[0].line,
+            col: v[0].col,
+            offset: v[0].offset,
+        })
+    },
 }
 const regexp = {
     parse: v => assign(v[0], {
@@ -1848,6 +1687,10 @@ const array = {
     },
     slice: (v, l, reject) => {
         if (v[0].type == 'debugging') return reject;
+        //if (done.includes(l)) return reject;
+
+        done.push(l);
+
         return({
         type: 'array_slice',
         start: v[3][1],

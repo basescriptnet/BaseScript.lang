@@ -70,9 +70,7 @@ module.exports = {
             } else {
                 if (!fs.existsSync(path))
                     path = `${path_applied}${watch ? '\\' + path : ''}`;
-                //console.time('text_to_ast');
                 content = BS(path, path, false);
-                //console.timeEnd('text_to_ast');
             }
             if (content === void 0) {
                 return;

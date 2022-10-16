@@ -9,7 +9,7 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/issues) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.1.50-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.1.51-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
@@ -175,12 +175,6 @@ new Object() // not recomended
 ```javascript
 object.x
 object['x']
-```
-
-> The *instanceof* operator returns a boolean, if value is instance of value2
-
-```javascript
-value instanceof value2
 ```
 
 ## 💬 Strings
@@ -441,6 +435,16 @@ return value
 function add(a, b):=> a + b
 ```
 
+> Calling functions
+
+```javascript
+add(10, 20)
+// call without arguments
+add 10, 20
+```
+
+### 📝 NOTE: calling function without parenthesis does work in environments, where there are no separations using commas, as well as pipe forward and backward operators
+
 > Typed arguments and args constant
 
 ### 📝 NOTE: every function contains **args** constant, which is an array representation of **arguments** object
@@ -628,6 +632,27 @@ addToArray({
 typeof // describes the type of the object
 sizeof // describes the size of the object, or returns null
 instanceof
+```
+
+
+> The *instanceof* operator
+
+```javascript
+value instanceof Array
+// as well as
+value not instaceof Array
+// or
+value !instanceof Array
+```
+
+> The *in* operator
+
+```javascript
+value in object
+// as well as
+value not in object
+// or
+value !in object
 ```
 
 > Pipe Forward And Pipe Back Operators
