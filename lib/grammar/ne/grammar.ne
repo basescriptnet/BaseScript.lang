@@ -334,6 +334,7 @@ allowed_keywords ->
     | "JSON" {% id %}
     | "Float" {% id %}
     | "Int" {% id %}
+    | "super" {% id %}
     | "undefined" {% v => assign(v[0], {
         type: 'keyword',
         value: 'void(0)'
@@ -1143,6 +1144,10 @@ base -> parenthesized {% id %}
     | myNull {% id %}
     | convert {% id %}
 	| object {% id %}
+    | "new" "." "target" {% v => assign(v[0], {
+        type: 'new.target',
+        value: 'new.target'
+    }) %}
     | "safeValue" _ arguments {% v => ({
         type: 'safeValue',
         value: v[2],
@@ -1212,12 +1217,9 @@ __nbsp -> (" " | [\t]):+ {% (v, l, reject) => {
     const parsed = new Map();
 const functions = {
     annonymous: (v, l, reject) => {
-        // console.log(v[0][0].value)
-        debugger
         if (v[4].inline) {
             return reject
         }
-        //debugger
         return {
             type: 'anonymous_function',
             identifier: v[2] ? v[2][1] : '',
@@ -1234,7 +1236,11 @@ const functions = {
         if (v[3].inline) {
             return reject
         }
-        // console.log(v[0][0].value)
+        for (let i = 0; i < v[1].value.length; i++) {
+            if (v[1].value[i][0] === v[1].value[i][0].toLowerCase()) {
+                throw new SyntaxError('Function argument names should be in capitalized at line ' + v[1].line + ', col ' + v[1].col)
+            }
+        }
         return {
             type: 'anonymous_function',
             identifier: v[2] ? v[2][1] : '',
