@@ -44,10 +44,24 @@ global.pathJS = function (pathString = '') {
         }
     }
 };
+global.CLIArguments = [];
 
 baseUrl.filename = '';
 const utils = require("./bin/utils");
+const fs = require('fs');
 
-module.exports = {
+const BaseScript = {
     compile: utils.fromString,
-}
+    compileFile(path) {
+        return BaseScript.compile(fs.readFileSync(path, 'utf8'));
+    },
+    builtins() {
+        return fs.readFileSync('./lib/compiler/builti_in.js', 'utf8');
+    },
+    run(path, args = []) {
+        let answer = utils.parse(path, '', '', false, true, null, args, true)
+        return answer;
+    }
+};
+
+module.exports = BaseScript;

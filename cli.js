@@ -18,7 +18,7 @@ global.internalPaths = {
 };
 
 global.development = require('./package.json').isDevelopment;
-global.extension = '.js';
+global.extension = '.js';
 global.baseUrl = {
     path: path_applied.replace(/\\/g, '/'),
     from_indexJS: true,
@@ -74,9 +74,7 @@ function showCommands () {
         console.log(commands[i]);
     }
 }
-//const utils = require("./utils");
-//const path_join = require("path").join;
-const usage = "\nUsage:\n* bsc --from <file_name> --to <file_name>"; //\n* bs run <file_name>";
+const usage = "\nUsage:\n* bsc --from <file_name> --to <file_name>"; //\n* bsc -f <file_name> -r";
 const options = yargs
     .usage(usage)
     .option("w", {

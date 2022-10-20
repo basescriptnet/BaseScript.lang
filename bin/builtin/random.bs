@@ -2,7 +2,9 @@
 let $this = globalThis || window || global || this
 if $this.random && $this.random.getRandom:
     return
-if BS && BS.libs && BS.libs.includes['random']:
+if !BS:
+    throw 'builtin library not imported'
+if BS.libs && BS.libs.includes['random']:
     return
 
 BS.libs.push('random')

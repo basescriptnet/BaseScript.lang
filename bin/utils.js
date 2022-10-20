@@ -6,6 +6,7 @@ if (globalThis.development) {
 }
 const path_applied = process.cwd();
 const run_code = require('./run_code.js');
+
 let ast_to_js = require(internalPaths.ast_to_js);
 let writeFile = (path, fileName, content, silent = false, env) => {
     if (!fileName) {
@@ -42,7 +43,7 @@ let writeFile = (path, fileName, content, silent = false, env) => {
 };
 
 module.exports = {
-    async parse(dir, arg0 = '', path, watch = false, run = false, to = '', args = [], env = false) {
+    parse(dir, arg0 = '', path, watch = false, run = false, to = '', args = [], env = false) {
         console.clear()
         let date = Date.now();
         if (!watch) {
@@ -58,15 +59,13 @@ module.exports = {
         let fileName = path.substr(0, path.length - 3); // .bs  or .bm
         if (to) {
             fileName = to.substr(0, to.length - 3);
-        }
+        }
         try {
             let content = '';
             // ! text_to_ast is really time consuming
             // ! so we use it only when we need to parse a file
             if (!watch && fs.existsSync(path)) {
-                //console.time('text_to_ast');
                 content = BS(path, path, false);
-                //console.timeEnd('text_to_ast');
             } else {
                 if (!fs.existsSync(path))
                     path = `${path_applied}${watch ? '\\' + path : ''}`;
@@ -91,15 +90,18 @@ module.exports = {
                 let builtins = '';
 
                 if (!tmp.builtins) {
-                    builtins = fs.readFileSync(pathJS(__dirname).add(internalPaths.built_in_from_utils), 'utf8');
+                    builtins = `(function () {${fs.readFileSync(pathJS(__dirname).add(internalPaths.built_in_from_utils), 'utf8')}})();`;
                 }
+                //console.log(builtins.slice(0, 5) === '(func' ? 'Builtins OK' : 'Builtins not OK');
                 let final = builtins + dirs + includes + '\n' + contentJS;
                 try {
-                    let result = await run_code(final, pathJS(path).dir/*, path.split('\\').pop()*/);
-                    console.log('Returned: ' +result);
+                    let result = run_code(final, pathJS(path).full()/*, path.split('\\').pop()*/);
+                    console.log('Returned: ' + result);
+                    return result
                 } catch (err) {
                     console.error(err);
                     console.log('exit')
+                    process.exit(1);
                 }
                 process.exit();
             }
@@ -117,7 +119,6 @@ module.exports = {
     fromString(string) {
         try {
             let content = BS(string, '', true);
-            //console.timeEnd('text_to_ast');
             if (content === void 0) {
                 return;
             }
@@ -128,10 +129,9 @@ module.exports = {
             let includes = tmp.includes;
             let dirs = ''//tmp.dirs;
             let contentJS = beautify(tmp.result);
-            let builtins = '';
+            let builtins = '';
             let final = builtins + dirs + includes + '\n' + contentJS;
-            //run_code(final, pathJS(path).dir, path.split('\\').pop());
-            return final
+            return final
         } catch (err) {
             console.warn('Can\'t compile. Unexpected input.');
             console.warn(err);

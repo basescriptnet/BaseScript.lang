@@ -92,10 +92,11 @@ const lexer = moo.compile({
     import: '@import',
     '@text': '@text',
     decorator: [/*'@php', */'@js'],
-    literal: ['|>', '<|', '#', '@', '~', '>>>', '>>', '<<', '^', '[', ']', '{', '}', '(', ')', '...', '..', '.', '\\', ',', ';', '::', ':', '??', '?.', '?', '!', '!=', '!==', '==', '===', '>=', '<=', '>', '<', '&&', '&', '||', '|', '+=', '-=', '*=', '/=', '%=', '**=', '=', '+', '-', '/', '*', '%'],
+    literal: ['|>', '<|', '#', '@', '~', '>>>', '>>', '<<', '^', '[', ']', '{', '}', '(', ')', '...', '..', '.', '\\', ',', ';', '::', ':', '??', '?.', '?', '!', '!=', '!==', '==', '===', '>=', '<=', '>', '<', '&&', '&', '||', '|', '+=', '-=', '*=', '/=', '%=', '**=', '=', '+', '-', '/', '**', '*', '%'],
 });
 %}
-@lexer lexer
+@lexer lexer
+
 process -> decorated_statements _ (";" _):? {% (v, l, reject) => {
     return v[0];
 } %}
@@ -122,7 +123,8 @@ includes -> includes EOL single_include {% (v, l, reject) =>
 %}
 | single_include {% v => [v[0]] %}
 
-group_include -> (_ includes):? {% v => v[0] ? v[0][1] : [] %}
+group_include -> (_ includes):? {% v => v[0] ? v[0][1] : [] %}
+
 decorated_statements -> _ %decorator group_include statements {% v => ({
 	type: 'decorator',
 	line: v[3] ? v[3].line : v[4].line,
@@ -140,21 +142,13 @@ decorated_statements -> _ %decorator group_include statements {% v => ({
 		value: v[1],
         line: 1,
         col: 0
-        //line: v[0].length ? v[0].line : v[1].length ? v[1][0].line : 1,
-        //col: v[0].length ? v[0].col : v[1].length ? v[1][0].col : 0
 	})} %}
 
 ### statements ###
-#(statement EOL):* (statement EOL:?):?
-# statements -> (_ statement {% v => v[1] %}):* _ {% id %}
 statements -> (_ global EOL {% v => v[1] %}):* (_ statement EOL):* (_ statement):? {% (v, l, reject) => {
 	let result = []
-    // debugger
-    // if (!v[0]?.length && !v[1]?.length && !v[2]) return reject
     if (v[0] && v[0].length) {
         if (!v[1].length && !v[2]) {
-            //debugger
-            //console.error('[Parser]: Unnecessary @global keyword usage. Declared, but never used.')
             return reject;
         }
         for (let i = 0; i < v[0].length; i++) {
@@ -164,15 +158,14 @@ statements -> (_ global EOL {% v => v[1] %}):* (_ statement EOL):* (_ statement)
     // this line prevent result duplication because of v[1]
     // if only one statement is provided v[2], needs to handle it
     if (v[1].length && !v[2]) return reject
-	// let removeComments = text => text.replace(/\/\/.*\n?/, '');
 	for (let i = 0/*, indent = 0*/; i < v[1].length; i++) {
+        // ? unused
 		/*if (i == 0) indent = (v[0][i][0].text)
 		if (indent !== (v[0][i][0].text)) {
 			throw new Error('Invalid indentation.')
 		}*/
 		result.push(v[1][i][1])
 	}
-    //debugger
     if (v[2]) result.push(v[2][1])
 	return result
 } %}
@@ -190,7 +183,6 @@ statement -> blocks {% id %}
     | "swap" __ superValue _ "," _ superValue {% statement.swap %}
 	| var_assign {% id %}
 	| value_reassign {% statement.value_reassign %}
-    #| value_addition {% statement.value_addition %}
 	| superValue {% statement.value %}
     | "namespace" __ superValue {% statement.namespace %}
 
@@ -221,23 +213,23 @@ statements_block -> _ "{" statements _ (";" _):? "}" {% v => ({
     line: v[3].line,
     col: v[3].col
 }) %}
-	#| _ ":" _ statement {% v => ({
-    #    @t scope
-    #    value: [v[3]],
-    #    line: v[3].line, col: v[3].col, offset: v[3].offset,
-    #}) %}
-	| _ ":" _ statement {% v => ({
-        type: 'scope',
-        value: [v[3]],
-        line: v[3].line, col: v[3].col, offset: v[3].offset,
-        mustEndWithEOL: true
-    }) %}
-    #{% v => [v[3]] %}
+	| _ ":" _ statement {% v => {
+        return ({
+            type: 'scope',
+            value: [v[3]],
+            line: v[3].line,
+            col: v[3].col,
+            inline: true,
+            mustEndWithEOL: true
+        })
+    } %}
 	| _nbsp "do" __ statement {% v => ({
         type: 'scope',
         value: [v[3]],
         line: v[3].line,
-        col: v[3].col
+        col: v[3].col,
+        inline: true,
+        mustEndWithEOL: true
     }) %}
 ### END statements ###
 
@@ -259,7 +251,7 @@ type_declaration -> "type" __ identifier _ arguments_with_types statements_block
 } %}
 operator -> "#" [A-Za-z0-9_\/*+-.&|$@!^#~]:+ {% v => ({
     type: 'operator',
-    value: v[1],
+    value: v[1].join(''),
     line: v[0].line, col: v[0].col, offset: v[0].offset,
 }) %}
 operator_declaration -> "operator" __ operator _ arguments_with_types statements_block {% v => {
@@ -345,10 +337,9 @@ allowed_keywords ->
     | "undefined" {% v => assign(v[0], {
         type: 'keyword',
         value: 'void(0)'
-    }) %}
+    }) %}
 
-convert -> prefixExp __ "as" __ convert_type {% (v, l, reject) => {
-    //if (v[0] && !v[6] || !v[0] && v[6]) return reject
+convert -> base __ "as" __ convert_type {% (v, l, reject) => {
     return {
         type: 'convert',
         value: v[0],
@@ -357,7 +348,7 @@ convert -> prefixExp __ "as" __ convert_type {% (v, l, reject) => {
     }
 } %}
 
-convert_type -> ("Function" | "JSON" | "String" | "Number" | "Boolean" | "Object" | "Float" | "Int" | "Array") {% v => v[0][0] %}
+convert_type -> ("Function" | "JSON" | "String" | "Number" | "Boolean" | "Object" | "Float" | "Int" | "Array") {% v => v[0][0] %}
 ### primitives' essentials ###
 # objects
 pair -> ("async" __):? key _ arguments_with_types statements_block {% object.es6_key_value %}
@@ -387,7 +378,6 @@ string_concat -> %string {% v => {
         line: v[0].line, col: v[0].col, offset: v[0].offset,
     }
 } %}
-    #| string_concat _ "+" _ %string {% string_concat %}
 
 # regexp
 regexp_flags -> [gmi] {% regexp.flag %}
@@ -399,7 +389,7 @@ myNull -> "null" {% Null %}
 
 # booleans
 boolean -> (%boolean) {% boolean %}
-    | "defined" _nbsp identifier {% v => ({
+    | "defined" __nbsp identifier {% v => ({
         type: 'defined',
         value: v[2],
         line: v[0].line, col: v[0].col, offset: v[0].offset,
@@ -409,42 +399,14 @@ boolean -> (%boolean) {% boolean %}
         value: v[4],
         line: v[0].line, col: v[0].col, offset: v[0].offset,
     }) %}
-	# | condition {% condition.value %}
 
 # strings
-string -> string_concat {% id %}
-	#| "typeof" _ "(" _ value _ ")" {% v => ({
-	#	type: 'typeof',
-	#	value: v[4],
-    #    line: v[0].line,
-    #    col: v[0].col
-	#}) %}
+string -> string_concat {% id %}
+
 # numbers
-# ! is not tested
 bigInt -> %bigInt {% number.bigInt %}
 
-number ->
-#("+" | "-"):? "0" [xX] [0-9A-Fa-f]:+ ("_":? [0-9A-Fa-f]:+):* {% v => {
-#        let n = v[0].value ? v[0].value : '';
-#        n += v[1].value + v[2].value;
-#        v[3].forEach(i => {
-#            n += i.value;
-#        });
-
-#        return {
-#            type: 'number',
-#            value: parseInt(n, 16),
-#            line: v[0].line, col: v[0].col, offset: v[0].offset,
-#        }
-#    } %}
-#    |
-    %number {% number.float %}
-    #| "sizeof" _ "(" _ value _ ")" {% v => ({
-	#	type: 'sizeof',
-	#	value: v[4],
-    #    line: v[0].line,
-    #    col: v[0].col
-	#}) %}
+number -> %number {% number.float %}
 
 # objects
 object -> "{" _ "}" {% object.empty %}
@@ -455,14 +417,7 @@ regexp -> %regexp (regexp_flags):* {% regexp.parse %}
 
 ### END primitives ###
 
-#_base -> base {% id %}
-#    #| array {% id %}
-#	| regexp {% id %}
-#    #| object {% id %}
-
-Var ->
-    # ! needs more tests, though works
-	base _nbsp "[" _ "]" {% (v, l, reject) => assure(v, l, reject, {
+Var -> base _nbsp "[" _ "]" {% (v, l, reject) => assure(v, l, reject, {
         type: 'item_retraction_last',
         from: v[0],
         line: v[0].line,
@@ -501,7 +456,6 @@ Var ->
         value: v[3],
         line: v[0].line,
         col: v[0].col
-        //identifier: v[0].value
 	}) %}
     | "::" "[" _ "]" {% v => ({
         type: 'namespace_retraction',
@@ -512,44 +466,25 @@ Var ->
     | function_call {% id %}
     | identifier {% id %}
 
-switch -> "caseof" _ superValue _ "{" (_ case_single_valued):* _ "}" {% v => assign(v[0], {
-	type: 'switch*',
-	value: v[2],
-	cases: v[5] ? v[5].map(i => i[1]) : []
-}) %}
-
-# switch case addons
-case_single_valued -> "|" _ superValue _ ":" _ (superValue EOL):? {% v => assign(v[0], {
-    type: 'case_with_break',
-    value: v[2],
-    statements: v[6] ? v[6][0] : []
-    }) %}
-    | "&" _ value _ ":" _ {% v => assign(v[0], {
-        type: 'case_singular',
-        value: v[2],
-        statements: v[6] ? v[6][0] : []
-    }) %}
-    | "default" _ ":" _ (value EOL):? {% v => assign(v[0], {
-    type: 'case_default_singular',
-    value: v[4] ? v[4][0] : [null],
-}) %}
 
 switch_multiple -> "switch" __ superValue _ "{" (_ case_multiline):* (_ case_default):? _ "}" {% v => assign(v[0], {
 	type: 'switch',
 	value: v[2],
 	cases: v[5] ? v[5].map(i => i[1]) : [],
     default: v[6] ? v[6][1] : null
-}) %}
+}) %}
+
 case_multiline -> "case" __ superValue _ ":" statements (_ ";"):? {% v => assign(v[0], {
-		type: 'case',
-		value: v[2],
-		statements: v[5]
-	}) %}
+    type: 'case',
+    value: v[2],
+    statements: v[5]
+}) %}
 
 case_default -> "default" _ ":" statements (_ ";"):? {% v => assign(v[0], {
-		type: 'case_default',
-		value: v[3]
-	}) %}
+    type: 'case_default',
+    value: v[3]
+}) %}
+
 # classes
 class_declaration -> "class" _ identifier _ "{" _ construct (_ es6_key_value {% v => v[1] %}):* _ "}" {% classes.parse %}
 construct -> "constructor" _ arguments_with_types statements_block {% classes.construct %}
@@ -575,22 +510,22 @@ if_block -> "if" statement_condition statements_block {% v => {
 	return {
 		type: 'if_else',
 		if: v[0],
-		//elifs: v[1] ? v[1].map(i => i[1]) : null,
 		else: v[2],
 		offset: v[0].offset,
 		lineBreaks: v[0].lineBreaks,
 		line: v[0].line,
 		col: v[0].col
 	}
-} %}
-else_block ->
-    "else" statements_block {% v => {
-    //if (v[1].type == 'value' && v[1].value.type == 'object') debugger
+} %}
+# else if blocks not implemented yet
+else_block -> "else" statements_block {% v => {
     return assign(v[0], {
 		type: 'else',
 		value: v[1],
+        inline: v[1].inline
 	});
-} %}# try catch finally
+} %}
+# try catch finally
 try_catch_finally -> try_catch (_ finally):? {% v => ({
 	type: 'try_catch_finally',
 	value: v[0],
@@ -641,7 +576,6 @@ catch -> "catch" __ identifier statements_block {% v => {
 	}
 } %}
 finally -> "finally" statements_block {% v => {
-	//debugger
 	return ({
 		type: 'finally',
 		value: v[1],
@@ -650,10 +584,8 @@ finally -> "finally" statements_block {% v => {
 	})
 } %}
 
-left_assign -> Var {% id %}
-    | function_call {% id %}
 # value assignment
-value_reassign -> left_assign _ "=" _ superValue {% v => {
+value_reassign -> Var _ "=" _ superValue {% v => {
 	return {
 		type: 'var_reassign',
 		identifier: v[0],
@@ -695,8 +627,7 @@ var_assign -> assign_type var_assign_list {% vars.assign %}
 	}
 } %}
 
-assign_type ->
-    ("let" __ | "const" __ | "\\") {% v => v[0][0].value %}
+assign_type -> ("let" __ | "const" __ | "\\") {% v => v[0][0].value %}
 
 var_assign_list -> var_reassign (_ "," _ var_reassign {% v => v[3] %}):* {% vars.var_assign_list %}
 
@@ -732,7 +663,8 @@ value_addition -> value _ ("+=" | "-=" | "*=" | "/=" | "%=" | "**=" | "<<=" | ">
         left: v[0],
         right: v[4],
         operator: v[2][0].value
-    }) %}# loops
+    }) %}
+# loops
 while_block -> "while" statement_condition statements_block {%  v => {
 	return assign(v[0], {
 		type: 'while',
@@ -777,13 +709,10 @@ for_block -> "for" _ "(" _ identifier __ ("in" | "of") __ superValue _ ")" state
 		include: v[10][0].text == 'till' ? false : true,
 		value: v[15],
 	});
-} %}# functions
-annonymous_function ->
-    # | ("async" __):? ("string" | "int" | "float" | "array" | "object" | "function" | "symbol" | "null" | "number") (__ identifier):? _ arguments_with_types _ "{" (_ statement | _ return):* _ "}" {% v => {
+} %}anonymous_function ->
 	("async" __):? value_type (__ identifier):? _ arguments_with_types statements_block {% functions.annonymous %}
-	| ("async" __):? value_type (__ identifier):? statements_block {% functions.annonymous_with_no_args %}
+	| ("async" __):? value_type (__ identifier):? statements_block {% functions.annonymous_with_no_args %}
 
-#value_type -> ("function" | "def" | "void" | "Int" | "Float" | "Array" | "Object" | "Null" | "Boolean" | "Number" | "String") {% id %}
 value_type -> _value_type {% id %}
     | ("void" | "def" | "function") {% v => ({
         type: 'value_type',
@@ -793,13 +722,18 @@ value_type -> _value_type {% id %}
         col: v[0][0].col
     }) %}
 
-_value_type -> (identifier) (_nbsp "[" _ "]"):? {% v => ({
+_value_type -> (identifier) (_nbsp "[" _ "]"):? {% v => {
+    //if (v[0][0].value[0].toUpperCase() !== v[0][0].value[0]) {
+    //    throw new Error(`Type "${v[0][0].value}" must be capitalized at line ${v[0][0].line}, col ${v[0][0].col}`)
+    //}
+    return {
         type: 'value_type',
         value: [v[0][0].value],
         is_array: [v[1] !== null],
         line: v[0][0].line,
-        col: v[0][0].col
-    }) %}
+        col: v[0][0].col,
+    }
+    } %}
     | value_type _nbsp "|" _ value_type {% v => ({
         type: 'value_type',
         value: v[0].value.concat(v[4].value),
@@ -813,17 +747,14 @@ return -> "return" __nbsp superValue {% returns.value %}
     | "=>" _nbsp superValue {% returns.value %}
 
 function_call -> base _nbsp arguments {% (v, l, reject) => {
-    if (v[0].type == 'annonymous_function') return reject
-    //console.log(v[2].type)
+    if (v[0].type == 'anonymous_function') return reject
 	return ({
 		type: 'function_call',
-        //check: v[1] ? true : false,
 		value: v[0],
 		arguments: v[2],
 	})
 } %}
     | "::" arguments {% (v, l, reject) => {
-    // if (v[0].type == 'annonymous_function') return reject
 	return ({
         type: 'namespace_retraction',
         retraction_type: 'function_call',
@@ -842,18 +773,11 @@ argument -> value {% id %}
         line: v[0].line,
         col: v[0].col
     }) %}
-    #| "..." {% v => ({
-    #    type: 'argument',
-    #    value: v[0][0].value,
-    #    line: v[0][0].line,
-    #    col: v[0][0].col
-    #}) %}
 
 arguments_with_types -> "(" _ ")" {% args.empty_arguments_with_types %}
 	| "(" _ argument_identifier_and_value (_ "," _ argument_identifier_and_value):* (_ ","):? _ ")" {% args.arguments_with_types %}
 
 argument_identifier_and_value -> (_value_type __):? identifier (_ "=" _ value):? {% v => {
-    //debugger
     return {
 	type: 'argument_identifier_and_value',
 	argument_type: v[0] ? v[0][0] : null,
@@ -861,10 +785,10 @@ argument_identifier_and_value -> (_value_type __):? identifier (_ "=" _ value):?
 	identifier: v[1].value,
 	value: v[2] ? v[2][3] : void 0
 }
-} %}
-argument_type -> _value_type __ {% v => {
-	return v[0];
-} %}debugging -> ("LOG" | "print") (__ "if"):? debugging_body {% v => ({
+} %}
+argument_type -> _value_type __ {% id %}
+
+debugging -> ("LOG" | "print") (__ "if"):? debugging_body {% v => ({
 	type: 'debugging',
 	method: 'log',
     conditional: v[1],
@@ -872,6 +796,7 @@ argument_type -> _value_type __ {% v => {
     line: v[0].line,
     col: v[0].col
 }) %}
+
 | "ERROR" (__ "if"):? debugging_body {% v => ({
 	type: 'debugging',
 	method: 'error',
@@ -879,7 +804,8 @@ argument_type -> _value_type __ {% v => {
 	value: v[2],
     line: v[0].line,
     col: v[0].col
-}) %}
+}) %}
+
 debugging_body -> __ superValue {% v => v[1] %}
     | _nbsp arguments {% v => ({
         type: 'arguments',
@@ -916,32 +842,7 @@ attrubutes -> var_reassign (__ var_reassign):* {% html.attributes %}
 # arrays
 array -> "[" _ "]" {% array.empty %}
 	| "[" _ value (_ "," _ value):* (_ ","):? _ "]" {% array.extract %}
-	| "[" _ superValue _ "through" _ superValue _ "]" {% array.loop %}
-
-array_interactions ->
-#("PUSH" | "UNSHIFT") _ value _ "INTO" _ prefixExp {% v => ({
-#		type: 'array_interactions',
-#		method: v[0][0],
-#		into: v[6],
-#		value: v[2],
-#		line: v[0].line,
-#		col: v[0].col
-#	}) %}
-#	| ("POP" | "SHIFT") _ value {% v => ({
-#		type: 'array_interactions',
-#		method: v[0][0],
-#		value: v[2],
-#		line: v[0].line,
-#		col: v[0].col
-#	}) %}
-#	|
-    "..." _ base {% v => ({
-		type: 'array_interactions',
-		method: 'spread',
-		value: v[2],
-		line: v[0].line,
-		col: v[0].col
-	}) %}
+	| "[" _ superValue _ "through" _ superValue _ "]" {% array.loop %}
 
 # expressions
 
@@ -1002,7 +903,7 @@ array_interactions ->
 # 21. assignment(=) right to left
     # | assignment, any compound (+= || -= || *= || /= || %= || **= || <<= || >>= || >>>= || &= || ^= || |= || #customOperator=) right to left
     # | assignment, any compound (||= || &&= || ??=) right to left
-# 22. comma (,) left to right # unused
+# 22. comma (,) left to right # ? unused
 
 new_statement2 -> "new" __ base {% (v, l, reject) => {
     if ('new' == v[2].type) return reject;
@@ -1014,8 +915,6 @@ new_statement2 -> "new" __ base {% (v, l, reject) => {
 
 postfix -> base _nbsp ("++" | "--") {% (v, l, reject) => {
     if (['function_call'].includes(v[0].type)) return reject;
-    //if (['item_retraction_last', 'item_retraction', 'dot_retraction_v2', 'namespace_retraction', 'function_call', 'identifier'].includes(v[0].type))
-    //    throw new SyntaxError('Invalid left-hand side expression in postfix operation');
     return ({
         type: 'postfix',
         value: v[0],
@@ -1023,12 +922,11 @@ postfix -> base _nbsp ("++" | "--") {% (v, l, reject) => {
     }) } %}
     | new_statement2 {% id %}
 
-unary2 -> ("!" _ #| "not" __
-) unary2 {% (v, l, reject) => ({
+unary2 -> "!" _ unary2 {% (v, l, reject) => ({
         type: 'reversed_unary',
-        value: v[1],
+        value: v[2],
         operator: '!',
-        reject: v[0][0].value === 'not'
+        reject: v[0].value === 'not'
     }) %}
     | "~" _ unary2 {% (v, l, reject) => {
         return ({
@@ -1064,12 +962,6 @@ unary2 -> ("!" _ #| "not" __
             type: 'void_unary',
             value: v[2],
         }) } %}
-    #| "defined" _ unary2 {% (v, l, reject) => {
-    #    if (v[2].type != 'expression_with_parenthesis' && v[1].length == 0) return reject;
-    #    return ({
-    #        type: 'defined',
-    #        value: v[2],
-    #    }) } %}
     | "delete" _ unary2 {% (v, l, reject) => {
         if (v[2].type != 'expression_with_parenthesis' && v[1].length == 0) return reject;
         return ({
@@ -1089,6 +981,14 @@ exponentiation -> unary2 _ "**" _ exponentiation {% (v, l, reject) => ({
         left: v[0],
         right: v[4]
     }) %}
+    | unary2 _ operator _ exponentiation {% (v, l, reject) => {
+        return ({
+            type: 'custom_operator',
+            left: v[0],
+            right: v[4],
+            operator: v[2]
+        })
+    } %}
     | unary2 {% id %}
 
 multiplicative -> multiplicative _ ("*" | "/" | "%") _ exponentiation {% (v, l, reject) => ({
@@ -1136,8 +1036,6 @@ relational -> relational _ ("<" | ">" | "<=" | ">=" | "in" | "instanceof"
     | shift {% id %}
 
 equality -> equality _ ("==" | "!=" | "===" | "!==" | "is" | "is" _ "not") _ relational {% (v, l, reject) => {
-    //console.log(v[4])
-    //if (v[4].type == 'reversed_unary' && v[4].reject) return reject;
     let operator = v[2][0].value;
     if (operator == 'is' && v[2][3] === 'not') operator = '!==';
     else if (operator == 'is') operator = '===';
@@ -1182,7 +1080,6 @@ logical_or -> logical_or _ ("||" | "or") _ logical_and {% (v, l, reject) => ({
         left: v[0],
         right: v[4]
     }) %}
-    #! ?? operator
     | logical_or _ "??" _ logical_and {% v => ({
         type: 'nullish_check',
         condition: v[0],
@@ -1190,18 +1087,14 @@ logical_or -> logical_or _ ("||" | "or") _ logical_and {% (v, l, reject) => ({
     }) %}
     | logical_and {% id %}
 
-conditional -> logical_or _ "?" _ conditional _ ":" _ conditional {% (v, l, reject) => ({
+conditional -> logical_or _ "?" _ conditional (_ ":" _ conditional):? {% (v, l, reject) => {
+    return {
         type: 'conditional',
         condition: v[0],
         true: v[4],
-        false: v[6]
-    }) %}
-    | logical_or _ "?" _ conditional {% (v, l, reject) => ({
-        type: 'conditional',
-        condition: v[0],
-        true: v[4],
-        false: null
-    }) %}
+        false: v[5] ? v[5][3] : null
+    }
+    } %}
     | logical_or _nbsp "if" _ conditional _ "else" _ conditional {% (v, l, reject) => ({
         type: 'conditional',
         condition: v[4],
@@ -1236,10 +1129,11 @@ pipeforward -> pipeforward _ "|>" _ pipeback {% (v, l, reject) => ({
     }) %}
     | pipeback {% id %}
 
-statement_condition -> _ superValue {% v => v[1] %}
+statement_condition -> _ superValue {% v => v[1] %}
+
 base -> parenthesized {% id %}
     | Var {% id %}
-	| annonymous_function {% id %}
+	| anonymous_function {% id %}
 	| regexp {% id %}
 	| boolean {% id %}
 	| string {% id %}
@@ -1254,15 +1148,15 @@ base -> parenthesized {% id %}
         value: v[2],
         line: v[0].line,
         col: v[0].col
-    }) %}
+    }) %}
+
 superValue -> value {% id %}
     | base __nbsp spread (_ "," _ spread):* {% (v, l, reject) => {
         let rejectables = ['expression_with_parenthesis'];
 
-        if (v[0].type == 'annonymous_function') return reject
+        if (v[0].type == 'anonymous_function') return reject
         if (rejectables.includes(v[2].type)) return reject
-        //if (done.includes(l)) return reject;
-        //done.push(l);
+
         for (let i in v[3]) {
             if (rejectables.includes(v[3][i][3].type)) {
                 return reject
@@ -1281,30 +1175,9 @@ superValue -> value {% id %}
         return v[0];
     } %}
 
-value -> pipeforward {% id %}
-	| myNull {% id %}
-    | "new" _ "." _ "target" {% v => ({
-        type: 'new.target',
-        line: v[0].line,
-        col: v[0].col
-    }) %}
-    #| "void" _nbsp arguments {% v => ({
-    #    type: 'void',
-    #    value: v[2],
-    #    line: v[0].line,
-    #    col: v[0].col
-    #}) %}
+value -> pipeforward {% id %}
 
-pipeline -> value (_ "|>" _ value):+ {% v => ({
-    type: 'pipeline',
-    left: v[0],
-    right: v[4],
-    line: v[0].line,
-    col: v[0].col
-}) %}
-#@out
 parenthesized -> "(" _ superValue _ ")" {% (v, l, reject) => {
-    //if (v[2].type == 'convert') return reject;
     return {
         type: 'expression_with_parenthesis',
         value: v[2],
@@ -1312,34 +1185,25 @@ parenthesized -> "(" _ superValue _ ")" {% (v, l, reject) => {
         col: v[0].col
     }
 } %}
-### whitespace ###
+### whitespace ###
 _ -> %space:* {% id %}
-	#| null {% v => '' %}
+
 # mandatory whitespace
-__ -> %space {% id %}
+__ -> %space {% id %}
+
 EOL -> [\n]:+ {% v => 'EOL' %}
 	| _nbsp ";" (_nbsp "/" "/" [^\n]:* [\n]:*):? {% v => v[1] %}
-    | _nbsp "/" "/" [^\n]:* [\n]:*  {% v => 'EOL' %}
+    | _nbsp "/" "/" [^\n]:* [\n]:*  {% v => 'EOL' %}
+
 # Not breaking space
 _nbsp -> (" " | [\t]):* {% (v, l, reject) => {
     let f = v[0].map(i => i.value).join('');
-    //if (f.length) {
-      //  if (/\n|\r/g.test(f)) {
-        //    return reject
-        //}
         return {type: 'nbsp', value: f}
-    //}
-    //return {type: 'nbsp', value: ''}
 } %}
 
 __nbsp -> (" " | [\t]):+ {% (v, l, reject) => {
     let f = v[0].map(i => i.value).join('');
-    //if (f.length) {
-      //  if (/\n|\r/g.test(f)) {
-        //    return reject
-        //}
         return {type: 'nbsp', value: f}
-    //}
 } %}
 
 ### END whitespace ###
@@ -1347,11 +1211,15 @@ __nbsp -> (" " | [\t]):+ {% (v, l, reject) => {
 @{%
     const parsed = new Map();
 const functions = {
-    annonymous: v => {
+    annonymous: (v, l, reject) => {
         // console.log(v[0][0].value)
+        debugger
+        if (v[4].inline) {
+            return reject
+        }
         //debugger
         return {
-            type: 'annonymous_function',
+            type: 'anonymous_function',
             identifier: v[2] ? v[2][1] : '',
             arguments: v[4],
             value: v[5],
@@ -1362,10 +1230,13 @@ const functions = {
             // text is one of the options above: string; int...
         }
     },
-    annonymous_with_no_args: v => {
+    annonymous_with_no_args: (v, l, reject) => {
+        if (v[3].inline) {
+            return reject
+        }
         // console.log(v[0][0].value)
         return {
-            type: 'annonymous_function',
+            type: 'anonymous_function',
             identifier: v[2] ? v[2][1] : '',
             arguments: [],
             value: v[3],
@@ -1427,7 +1298,7 @@ const condition = {
         col: v[0].col,
     }),
     ternary: (v, l, reject) => {
-        if (v[0].value && v[0].value.type === 'annonymous_function')
+        if (v[0].value && v[0].value.type === 'anonymous_function')
             return reject;
         //if (parsed.has(v[0].line)) {
         //    if (parsed.get(v[0].line).indexOf(v[0].col) != -1) {
@@ -1464,7 +1335,7 @@ const condition = {
         }
     },
     ternary_with_if: (v, l, reject) => {
-        if (v[0].value && v[0].value.type === 'annonymous_function')
+        if (v[0].value && v[0].value.type === 'anonymous_function')
             return reject;
         //if (parsed.has(v[0].line)) {
         //    if (parsed.get(v[0].line).indexOf(v[0].col) != -1) {
@@ -1519,6 +1390,7 @@ const vars = {
     },
     var_assign_list: v => {
         //debugger
+        //console.log(v)
         return {
             type: 'var_assign_group',
             line: v[0].line,

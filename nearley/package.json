@@ -22,7 +22,7 @@
   "_resolved": "https://registry.npmjs.org/nearley/-/nearley-2.20.1.tgz",
   "_shasum": "246cd33eff0d012faf197ff6774d7ac78acdd474",
   "_spec": "nearley@^2.20.1",
-  "_where": "C:\\xampp\\apache\\htdocs\\BaseScript.lang",
+  "_where": "D:\\BaseScript.lang",
   "author": {
     "name": "Hardmath123"
   },
@@ -36,7 +36,7 @@
     "url": "https://github.com/hardmath123/nearley/issues"
   },
   "bundleDependencies": false,
-  "contributors": "https://github.com/Hardmath123/nearley/graphs/contributors",
+  "contributors": ["https://github.com/Hardmath123/nearley/graphs/contributors"],
   "dependencies": {
     "commander": "^2.19.0",
     "moo": "^0.5.0",

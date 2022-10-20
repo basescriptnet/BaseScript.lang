@@ -1,4 +1,4 @@
-module.exports = async function run_code (content, path) {
+module.exports = function run_code (content, path) {
     const vm = require('vm');
     process.argv[0] = 'BaseScript';
     process.argv[1] = path;
@@ -21,7 +21,6 @@ module.exports = async function run_code (content, path) {
     let m = new Module();
     m.filename = path;
     m.paths = module.paths;
-
     // make the require relative to path
     let _require = Module.createRequire(require.resolve(path));
     //require the module
@@ -31,7 +30,7 @@ module.exports = async function run_code (content, path) {
     _require.main.filename = path;
     _require.main.paths = m.paths;
     _require.main.children = [];
-    _require.main.exports = {};
+    _require.main.exports = void(0);
     _require.main.loaded = false;
     _require.main.id = path;
 
@@ -91,15 +90,23 @@ module.exports = async function run_code (content, path) {
         //__filename: fileName,
     };
     let script = '';
-    // make the code wait for the promise to resolve
 
-    return await new Promise(async resolve => {
+    let a = (() => {
         script = new vm.createScript((
-`(function () {try{${content};} catch (err) { console.error(err); } finally { return 0 }})();`));
-        // run in new context
-        let result = script.runInNewContext(sandbox);
 
-        // wait for the intervals to finish
+`(function () {
+    try{
+${content};
+} catch (err) {
+    console.error('Execution failed');
+    console.error(err);
+} finally {
+    return 0;
+}})();`
+
+), path);
+        // run in new context
+        script.runInNewContext(sandbox)
         async function wait() {
             await new Promise(resolve => setTimeout(resolve, 100));
         };
@@ -107,12 +114,10 @@ module.exports = async function run_code (content, path) {
             if (intervals.length) {
                 await wait(500)
                 check();
-            } else {
-                return resolve(result);
             }
         }
         check();
-
         return sandbox.module.exports;
-    })
-}
+    })()
+    return sandbox.module.exports;
+}

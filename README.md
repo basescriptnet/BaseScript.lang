@@ -9,12 +9,24 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/issues) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.1.52-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.1.53-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
 
 🏗️ BaseScript is a programming language, which aims to compile your code to JavaScript.
+
+> Why to choose BaseScript?
+
+* It is in the phase of active development, so more and more features are being added constantly
+* Your ideas are also being reviewed and added, as the language is welcoming collaborations
+* It provides you things, that JavaScript lacks:
+    + Typed functions and arguments
+    + Interfaces
+    + Pipe forward and pipe backward operators
+    + Ability to get compile time errors to prevent runtime errors
+    + Syntax sugar from other languages, that are so excess
+    + Unparenthesised arguments and conditions and much more!
 
 This page represents the simple to follow documentation of the language.
 
