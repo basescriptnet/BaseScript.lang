@@ -1,10 +1,11 @@
 {
     "name": "basescript.js",
-    "version": "0.1.54",
+    "version": "0.1.55",
     "description": "A scritpting language powered with Node.js and Nearley, that compiles down to JavaScript, and has the possibility for even more!",
     "main": "./index.js",
     "scripts": {
-        "test": "test"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "postinstall": "echo \"Successfully installed. Release note: Function calls without parenthesis is deprecated. \""
     },
     "bin": {
         "bsc": "./cli.js"
@@ -39,10 +40,7 @@
     },
     "homepage": "https://github.com/basescriptnet/basescript.lang#readme",
     "dependencies": {
-        "basescript.js": "^0.1.52",
         "moo": "^0.5.1",
-        "sleep": "^6.3.0",
-        "synchronous-promise": "^2.0.16",
         "yargs": "^17.3.1"
     },
     "devDependencies": {

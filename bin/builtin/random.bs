@@ -1,9 +1,8 @@
-//#include <external>
 let $this = globalThis || window || global || this
 if $this.random && $this.random.getRandom:
     return
-if !BS:
-    throw 'builtin library not imported'
+if !defined BS:
+    throw 'builtins library not imported'
 if BS.libs && BS.libs.includes['random']:
     return
 

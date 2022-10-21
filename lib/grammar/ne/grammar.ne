@@ -73,9 +73,6 @@ const lexer = moo.compile({
             value: v => parseFloat(v.replace(/_/g, ''))
         },
     ],
-    boolean: ['true', 'false'],
-    //fat_arrow: '=>',
-    //constant: 'const',
     identifier: [
         {
             match: /[A-Za-z_$]+[A-Za-z0-9_$]*/,
@@ -85,6 +82,7 @@ const lexer = moo.compile({
             value: x => 'emoji_' + x.codePointAt(),
         }
     ],
+    boolean: ['true', 'false'],
     eval: '@eval',
     //at: '@',
     '@include': '@include',
@@ -92,7 +90,17 @@ const lexer = moo.compile({
     import: '@import',
     '@text': '@text',
     decorator: [/*'@php', */'@js'],
-    literal: ['|>', '<|', '#', '@', '~', '>>>', '>>', '<<', '^', '[', ']', '{', '}', '(', ')', '...', '..', '.', '\\', ',', ';', '::', ':', '??', '?.', '?', '!', '!=', '!==', '==', '===', '>=', '<=', '>', '<', '&&', '&', '||', '|', '+=', '-=', '*=', '/=', '%=', '**=', '=', '+', '-', '/', '**', '*', '%'],
+    literal: ['|>', '<|', '#', '@', '~', '>>>', '>>', '<<', '^'
+        , '[', ']', '{', '}', '(', ')', '...', '..', '.', '\\'
+        , ',', ';', '::', ':', '??', '?.', '?', '!'
+        , '!=', '!==', '==', '===', '>=', '<=', '>', '<'
+        , '&&', '&', '||', '|'
+        , '+=', '-=', '*=', '/=', '%=', '**=', '='
+        , '+', '-', '/', '**', '*', '%'],
+    '': {
+        match: /./,
+        error: true,
+    }
 });
 %}
 @lexer lexer
@@ -1156,23 +1164,23 @@ base -> parenthesized {% id %}
     }) %}
 
 superValue -> value {% id %}
-    | base __nbsp spread (_ "," _ spread):* {% (v, l, reject) => {
-        let rejectables = ['expression_with_parenthesis'];
+    #| base __nbsp spread (_ "," _ spread):* {% (v, l, reject) => {
+    #    let rejectables = ['expression_with_parenthesis'];
 
-        if (v[0].type == 'anonymous_function') return reject
-        if (rejectables.includes(v[2].type)) return reject
+    #    if (v[0].type == 'anonymous_function') return reject
+    #    if (rejectables.includes(v[2].type)) return reject
 
-        for (let i in v[3]) {
-            if (rejectables.includes(v[3][i][3].type)) {
-                return reject
-            }
-        }
-        return ({
-            type: 'function_call',
-            value: v[0],
-            arguments: args.extract_with_no_parenthesis([v[2], v[3]])
-        })
-    } %}
+    #    for (let i in v[3]) {
+    #        if (rejectables.includes(v[3][i][3].type)) {
+    #            return reject
+    #        }
+    #    }
+    #    return ({
+    #        type: 'function_call',
+    #        value: v[0],
+    #        arguments: args.extract_with_no_parenthesis([v[2], v[3]])
+    #    })
+    #} %}
     | html {% (v, l, reject) => {
         if (!HTML_ALLOWED) {
             throw new ReferenceError('HTML syntax is not imported. Use #include <HTML> first.')
@@ -1236,11 +1244,11 @@ const functions = {
         if (v[3].inline) {
             return reject
         }
-        for (let i = 0; i < v[1].value.length; i++) {
-            if (v[1].value[i][0] === v[1].value[i][0].toLowerCase()) {
-                throw new SyntaxError('Function argument names should be in capitalized at line ' + v[1].line + ', col ' + v[1].col)
-            }
-        }
+        //for (let i = 0; i < v[1].value.length; i++) {
+        //    if (v[1].value[i][0] === v[1].value[i][0].toLowerCase()) {
+        //        throw new SyntaxError('Function argument names should be in capitalized at line ' + v[1].line + ', col ' + v[1].col)
+        //    }
+        //}
         return {
             type: 'anonymous_function',
             identifier: v[2] ? v[2][1] : '',
@@ -1539,7 +1547,12 @@ const statement = {
         type: '@include',
         value: v[3]
     }),
-    value: v => {
+    value: (v, l, reject) => {
+        if (v[0].type == 'anonymous_function') {
+            if (!v[0].identifier) {
+                return reject;
+            }
+        }
         return ({
             type: 'statement_value',
             value: v[0],

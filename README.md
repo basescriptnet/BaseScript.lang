@@ -9,7 +9,7 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/issues) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.1.54-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.1.55-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
@@ -26,7 +26,7 @@
     + Pipe forward and pipe backward operators
     + Ability to get compile time errors to prevent runtime errors
     + Syntax sugar from other languages, that are so excess
-    + Unparenthesised arguments and conditions and much more!
+    + Ability to customize your code the way you want it, and much more!
 
 This page represents the simple to follow documentation of the language.
 
@@ -451,11 +451,7 @@ function add(a, b):=> a + b
 
 ```javascript
 add(10, 20)
-// call without arguments
-add 10, 20
 ```
-
-### 📝 NOTE: calling function without parenthesis does work in environments, where there are no separations using commas, as well as pipe forward and backward operators
 
 > Typed arguments and args constant
 
@@ -543,7 +539,7 @@ try {
 > Declaration, cases?, default?
 
 ```javascript
-switch typeof(value) {
+switch typeof value {
     case 'String':
         return value
     case 'Number':
