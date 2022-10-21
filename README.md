@@ -9,7 +9,7 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/issues) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.1.55-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.1.56-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
@@ -408,7 +408,7 @@ unless isAdmin:
     print "You don't have access."
 // same as
 if (!isAdmin) {
-    console.log("You don't have access");
+    console.log("You don't have access.");
 }
 ```
 ## 🚄 Functions
@@ -465,7 +465,7 @@ function add(Int a, Int b) {
 }
 // only strings are allowed
 function say(String text) {
-    WRITE text
+    WRITE text // deprecated
 }
 ```
 
@@ -528,7 +528,7 @@ try: isWorking(1)
 finally: doSomethingElse()
 // same as:
 try {
-    isWorking()
+    isWorking(1)
 } finally {
     doSomethingElse()
 }
@@ -648,7 +648,7 @@ instanceof
 ```javascript
 value instanceof Array
 // as well as
-value not instaceof Array
+value not instanceof Array
 // or
 value !instanceof Array
 ```

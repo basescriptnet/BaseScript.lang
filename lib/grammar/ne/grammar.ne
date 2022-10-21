@@ -1042,18 +1042,50 @@ relational -> relational _ ("<" | ">" | "<=" | ">=" | "in" | "instanceof"
             reversed
         }
     } %}
+    | relational _ ("<" | ">" | "<=" | ">=" | "in" | "instanceof"
+        | ("not" _ "in" | "!" _ "in")
+        | ("not" _ "instanceof" | "!" _ "instanceof")
+    ) _ arguments {% (v, l, reject) => {
+        if (v[4].value.length < 2) return reject;
+        let reversed = false;
+        let o = v[2][0].value;
+        if (v[2][0] instanceof Array && (v[2][0][0].value == 'not' || v[2][0][0].value == '!')) {
+            reversed = true;
+            o = v[2][0][2].value;
+        }
+        return {
+            type: 'condition_destructive',
+            left: v[0],
+            right: v[4],
+            operator: o,
+            reversed
+        }
+    } %}
     | shift {% id %}
 
 equality -> equality _ ("==" | "!=" | "===" | "!==" | "is" | "is" _ "not") _ relational {% (v, l, reject) => {
-    let operator = v[2][0].value;
-    if (operator == 'is' && v[2][3] === 'not') operator = '!==';
-    else if (operator == 'is') operator = '===';
+    let o = v[2][0].value;
+    if (o == 'is' && v[2][2].value === 'not') o = '!==';
+    else if (o == 'is') o = '===';
     return ({
         type: 'equality',
         left: v[0],
         right: v[4],
-        operator: operator
+        operator: o
     }) } %}
+    | equality _ ("==" | "!=" | "===" | "!==" | "is" | "is" _ "not") _ arguments {% (v, l, reject) => {
+        if (v[4].value.length < 2) return reject;
+        let o = v[2][0].value;
+        if (o == 'is' && v[2][2].value === 'not') o = '!==';
+        else if (o == 'is') o = '===';
+
+        return {
+            type: 'condition_destructive',
+            left: v[0],
+            right: v[4],
+            operator: o,
+        }
+    } %}
     | relational {% id %}
 
 bitwise_and -> bitwise_and _ "&" _ equality {% (v, l, reject) => ({
@@ -1164,23 +1196,6 @@ base -> parenthesized {% id %}
     }) %}
 
 superValue -> value {% id %}
-    #| base __nbsp spread (_ "," _ spread):* {% (v, l, reject) => {
-    #    let rejectables = ['expression_with_parenthesis'];
-
-    #    if (v[0].type == 'anonymous_function') return reject
-    #    if (rejectables.includes(v[2].type)) return reject
-
-    #    for (let i in v[3]) {
-    #        if (rejectables.includes(v[3][i][3].type)) {
-    #            return reject
-    #        }
-    #    }
-    #    return ({
-    #        type: 'function_call',
-    #        value: v[0],
-    #        arguments: args.extract_with_no_parenthesis([v[2], v[3]])
-    #    })
-    #} %}
     | html {% (v, l, reject) => {
         if (!HTML_ALLOWED) {
             throw new ReferenceError('HTML syntax is not imported. Use #include <HTML> first.')
