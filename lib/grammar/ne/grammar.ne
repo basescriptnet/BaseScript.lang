@@ -29,47 +29,46 @@ const lexer = moo.compile({
     //'@constructor': 'constructor',
     keyword: ['class', 'interface', 'void', 'defined', 'safeValue', 'swap', 'namespace', 'Boolean', 'Number', 'String', 'Array', 'Object', 'unless', 'than', 'constructor', 'null', 'const', 'print', 'var',
         'sizeof', 'Infinity', 'NaN', 'undefined', 'globalThis', 'through', 'delete', 'THAT', 'DELETE', 'SAVE', 'LOG', 'ERROR', 'WRITE', 'INTO', 'PUSH',
-        'POP', 'SHIFT', 'UNSHIFT', 'FROM', 'Int', 'Float', 'BEGIN', 'END', 'SET', 'TO', 'typeof', 'instanceof', 'in', 'of', 'type', 'super',
+        'POP', 'SHIFT', 'UNSHIFT', 'FROM', 'Int', 'Float', 'BEGIN', 'END', 'set', 'get', 'package', 'private', 'SET', 'TO', 'typeof', 'instanceof', 'in', 'of', 'type', 'super',
         'extends', 'function', 'def', 'this', 'echo', 'export', 'as', 'JSON', 'yield', 'async', 'try', 'catch', 'finally', 'static', 'while',
         'if', 'else', 'import', 'from', 'let', 'const', 'null', 'of', 'default', 'caseof', 'switch', 'with', 'for', 'case', 'default', 'elif',
         'debugger', 'or', 'and', 'return', 'new', 'is', 'not', 'throw', 'break', 'continue', 'when', 'exit'].map(i => new RegExp(`\\b${i}\\b`)),
     //regexp: /\/((?![*+?])(?:[^\r\n\[/\\]|\\.|\[(?:[^\r\n\]\\]|\\.)*\])+)\/((?:g(?:im?|mi?)?|i(?:gm?|mg?)?|m(?:gi?|ig?)?)?)/,
     regexp: /\/(?:\\[ \/><bBfFnNrRtTvVxXuUsSwWdD.+\-!@#&()*^$[\]{}|?:\\]|[^><\n\/\\])*?\//,
-    operator: ['++', '--', /*'+', '-', '/', '**', '*', '%'*/],
     // ! is not tested
     bigInt: [
         {
-            match: /(?:\+|-)?0[xX](?:[0-9A-Fa-f]+(?:_?[0-9A-Fa-f]+)*)n/,
+            match: /0[xX](?:[0-9A-Fa-f]+(?:_?[0-9A-Fa-f]+)*)n/,
             value: v => numberify(v, 16) + 'n'
         },
         {
-            match: /(?:\+|-)?0[oO](?:[0-7]+(?:_?[0-7]+)*)n/,
+            match: /0[oO](?:[0-7]+(?:_?[0-7]+)*)n/,
             value: v => numberify(v, 8) + 'n'
         },
         {
-            match: /(?:\+|-)?0[bB](?:[01]+(?:_?[01]+)*)n/,
+            match: /0[bB](?:[01]+(?:_?[01]+)*)n/,
             value: v => numberify(v, 2) + 'n'
         },
         {
-            match: /(?:\+|-)?(?:[0-9]+(?:_?[0-9]+)*)n/,
+            match: /(?:[0-9]+(?:_?[0-9]+)*)n/,
             value: v => parseFloat(v.replace(/_/g, '')) + 'n'
         },
     ],
     number: [
         {
-            match: /(?:\+|-)?0[xX](?:[0-9A-Fa-f]+(?:_?[0-9A-Fa-f]+)*)/,
+            match: /0[xX](?:[0-9A-Fa-f]+(?:_?[0-9A-Fa-f]+)*)/,
             value: v => numberify(v, 16)
         },
         {
-            match: /(?:\+|-)?0[oO](?:[0-7]+(?:_?[0-7]+)*)/,
+            match: /0[oO](?:[0-7]+(?:_?[0-7]+)*)/,
             value: v => numberify(v, 8)
         },
         {
-            match: /(?:\+|-)?0[bB](?:[01]+(?:_?[01]+)*)/,
+            match: /0[bB](?:[01]+(?:_?[01]+)*)/,
             value: v => numberify(v, 2)
         },
         {
-            match: /(?:\+|-)?(?:[0-9]+(?:_?[0-9]+)*)(?:\.[0-9]+)?/,
+            match: /(?:[0-9]+(?:_?[0-9]+)*)(?:\.[0-9]+)?/,
             value: v => parseFloat(v.replace(/_/g, ''))
         },
     ],
@@ -90,6 +89,7 @@ const lexer = moo.compile({
     import: '@import',
     '@text': '@text',
     decorator: [/*'@php', */'@js'],
+    operator: ['++', '--', /*'+', '-', '/', '**', '*', '%'*/],
     literal: ['|>', '<|', '#', '@', '~', '>>>', '>>', '<<', '^'
         , '[', ']', '{', '}', '(', ')', '...', '..', '.', '\\'
         , ',', ';', '::', ':', '??', '?.', '?', '!'
@@ -193,6 +193,7 @@ statement -> blocks {% id %}
 	| value_reassign {% statement.value_reassign %}
 	| superValue {% statement.value %}
     | "namespace" __ superValue {% statement.namespace %}
+    | declare {% id %}
 
 blocks ->
 	if_block {% id %}
@@ -426,12 +427,13 @@ regexp -> %regexp (regexp_flags):* {% regexp.parse %}
 
 ### END primitives ###
 
-Var -> base _nbsp "[" _ "]" {% (v, l, reject) => assure(v, l, reject, {
+Var -> base _nbsp "[" _ "]" {% (v, l, reject) => {
+    return {
         type: 'item_retraction_last',
         from: v[0],
         line: v[0].line,
         col: v[0].col
-	}) %}
+    } } %}
 	| base _ "[" (_ superValue) _ ":" (_ superValue):? (_ ":" _ superValue):? _ "]" {% array.slice %}
 	| base _nbsp "[" _ superValue _ "]" {% v => ({
         type: 'item_retraction',
@@ -439,7 +441,7 @@ Var -> base _nbsp "[" _ "]" {% (v, l, reject) => assure(v, l, reject, {
         value: v[4],
         line: v[0].line,
         col: v[0].col
-	}) %}
+	}) %}
 	| base _ "." _ (%keyword | identifier) {% (v, l, reject) => {
         if (v[0].type == 'annonymous_function') return reject
         return {
@@ -668,11 +670,11 @@ var_reassign -> identifier _ "=" _ superValue {% v => {
 } %}
 
 value_addition -> value _ ("+=" | "-=" | "*=" | "/=" | "%=" | "**=" | "<<=" | ">>=" | ">>>=" | "&=" | "^=" | "|=") _ superValue {% (v, l, reject) => ({
-        type: 'expression_short_equation',
-        left: v[0],
-        right: v[4],
-        operator: v[2][0].value
-    }) %}
+    type: 'expression_short_equation',
+    left: v[0],
+    right: v[4],
+    operator: v[2][0].value
+}) %}
 # loops
 while_block -> "while" statement_condition statements_block {%  v => {
 	return assign(v[0], {
@@ -718,7 +720,18 @@ for_block -> "for" _ "(" _ identifier __ ("in" | "of") __ superValue _ ")" state
 		include: v[10][0].text == 'till' ? false : true,
 		value: v[15],
 	});
-} %}anonymous_function ->
+} %}
+	| "for" __ (var_assign | var_assign_list) _ ";" statement_condition _ ";" _ superValue statements_block {%  v => {
+	return assign(v[0], {
+		type: 'for_loop_regular',
+		condition: v[5],
+		identifier: v[2][0],
+		change: v[9],
+		value: v[10],
+	});
+} %}
+
+anonymous_function ->
 	("async" __):? value_type (__ identifier):? _ arguments_with_types statements_block {% functions.annonymous %}
 	| ("async" __):? value_type (__ identifier):? statements_block {% functions.annonymous_with_no_args %}
 
@@ -877,6 +890,7 @@ array -> "[" _ "]" {% array.empty %}
     # | void n/a
     # | delete n/a
     # | await n/a
+    # | declared prefixed operator n/a
 # 6. exponentiation (**) right to left
 # 7. multiplication (*) left to right
     # | division (/) left to right
@@ -953,6 +967,11 @@ unary2 -> "!" _ unary2 {% (v, l, reject) => ({
             operator: v[0][0].value
         })
     } %}
+    | ("+" | "-") _ unary2 {% (v, l, reject) => ({
+        type: 'unary_plus_minus',
+        value: v[2],
+        operator: v[0][0].value
+    }) %}
     | "typeof" _ unary2 {% (v, l, reject) => {
         if (v[2].type != 'expression_with_parenthesis' && v[1].length == 0) return reject;
         return ({

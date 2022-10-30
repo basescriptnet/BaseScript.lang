@@ -9,7 +9,7 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/issues) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.1.56-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.1.57-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
@@ -56,6 +56,7 @@ This page represents the simple to follow documentation of the language.
  - [Debugger](#-debugger)
  - [try|catch|finally statement](#-trycatchfinally-statement)
  - [Switch cases](#-switch-cases)
+ - [Loops](#🔛-loops)
  - [Strict mode](#%EF%B8%8F-strict-mode)
  - [Interfaces](#interfaces)
  - [Operators](#operators)
@@ -551,9 +552,9 @@ switch typeof value {
 }
 ```
 
-## 🔛 While loop
+## 🔛 Loops
 
-> Declaration
+> Declaration of while loop
 
 ```javascript
 while isTrue {
@@ -562,6 +563,30 @@ while isTrue {
 // or
 while (isTrue):
     print true
+```
+
+> Declaration of for loop
+
+```javascript
+for key in object {
+    print object[key]
+}
+for value of object {
+    print value
+}
+for i of range(0, 10) {
+    print i
+}
+for i from 0 till 10 {
+    print i
+}
+for i from 0 through 10 {
+    print i
+}
+// notice, const or let are alowed here, but not necessary
+for i = 0; i < 10; i++ {
+    print i
+}
 ```
 
 ## ☝️ Strict mode

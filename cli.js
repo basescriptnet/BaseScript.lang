@@ -217,6 +217,7 @@ if (options.watch) {
         baseUrl.relative = pathJS(path).dir;
         baseUrl.ext = pathJS(path).ext;
         baseUrl.filename = pathJS(path).filename;
+        console.clear();
         execute(`bsc -f=${options.file} -o=${options.out} ${options._.join(' ')}`);
         //utils.parse(path);
         baseUrl.relative = '';
