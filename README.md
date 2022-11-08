@@ -61,7 +61,7 @@ This page represents the simple to follow documentation of the language.
  - [Interfaces](#%EF%B8%8F-interfaces)
  - [Operators](#-operators)
  - [Custom Operators](#-custom-operators)
- - [CONTRIBUTING](#contributing)
+ - [CONTRIBUTING](#-contributing)
  - [LICENSE](#-license)
 
 ## ▶️ Getting started
@@ -740,7 +740,7 @@ print Infinity #/ Infinity
 
 > We are constantly updating, fixing and adding new features!
 
-## Contributing
+## 👥 Contributing
 
 Thanks to **all** the contributors who contributed to this project!
 
