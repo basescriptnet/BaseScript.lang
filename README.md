@@ -56,11 +56,11 @@ This page represents the simple to follow documentation of the language.
  - [Debugger](#-debugger)
  - [try|catch|finally statement](#-trycatchfinally-statement)
  - [Switch cases](#-switch-cases)
- - [Loops](#🔛-loops)
+ - [Loops](#-loops)
  - [Strict mode](#%EF%B8%8F-strict-mode)
- - [Interfaces](#interfaces)
- - [Operators](#operators)
- - [Custom Operators](#custom-operators)
+ - [Interfaces](#%EF%B8%8F-interfaces)
+ - [Operators](#-operators)
+ - [Custom Operators](#-custom-operators)
 
 ## ▶️ Getting started
 
@@ -598,7 +598,7 @@ for i = 0; i < 10; i++ {
 // learn more at https://www.w3schools.com/js/js_strict.asp
 ```
 
-## Interfaces
+## 🕹️ Interfaces
 
 > Declaration
 
@@ -624,7 +624,7 @@ addToArray({
 })
 ```
 
-##  Operators
+## 📐 Operators
 
 > Arithmetic Operators
 
