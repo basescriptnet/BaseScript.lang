@@ -9,7 +9,9 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/issues) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.1.57-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-v0.1.57-yellow" alt="version"></b>
+[![npm](https://img.shields.io/npm/dt/basescript.js.svg?color=yellow)](https://npmjs.com/package/basescript.js) [![js-standard-style](https://img.shields.io/badge/code%20style-standard-yellow.svg)](http://standardjs.com)
+
 </div>
 
 ## ℹ️ About
