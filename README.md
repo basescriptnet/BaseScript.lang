@@ -61,6 +61,8 @@ This page represents the simple to follow documentation of the language.
  - [Interfaces](#%EF%B8%8F-interfaces)
  - [Operators](#-operators)
  - [Custom Operators](#-custom-operators)
+ - [CONTRIBUTING](#contributing)
+ - [LICENSE](#-license)
 
 ## ▶️ Getting started
 
@@ -737,6 +739,18 @@ print Infinity #/ Infinity
 > The documentation is not final, and more examples and syntax sugar tricks will be added
 
 > We are constantly updating, fixing and adding new features!
+
+## Contributing
+
+Thanks to **all** the contributors who contributed to this project!
+
+> See the  [CONTRIBUTING](https://github.com/basescriptnet/BaseScript.lang/blob/master/CONTRIBUTING.md) file for how to contribute to this project
+
+<a href="https://github.com/basescriptnet/BaseScript.lang/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=basescriptnet/BaseScript.lang" />
+</a>
+
+Made with [contributors-img](https://contrib.rocks).
 
 ## 📃 License
 
