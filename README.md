@@ -72,7 +72,7 @@ This page represents the simple to follow documentation of the language.
 
 > Install via npm
 
-```sh
+```node
 npm i basescript.js -g
 ```
 
@@ -606,7 +606,7 @@ for i = 0; i < 10; i++ {
 
 > Declaration
 
-```javascript
+```typescript 
 interface Person {
     name: String,
     age: Int,
