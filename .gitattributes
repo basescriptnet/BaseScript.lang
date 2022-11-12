@@ -1,4 +1,4 @@
 # Basic .gitattributes for basescript files 
   
- *.bs linguist-detectable=false
- *.bs linguist-language=ts
+ *.bs linguist-detectable=true
+ *.bs linguist-language=bsc
