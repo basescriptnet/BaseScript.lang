@@ -1,4 +1,6 @@
-# Basic .gitattributes for sketch files 
+# Basic .gitattributes for basescript files 
   
  *.bs linguist-detectable=true 
- *.bs linguist-language=text
+ *.bs linguist-language=
+
+ *.bs text diff=BaseScript
