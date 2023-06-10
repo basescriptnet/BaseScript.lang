@@ -9,9 +9,7 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/issues) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-v0.1.57-yellow" alt="version"></b>
-[![npm](https://img.shields.io/npm/dt/basescript.js.svg?color=yellow)](https://npmjs.com/package/basescript.js) [![js-standard-style](https://img.shields.io/badge/code%20style-standard-yellow.svg)](http://standardjs.com)
-
+<b><img src="https://img.shields.io/badge/version-0.2.0-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
@@ -58,13 +56,11 @@ This page represents the simple to follow documentation of the language.
  - [Debugger](#-debugger)
  - [try|catch|finally statement](#-trycatchfinally-statement)
  - [Switch cases](#-switch-cases)
- - [Loops](#-loops)
+ - [Loops](#🔛-loops)
  - [Strict mode](#%EF%B8%8F-strict-mode)
- - [Interfaces](#%EF%B8%8F-interfaces)
- - [Operators](#-operators)
- - [Custom Operators](#-custom-operators)
- - [CONTRIBUTING](#-contributing)
- - [LICENSE](#-license)
+ - [Interfaces](#interfaces)
+ - [Operators](#operators)
+ - [Custom Operators](#custom-operators)
 
 ## ▶️ Getting started
 
@@ -72,7 +68,7 @@ This page represents the simple to follow documentation of the language.
 
 > Install via npm
 
-```node
+```sh
 npm i basescript.js -g
 ```
 
@@ -94,7 +90,7 @@ bsc -help
 npm install -g ./
 ```
 
-> Include built-in functionality in .bs files
+> [Deprecated]: Include built-in functionality in .bs files
 
 > If you already have it in the main file, connected files won't need it (as well as with -r flag)
 
@@ -602,11 +598,11 @@ for i = 0; i < 10; i++ {
 // learn more at https://www.w3schools.com/js/js_strict.asp
 ```
 
-## 🕹️ Interfaces
+## Interfaces
 
 > Declaration
 
-```typescript 
+```javascript
 interface Person {
     name: String,
     age: Int,
@@ -628,7 +624,7 @@ addToArray({
 })
 ```
 
-## 📐 Operators
+##  Operators
 
 > Arithmetic Operators
 
@@ -741,18 +737,6 @@ print Infinity #/ Infinity
 > The documentation is not final, and more examples and syntax sugar tricks will be added
 
 > We are constantly updating, fixing and adding new features!
-
-## 👥 Contributing
-
-Thanks to **all** the contributors who contributed to this project!
-
-> See the  [CONTRIBUTING](https://github.com/basescriptnet/BaseScript.lang/blob/master/CONTRIBUTING.md) file for how to contribute to this project
-
-<a href="https://github.com/basescriptnet/BaseScript.lang/graphs/contributors">
-  <img src="https://contributors-img.web.app/image?repo=basescriptnet/BaseScript.lang" />
-</a>
-
-Made with [contributors-img](https://contrib.rocks).
 
 ## 📃 License
 

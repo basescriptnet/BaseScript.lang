@@ -1,5 +1,5 @@
-const path_applied = process.cwd();
-const pathLib = require('path');
+const path_applied = process.cwd(),
+    pathLib = require('path')
 
 global.internalPaths = {
     utils: './bin/utils.js',
@@ -33,13 +33,13 @@ global.pathJS = function (pathString = '') {
         filename: (function (str) {
             return str.split('\\').join('/').split('/').pop();
         })(pathString),
-        add: function (...args) {
+        add(...args) {
             return pathLib.join(pathString, ...args).replace(r, '/');
         },
-        relative: function () {
+        relative() {
             return pathJS(baseUrl.path).add(baseUrl.relative);
         },
-        full: function () {
+        full() {
             return pathJS(baseUrl.path).add(baseUrl.relative, baseUrl.filename);
         }
     }
@@ -47,8 +47,8 @@ global.pathJS = function (pathString = '') {
 global.CLIArguments = [];
 
 baseUrl.filename = '';
-const utils = require("./bin/utils");
-const fs = require('fs');
+const utils = require("./bin/utils"),
+    fs = require('fs');
 
 const BaseScript = {
     compile: utils.fromString,
@@ -56,7 +56,7 @@ const BaseScript = {
         return BaseScript.compile(fs.readFileSync(path, 'utf8'));
     },
     builtins() {
-        return fs.readFileSync('./lib/compiler/builti_in.js', 'utf8');
+        return fs.readFileSync('./lib/compiler/builtin/index.js', 'utf8');
     },
     run(path, args = []) {
         let answer = utils.parse(path, '', '', false, true, null, args, true)

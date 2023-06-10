@@ -31,8 +31,8 @@ const lexer = moo.compile({
         'sizeof', 'Infinity', 'NaN', 'undefined', 'globalThis', 'through', 'delete', 'THAT', 'DELETE', 'SAVE', 'LOG', 'ERROR', 'WRITE', 'INTO', 'PUSH',
         'POP', 'SHIFT', 'UNSHIFT', 'FROM', 'Int', 'Float', 'BEGIN', 'END', 'set', 'get', 'package', 'private', 'SET', 'TO', 'typeof', 'instanceof', 'in', 'of', 'type', 'super',
         'extends', 'function', 'def', 'this', 'echo', 'export', 'as', 'JSON', 'yield', 'async', 'try', 'catch', 'finally', 'static', 'while',
-        'if', 'else', 'import', 'from', 'let', 'const', 'null', 'of', 'default', 'caseof', 'switch', 'with', 'for', 'case', 'default', 'elif',
-        'debugger', 'or', 'and', 'return', 'new', 'is', 'not', 'throw', 'break', 'continue', 'when', 'exit'].map(i => new RegExp(`\\b${i}\\b`)),
+        'if', 'else', 'import', 'from', 'let', 'const', 'null', 'of', 'default', 'caseof', 'switch*', 'switch', 'with', 'for', 'case', 'default', 'elif',
+        'debugger', 'or', 'and', 'return', 'new', 'is', 'not', 'throw', 'break', 'continue', 'when', 'exit',].map(i => new RegExp(`\\b${i}\\b`)),
     //regexp: /\/((?![*+?])(?:[^\r\n\[/\\]|\\.|\[(?:[^\r\n\]\\]|\\.)*\])+)\/((?:g(?:im?|mi?)?|i(?:gm?|mg?)?|m(?:gi?|ig?)?)?)/,
     regexp: /\/(?:\\[ \/><bBfFnNrRtTvVxXuUsSwWdD.+\-!@#&()*^$[\]{}|?:\\]|[^><\n\/\\])*?\//,
     // ! is not tested
@@ -102,6 +102,7 @@ const lexer = moo.compile({
         error: true,
     }
 });
+
 %}
 @lexer lexer
 
@@ -200,10 +201,15 @@ blocks ->
 	| while_block {% id %}
 	| for_block {% id %}
 	| try_catch_finally {% id %}
-	| switch_multiple {% id %}
 	| type_declaration {% id %}
     | operator_declaration {% id %}
     | interface {% id %}
+    | "@" "ignore" statements_block {% v => ({
+        type: 'ignore',
+        value: v[3],
+        line: v[0].line,
+        col: v[0].col
+    }) %}
     #| "test" statements_block _ "expect" _ value {% v => ({
     #    type: 'test',
     #    value: v[1],
@@ -364,6 +370,7 @@ convert_type -> ("Function" | "JSON" | "String" | "Number" | "Boolean" | "Object
 pair -> ("async" __):? key _ arguments_with_types statements_block {% object.es6_key_value %}
 	| key _ ":" _ value {% v => [v[0], v[4]] %}
     | key {% v => [v[0], v[0]] %}
+    | "..." _ Var {% v => v[2] %}
 
 key -> string {% id %}
 	| identifier {% id %}
@@ -412,6 +419,10 @@ boolean -> (%boolean) {% boolean %}
 
 # strings
 string -> string_concat {% id %}
+    | ("@" "dirname" | "@" "filename") {% v => ({
+        type: 'locator',
+        value: v[0][1],
+    }) %}
 
 # numbers
 bigInt -> %bigInt {% number.bigInt %}
@@ -442,7 +453,27 @@ Var -> base _nbsp "[" _ "]" {% (v, l, reject) => {
         line: v[0].line,
         col: v[0].col
 	}) %}
-	| base _ "." _ (%keyword | identifier) {% (v, l, reject) => {
+	| base _ "." _ object {% (v, l, reject) => {
+        //if (v[0].type == 'annonymous_function') return reject
+        return {
+            type: 'dot_property_addition',
+            from: v[0],
+            value: v[4],
+            line: v[0].line,
+            col: v[0].col
+        }
+    } %}
+    #| base _ "." _ array {% (v, l, reject) => {
+    #    if (v[0].type == 'annonymous_function') return reject
+    #    return {
+    #        type: 'dot_array_addition',
+    #        from: v[0],
+    #        value: v[4],
+    #        line: v[0].line,
+    #        col: v[0].col
+    #    }
+    #} %}
+    | base _ "." _ (%keyword | identifier) {% (v, l, reject) => {
         if (v[0].type == 'annonymous_function') return reject
         return {
             type: 'dot_retraction_v2',
@@ -477,6 +508,26 @@ Var -> base _nbsp "[" _ "]" {% (v, l, reject) => {
     | function_call {% id %}
     | identifier {% id %}
 
+switch -> "switch" "*" _ superValue _ "{" (_ case_single_valued):* _ "}" {% v => assign(v[0], {
+	type: 'switch*',
+	value: v[3],
+	cases: v[6] ? v[6].map(i => i[1]) : []
+}) %}
+# switch case addons
+case_single_valued -> "case" _ superValue _ ":" _ (superValue EOL):? {% v => assign(v[0], {
+    type: 'case_with_break',
+    value: v[2],
+    statements: v[6] ? v[6][0] : []
+    }) %}
+    #| "&" _ value _ ":" _ {% v => assign(v[0], {
+    #    type: 'case_singular',
+    #    value: v[2],
+    #    statements: v[6] ? v[6][0] : []
+    #}) %}
+    | "default" _ ":" _ (value EOL):? {% v => assign(v[0], {
+    type: 'case_default_singular',
+    value: v[4] ? v[4][0] : [null],
+}) %}
 
 switch_multiple -> "switch" __ superValue _ "{" (_ case_multiline):* (_ case_default):? _ "}" {% v => assign(v[0], {
 	type: 'switch',
@@ -489,6 +540,11 @@ case_multiline -> "case" __ superValue _ ":" statements (_ ";"):? {% v => assign
     type: 'case',
     value: v[2],
     statements: v[5]
+}) %}
+    | "case" "*" __ superValue _ ":" statements (_ ";"):? {% v => assign(v[0], {
+    type: 'broken_case',
+    value: v[3],
+    statements: v[6]
 }) %}
 
 case_default -> "default" _ ":" statements (_ ";"):? {% v => assign(v[0], {
@@ -1213,6 +1269,7 @@ base -> parenthesized {% id %}
         line: v[0].line,
         col: v[0].col
     }) %}
+	| switch {% id %}
 
 superValue -> value {% id %}
     | html {% (v, l, reject) => {
@@ -1232,6 +1289,7 @@ parenthesized -> "(" _ superValue _ ")" {% (v, l, reject) => {
         col: v[0].col
     }
 } %}
+
 ### whitespace ###
 _ -> %space:* {% id %}
 
@@ -1688,13 +1746,15 @@ const object = {
     },
     extractObject (v) {
         let output = {};
-        extractPair(v[2], output);
+        let rest = [];
+        extractPair(v[2], output, rest);
         for (let i in v[3]) {
-            extractPair(v[3][i][3], output);
+            extractPair(v[3][i][3], output, rest);
         }
         return assign(v[0], {
             type: 'object',
-            value: output
+            value: output,
+            rest
         });
     },
     es6_key_value: v => [v[1], {
@@ -1744,8 +1804,13 @@ function boolean ([v]) {
         return assign(v[0], {type: 'boolean_reversed', value: v[2] })
     return assign(v[0], {type: 'boolean', value: v[0].value })
 }
-function extractPair (kv, output) {
+function extractPair (kv, output, rest) {
     //debugger
+    // for spread operators kv is object
+    if (kv.type) {
+        rest.push(kv)
+        return;
+    }
     if (kv[0]) {
         if (typeof kv[0] == 'string') {
             output[kv[0]] = kv[1];
@@ -1761,4 +1826,5 @@ const global = {};
 Object.join = function (obj) {
     return {...this, ...obj};
 }
+
 %}
