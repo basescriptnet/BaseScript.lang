@@ -1,5 +1,45 @@
 ### Release Notes:
 
+## Support for keywords as class method names
+
+```js
+class Country {
+    constructor() {}
+    import() {}
+    export() {}
+}
+```
+
+## Code execution with improved global variable access
+
+```js
+global.a = 10
+// before
+print global.a
+// now
+print a // 10
+```
+
+## Rest operator for function arguments
+
+```js
+function values(...all_args) {
+    print all_args
+}
+```
+
+## Variable destructuring assignment
+
+> Note: rest operator will be added in upcoming releases for this syntax
+
+```js
+let {a, b, c} = object
+// same as
+let a = object.a
+let b = object.b
+let c = object.c
+```
+
 ## Removal of mandatory `__dirname` and `__filename` variables
 
 > If you want to get the basescript file or directory, use:

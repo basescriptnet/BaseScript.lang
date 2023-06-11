@@ -228,7 +228,11 @@ statements_block -> _ "{" statements _ (";" _):? "}" {% v => ({
     line: v[3].line,
     col: v[3].col
 }) %}
-	| _ ":" _ statement {% v => {
+	| _ ":" _ statement {% (v, l, r) => {
+        if (done.includes[l]) {
+            //return r
+        }
+        done.push(l)
         return ({
             type: 'scope',
             value: [v[3]],
@@ -556,42 +560,83 @@ case_default -> "default" _ ":" statements (_ ";"):? {% v => assign(v[0], {
 class_declaration -> "class" _ identifier _ "{" _ construct (_ es6_key_value {% v => v[1] %}):* _ "}" {% classes.parse %}
 construct -> "constructor" _ arguments_with_types statements_block {% classes.construct %}
 # add async
-es6_key_value -> identifier _ arguments_with_types statements_block {% classes.es6_key_value %}
+es6_key_value -> (identifier | %keyword {% (v, l, reject) => v.value == 'constructor' ? reject : v %}) _ arguments_with_types statements_block {% classes.es6_key_value %}
+
 # if else
-if_block -> "if" statement_condition statements_block {% v => {
-	return assign(v[0], {
-		type: 'if',
-		condition: v[1],
-		value: v[2]
-	});
-} %}
-    | "unless" statement_condition statements_block {% v => {
-	return assign(v[0], {
+if_block -> ("if" | "unless") statement_condition statements_block {% v => {
+	return {
 		type: 'if',
 		condition: v[1],
 		value: v[2],
-        unless: true
-	});
+        unless: v[0][0] == 'if' ? false : true,
+        line: v[1].line,
+        col: v[1].col,
+        //offset: v[1].offset,
+	};
 } %}
 	| if_block _ else_block {% v => {
 	return {
 		type: 'if_else',
 		if: v[0],
 		else: v[2],
-		offset: v[0].offset,
-		lineBreaks: v[0].lineBreaks,
+		//offset: v[0].offset,
+		//lineBreaks: v[0].lineBreaks,
 		line: v[0].line,
 		col: v[0].col
 	}
 } %}
+
+elif -> "elif" statement_condition statements_block {% v => {
+    return {
+        type: 'elif',
+        condition: v[1],
+        value: v[2],
+        line: v[1].line,
+        col: v[1].col,
+        //offset: v[1].offset,
+    };
+} %}
+    | elif _ else_block {% v => {
+    return {
+        type: 'elif_else',
+        elif: v[0],
+        else: v[2],
+        //offset: v[0].offset,
+        //lineBreaks: v[0].lineBreaks,
+        line: v[0].line,
+        col: v[0].col
+    }
+} %}
+    | elif _ elif {% v => {
+    return {
+        type: 'elif_elif',
+        elif: v[0],
+        elif2: v[2],
+        //offset: v[0].offset,
+        //lineBreaks: v[0].lineBreaks,
+        line: v[0].line,
+        col: v[0].col
+    }
+} %}
 # else if blocks not implemented yet
-else_block -> "else" statements_block {% v => {
+else_block ->
+#"else" __nbsp if_block {% v => {
+#    //console.log(v[2]);
+#    return assign(v[0], {
+#		type: 'else_if',
+#		value: v[2],
+#        inline: v[2].inline
+#	});
+#} %}
+#|
+"else" statements_block {% v => {
     return assign(v[0], {
 		type: 'else',
 		value: v[1],
         inline: v[1].inline
 	});
 } %}
+
 # try catch finally
 try_catch_finally -> try_catch (_ finally):? {% v => ({
 	type: 'try_catch_finally',
@@ -674,7 +719,7 @@ value_reassign -> Var _ "=" _ superValue {% v => {
 } %}
     | value_addition {% id %}
 
-var_assign -> assign_type var_assign_list {% vars.assign %}
+var_assign -> assign_type var_assign_list_w_destruction {% vars.assign %}
     #| assign_type var_assign_list {% vars.assign %}
 	| "ASSIGN" _ (switch | superValue) _ "TO" _  identifier {% v => {
 	return {
@@ -697,6 +742,18 @@ var_assign -> assign_type var_assign_list {% vars.assign %}
 assign_type -> ("let" __ | "const" __ | "\\") {% v => v[0][0].value %}
 
 var_assign_list -> var_reassign (_ "," _ var_reassign {% v => v[3] %}):* {% vars.var_assign_list %}
+
+var_assign_list_w_destruction -> var_reassign_w_destruction (_ "," _ var_reassign_w_destruction {% v => v[3] %}):* {% vars.var_assign_list %}
+
+var_reassign_w_destruction -> var_reassign {% id %}
+    | "{" _ identifier (_ "," _ identifier):* _ "}" _ "=" _ superValue {% v => ({
+        type: 'var_reassign_w_destruction',
+        identifier: array.extract(v),
+        line: v[0].line,
+        col: v[0].col,
+        value: v[9],
+        offset: v[0].offset
+    }) %}
 
 var_reassign -> identifier _ "=" _ superValue {% v => {
 	return {
@@ -731,6 +788,7 @@ value_addition -> value _ ("+=" | "-=" | "*=" | "/=" | "%=" | "**=" | "<<=" | ">
     right: v[4],
     operator: v[2][0].value
 }) %}
+
 # loops
 while_block -> "while" statement_condition statements_block {%  v => {
 	return assign(v[0], {
@@ -748,7 +806,7 @@ for_block -> "for" __ identifier __ ("in" | "of") __ superValue statements_block
 		value: v[7],
 	});
 } %}
-for_block -> "for" _ "(" _ identifier __ ("in" | "of") __ superValue _ ")" statements_block {%  v => {
+| "for" _ "(" _ identifier __ ("in" | "of") __ superValue _ ")" statements_block {%  v => {
 	return assign(v[0], {
 		type: 'for_' + v[6][0],
 		//condition: v[4],
@@ -784,6 +842,15 @@ for_block -> "for" _ "(" _ identifier __ ("in" | "of") __ superValue _ ")" state
 		identifier: v[2][0],
 		change: v[9],
 		value: v[10],
+	});
+} %}
+| "for" _ "(" _ (var_assign | var_assign_list) _ ";" statement_condition _ ";" _ superValue _ ")" statements_block {%  v => {
+	return assign(v[0], {
+		type: 'for_loop_regular',
+		condition: v[7],
+		identifier: v[4][0],
+		change: v[11],
+		value: v[14],
 	});
 } %}
 
@@ -857,13 +924,20 @@ arguments_with_types -> "(" _ ")" {% args.empty_arguments_with_types %}
 
 argument_identifier_and_value -> (_value_type __):? identifier (_ "=" _ value):? {% v => {
     return {
-	type: 'argument_identifier_and_value',
-	argument_type: v[0] ? v[0][0] : null,
-	can_be_null: false, //v[0] ? v[0][1] : false,
-	identifier: v[1].value,
-	value: v[2] ? v[2][3] : void 0
-}
+        type: 'argument_identifier_and_value',
+        argument_type: v[0] ? v[0][0] : null,
+        can_be_null: false, //v[0] ? v[0][1] : false,
+        identifier: v[1].value,
+        value: v[2] ? v[2][3] : void 0
+    }
 } %}
+    | "..." _ identifier {% v => ({
+        type: 'spread_argument',
+        identifier: '...' + v[2].value,
+        can_be_null: false,
+        argument_type: null,
+    }) %}
+
 argument_type -> _value_type __ {% id %}
 
 debugging -> ("LOG" | "print") (__ "if"):? debugging_body {% v => ({
@@ -1526,7 +1600,6 @@ const args = {
         types.push(subt);
         let cancelables = [v[2].can_be_null ? true : false];
         let values = [v[2].value];
-        //console.log(v[3]);
         for (let i in v[3]) {
             subt = [];
             t = v[3][i][3].argument_type;
@@ -1578,12 +1651,15 @@ const args = {
     }
 }
 const classes = {
-    es6_key_value: v => ({
-        type: 'es6_key_value',
-        key: v[0],
-        arguments: v[2],
-        value: v[3],
-    }),
+    es6_key_value: v => {
+        //console.log(v)
+        return {
+            type: 'es6_key_value',
+            key: v[0][0],
+            arguments: v[2],
+            value: v[3],
+        }
+    },
     construct: v => ({
         type: 'construct',
         arguments: v[2],

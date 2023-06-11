@@ -25,6 +25,8 @@ class Executor {
         delete global.pathJS;
         delete global.baseUrl;
         delete global.development;
+        //delete global.usedFeatures;
+        //console.log(global)
         require.main.children = [];
         return this
     }
@@ -115,8 +117,10 @@ class Executor {
         this.script = new vm.createScript((
 
 `(function () {
-    try{
+try{
+with(globalThis) {
 ${this.content};
+}
 } catch (err) {
     console.error('Execution failed');
     console.error(err);
