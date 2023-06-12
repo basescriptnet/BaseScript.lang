@@ -1,5 +1,16 @@
 ### Release Notes:
 
+## If Else Block fix
+
+> Now you can use the `else if` block with more ease
+
+```js
+if a: 10
+else if b: 20
+else if c: 30
+else: 40
+```
+
 ## Support for keywords as class method names
 
 ```js

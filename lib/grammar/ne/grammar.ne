@@ -563,7 +563,27 @@ construct -> "constructor" _ arguments_with_types statements_block {% classes.co
 es6_key_value -> (identifier | %keyword {% (v, l, reject) => v.value == 'constructor' ? reject : v %}) _ arguments_with_types statements_block {% classes.es6_key_value %}
 
 # if else
-if_block -> ("if" | "unless") statement_condition statements_block {% v => {
+#if_block -> if_block else_if
+#    | "if" condition statement
+
+#else_if -> else_if else_if
+#| "else" "if" condition statement
+
+#else -> "else" statement
+
+if_block -> if_block _ else_block {% (v, l, r) => {
+    return {
+        type: 'if_else_if',
+        if: v[0],
+        else: v[2],
+        //offset: v[0].offset,
+        //lineBreaks: v[0].lineBreaks,
+        line: v[0].line,
+        col: v[0].col
+    }
+} %}
+| ("if" | "unless") statement_condition statements_block {% v => {
+    // works perfectly
 	return {
 		type: 'if',
 		condition: v[1],
@@ -574,62 +594,46 @@ if_block -> ("if" | "unless") statement_condition statements_block {% v => {
         //offset: v[1].offset,
 	};
 } %}
-	| if_block _ else_block {% v => {
-	return {
-		type: 'if_else',
-		if: v[0],
-		else: v[2],
-		//offset: v[0].offset,
-		//lineBreaks: v[0].lineBreaks,
-		line: v[0].line,
-		col: v[0].col
-	}
-} %}
-
-elif -> "elif" statement_condition statements_block {% v => {
-    return {
-        type: 'elif',
-        condition: v[1],
-        value: v[2],
-        line: v[1].line,
-        col: v[1].col,
-        //offset: v[1].offset,
-    };
-} %}
-    | elif _ else_block {% v => {
-    return {
-        type: 'elif_else',
-        elif: v[0],
-        else: v[2],
-        //offset: v[0].offset,
-        //lineBreaks: v[0].lineBreaks,
-        line: v[0].line,
-        col: v[0].col
-    }
-} %}
-    | elif _ elif {% v => {
-    return {
-        type: 'elif_elif',
-        elif: v[0],
-        elif2: v[2],
-        //offset: v[0].offset,
-        //lineBreaks: v[0].lineBreaks,
-        line: v[0].line,
-        col: v[0].col
-    }
-} %}
 # else if blocks not implemented yet
-else_block ->
-#"else" __nbsp if_block {% v => {
-#    //console.log(v[2]);
-#    return assign(v[0], {
+#else_if -> _ "else" _ ("if" | "unless") statement_condition statements_block {% v => {
+#    // works perfectly
+#	return {
 #		type: 'else_if',
-#		value: v[2],
-#        inline: v[2].inline
-#	});
+#		condition: v[4],
+#		value: v[5],
+#        unless: v[3][0] == 'if' ? false : true,
+#        line: v[1].line,
+#        col: v[1].col,
+#        //offset: v[1].offset,
+#	};
 #} %}
-#|
-"else" statements_block {% v => {
+#| else_if else_if {% (v, l, r) => {
+#    console.log(v[5])
+#    if (done.includes(l)) return r
+#    done.push(l)
+#    // works perfectly
+#    return {
+#        type: 'else_if',
+#        condition: v[1],
+#        value: v[2],
+#        unless: v[0].unless,
+#        line: v[1].line,
+#        col: v[1].col,
+#        //offset: v[1].offset,
+#    };
+#} %}
+
+else_block ->
+"else" _ "if" statement_condition statements_block {% v => {
+    return assign(v[0], {
+        type: 'else_if',
+        condition: v[3],
+        value: v[4],
+        flatten: true,
+        inline: v[4].inline
+    });
+} %}
+| "else" statements_block {% v => {
     return assign(v[0], {
 		type: 'else',
 		value: v[1],
