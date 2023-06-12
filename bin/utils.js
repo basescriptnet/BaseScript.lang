@@ -78,6 +78,7 @@ let writeFile = (path, fileName, content, silent = false, env) => {
     try {
         // this is pretty fast. Max was 3ms for regular file
         var tmp = ast_to_js(content, pathJS(path).dir);
+        if (!tmp) return // null when error occurs
 
         //console.log(tmp)
         //console.log(tmp.usedFeatures)
@@ -149,6 +150,7 @@ module.exports = {
 
             if (run) {
                 let tmp = ast_to_js(content.result, pathJS(path).dir);
+                if (!tmp) return // null when error occurs
 
                 if (tmp.result && tmp.result.length === 0 || !tmp.result) return;
                 let includes = tmp.includes;
@@ -169,7 +171,7 @@ module.exports = {
                 }
             }
             let wrote = writeFile(path, fileName, content.result, run ? true : false, env);
-            if (wrote !== void 0 || wrote !== false || wrote !== null) {
+            if (wrote !== void 0 && wrote !== false && wrote !== null) {
                 if (!run) {
                     console.log('Compiled in ' + (Date.now() - date) + 'ms');
                 }
@@ -187,6 +189,7 @@ module.exports = {
             }
 
             let tmp = ast_to_js(content.result);
+            if (!tmp) return // null when error occurs
 
             if (tmp.result && tmp.result.length === 0 || !tmp.result) return;
             let includes = tmp.includes;

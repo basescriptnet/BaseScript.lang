@@ -9,7 +9,7 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/issues) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.2.21-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.2.22-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
@@ -664,9 +664,7 @@ addToArray({
 ```javascript
 typeof // describes the type of the object
 sizeof // describes the size of the object, or returns null
-instanceof
 ```
-
 
 > The *instanceof* operator
 

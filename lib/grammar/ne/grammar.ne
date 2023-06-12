@@ -750,7 +750,7 @@ var_assign_list -> var_reassign (_ "," _ var_reassign {% v => v[3] %}):* {% vars
 var_assign_list_w_destruction -> var_reassign_w_destruction (_ "," _ var_reassign_w_destruction {% v => v[3] %}):* {% vars.var_assign_list %}
 
 var_reassign_w_destruction -> var_reassign {% id %}
-    | "{" _ identifier (_ "," _ identifier):* _ "}" _ "=" _ superValue {% v => ({
+    | "{" _ id_or_rest (_ "," _ id_or_rest):* _ "}" _ "=" _ superValue {% v => ({
         type: 'var_reassign_w_destruction',
         identifier: array.extract(v),
         line: v[0].line,
@@ -758,6 +758,12 @@ var_reassign_w_destruction -> var_reassign {% id %}
         value: v[9],
         offset: v[0].offset
     }) %}
+
+id_or_rest -> identifier {% v => v[0] %}
+    | "..." _ identifier {% v => {
+        v[2].value = '...' + v[2].value
+        return v[2]
+    } %}
 
 var_reassign -> identifier _ "=" _ superValue {% v => {
 	return {
