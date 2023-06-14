@@ -188,7 +188,7 @@ statement -> blocks {% id %}
     #| "delete" _nbsp value {% statement.delete %}
 	| return {% id %}
 	| "throw" __ superValue {% statement.throw %}
-	| ("break" | "continue") {% statement.break_continue %}
+	| ("break" | "continue") (__nbsp ("when" | "when" __ "not") statement_condition):? {% statement.break_continue %}
     | "swap" __ superValue _ "," _ superValue {% statement.swap %}
 	| var_assign {% id %}
 	| value_reassign {% statement.value_reassign %}
@@ -229,18 +229,18 @@ statements_block -> _ "{" statements _ (";" _):? "}" {% v => ({
     col: v[3].col
 }) %}
 	| _ ":" _ statement {% (v, l, r) => {
-        if (done.includes[l]) {
+        //if (done.includes[l]) {
             //return r
-        }
-        done.push(l)
-        return ({
+        //}
+        //done.push(l)
+        return {
             type: 'scope',
             value: [v[3]],
             line: v[3].line,
             col: v[3].col,
             inline: true,
             mustEndWithEOL: true
-        })
+        }
     } %}
 	| _nbsp "do" __ statement {% v => ({
         type: 'scope',
@@ -867,6 +867,18 @@ for_block -> "for" __ identifier __ ("in" | "of") __ superValue statements_block
 anonymous_function ->
 	("async" __):? value_type (__ identifier):? _ arguments_with_types statements_block {% functions.annonymous %}
 	| ("async" __):? value_type (__ identifier):? statements_block {% functions.annonymous_with_no_args %}
+    | ("async" __):? arguments_with_types __nbsp "=" ">" statements_block {% (v, l, r) => {
+        if (v[5].inline) {
+            console.error('Inline arrow functions are not supporte yet. Please use block level scopes instead using "{}" at ' + v[1].line + ', col ' + v[1].col)
+            return r
+        }
+        return {
+            type: 'arrow_function',
+            arguments: v[1],
+            async: !!v[0],
+            value: v[5],
+        }
+    } %}
 
 value_type -> _value_type {% id %}
     | ("void" | "def" | "function") {% v => ({
@@ -900,6 +912,15 @@ _value_type -> (identifier) (_nbsp "[" _ "]"):? {% v => {
 return -> "return" __nbsp superValue {% returns.value %}
     | "return" {% returns.empty %}
     | "=>" _nbsp superValue {% returns.value %}
+    | "return" ((__nbsp superValue):? __nbsp ("when" | "when" __ "not") statement_condition) {% v => {
+        let unless = !!v[1][2][2]
+        return {
+            type: 'return',
+            condition: v[1] ? v[1][3] : null,
+            value: v[1] ? v[1][0] ? v[1][0][1] : null : null,
+            unless,
+        }
+    } %}
 
 function_call -> base _nbsp arguments {% (v, l, reject) => {
     if (v[0].type == 'anonymous_function') return reject
@@ -1708,6 +1729,8 @@ const statement = {
     }),
     break_continue: v => assign(v[0][0], {
         type: 'break_continue',
+        unless: v[1] ? v[1][1][2] : null,
+        condition: v[1] ? v[1][2] : null
     }),
     echo: v => assign(v[0], {
         type: 'echo',
@@ -1726,7 +1749,7 @@ const statement = {
         value: v[3]
     }),
     value: (v, l, reject) => {
-        if (v[0].type == 'anonymous_function') {
+        if (v[0].type === 'anonymous_function') {
             if (!v[0].identifier) {
                 return reject;
             }

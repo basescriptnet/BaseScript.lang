@@ -1,5 +1,41 @@
 ### Release Notes:
 
+## Arrow functions
+
+> Now, arrow functions supported
+
+```js
+let func = (Int a, Int b) => {a + b} // automatically returns
+
+// Not supported
+let func = (Int a, Int b) =>: a + b
+let func = (Int a, Int b) => do a + b
+```
+
+> Note: inline arrow functions are not implemented yet. Use block level scopes instead, as a single statemented scope will automatically return the result, if possible
+
+## Return, break, continue statement syntax addition
+
+> You can use this statements with a condition usigng `when` and `when not` keywords
+
+```js
+while i < sizeof array {
+    break when not array[i] == true
+    i++
+}
+
+let result = ''
+for i in object {
+    continue when typeof object[i] != 'String'
+    result += object[i]
+}
+
+function someFunction(a, b) {
+    return false when not a instanceof b
+    return when a instanceof SomeClass
+}
+```
+
 ## If Else Block fix
 
 > Now you can use the `else if` block with more ease
