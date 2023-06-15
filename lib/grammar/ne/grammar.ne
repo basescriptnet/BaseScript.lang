@@ -12,13 +12,13 @@ const numberify = function (v, radix) {
 const lexer = moo.compile({
     string: [
         {
-            match: /"(?:\\["'`bfnrtvxu$\\/]|[^"\\])*"/, quoteType: '\"'
+            match: /"(?:\\["'`bfnrtvxu$\\/]|[^\n\r"\\])*?"/, quoteType: '\"'
         },
         {
-            match: /'(?:\\["'`bfnrtvxu$\\/]|[^'\\])*'/, quoteType: '\''
+            match: /'(?:\\["'`bfnrtvxu$\\/]|[^\n\r'\\])*?'/, quoteType: '\''
         },
         {
-            match: /`(?:[^`\\$]|\\[\s\S]|\$(?!\{)|\$\{(?:[^}]|\\[\s\S])*\})*`/, lineBreaks: true, quoteType: '\`'
+            match: /`(?:[^`\\$]|\\[\s\S]|\$(?!\{)|\$\{(?:[^}]|\\[\s\S])*\})*?`/, lineBreaks: true, quoteType: '\`'
         },
     ],
     space: {
@@ -100,7 +100,7 @@ const lexer = moo.compile({
     '': {
         match: /./,
         error: true,
-    }
+    },
 });
 
 %
@@ -190,6 +190,14 @@ statement -> blocks {% id %}
 	| "throw" __ superValue {% statement.throw %}
 	| ("break" | "continue") (__nbsp ("when" | "when" __ "not") statement_condition):? {% statement.break_continue %}
     | "swap" __ superValue _ "," _ superValue {% statement.swap %}
+	| "import" (__ identifier (__ "as" __ identifier {% v => v[3] %}):?
+        (_ "," _ identifier
+            (__ "as" __ identifier {% v => v[3] %}):?
+            {% v => [v[3], v[4]] %}):* _ "from"
+        ):? __ string_concat {% statement.import %}
+    | "import" __ "*" __ "as" __ identifier __ "from" __ string_concat {% statement.importAll %}
+    | "export" __ "default" __ superValue {% statement.exportDefault %}
+    | "export" __ (var_assign | class_declaration | superValue) {% statement.export %}
 	| var_assign {% id %}
 	| value_reassign {% statement.value_reassign %}
 	| superValue {% statement.value %}
@@ -1357,7 +1365,7 @@ base -> parenthesized {% id %}
 	| anonymous_function {% id %}
 	| regexp {% id %}
 	| boolean {% id %}
-	| string {% id %}
+	| string_concat {% id %}
 	| bigInt {% id %}
 	| number {% id %}
 	| array {% id %}
@@ -1401,7 +1409,12 @@ _ -> %space:* {% id %}
 # mandatory whitespace
 __ -> %space {% id %}
 
-EOL -> [\n]:+ {% v => 'EOL' %}
+EOL -> __ {% (v, l, r) => {
+    if (!/(\n|\r)/.test(v[0].value)) {
+        return r
+    }
+    return 'EOL'
+} %}
 	| _nbsp ";" (_nbsp "/" "/" [^\n]:* [\n]:*):? {% v => v[1] %}
     | _nbsp "/" "/" [^\n]:* [\n]:*  {% v => 'EOL' %}
 
@@ -1740,10 +1753,30 @@ const statement = {
         type: 'eval',
         value: v[2]
     }),
-    import: v => assign(v[0], {
-        type: '@import',
-        value: v[2]
-    }),
+    import: v => {
+        let from = v[3]
+        let identifiers = []
+        if (v[1]) {
+            identifiers.push([v[1][1], v[1][2]])
+            if (v[1][3]) {
+                for (let i in v[1][3]) {
+                    identifiers.push([v[1][3][i][0], v[1][3][i][1]])
+                }
+            }
+        }
+        return assign(v[0], {
+            type: '@import',
+            identifiers,
+            from,
+        })
+    },
+    importAll: v => {
+        return {
+            type: '@importAll',
+            as: v[6].value,
+            from: v[10]
+        }
+    },
     include: v => assign(v[0], {
         type: '@include',
         value: v[3]
@@ -1762,6 +1795,14 @@ const statement = {
             offset: v[0].offset,
         })
     },
+    exportDefault: v => ({
+        type: '@exportDefault',
+        value: v[4]
+    }),
+    export: v => ({
+        type: '@export',
+        value: v[2]
+    })
 }
 const regexp = {
     parse: v => assign(v[0], {

@@ -1,6 +1,6 @@
 {
     "name": "basescript.js",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "description": "A scritpting language powered with Node.js and Nearley, that compiles down to JavaScript, and has the possibility for even more!",
     "main": "./index.js",
     "scripts": {

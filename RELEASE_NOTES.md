@@ -1,5 +1,38 @@
 ### Release Notes:
 
+### [0.2.5]
+
+## End Of Line token fixed
+
+> EOL token had a bug, that could accidentally match strings. Now, it is fixed
+
+## JavaScript Import Statements
+
+> JavaScript module imports are now available to use
+> Note: you don't have to use `{}` to import multiple items from the import
+
+```js
+// import everything
+import * as lib from 'lib'
+// import specific items
+import min, max from 'math'
+// solly import
+import 'addon'
+// import with aliases
+import sin as s, cos as c from 'math'
+```
+
+## JavaScript-like exports
+
+```js
+export function doSomething() {
+    //...your code here
+}
+export mainValue // automatically converted to export { mainValue }
+export const someConst = 10
+export let a = 10
+```
+
 ## Multiline strings fixed
 
 > `\n` and `\r` now are replaced with `\x0A` and `\x0D` respectively
