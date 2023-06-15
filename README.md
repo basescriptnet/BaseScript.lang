@@ -9,7 +9,7 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/issues) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.2.3-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-0.2.4-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
@@ -18,7 +18,7 @@
 
 > Why to choose BaseScript?
 
-* It is in the phase of active development, so more and more features are being added constantly
+* It is in the phase of active development, so more and more features are being added constantly. Also, check out [RELEASE_NOTES.md](https://github.com/basescriptnet/BaseScript.lang/RELEASE_NOTES.md), as well as [Syntax Highlighter](https://github.com/basescriptnet/VSCode_highlighter/) for the language
 * Your ideas are also being reviewed and added, as the language is welcoming collaborations
 * It provides you things, that JavaScript lacks:
     + Typed functions and arguments
@@ -27,6 +27,9 @@
     + Ability to get compile time errors to prevent runtime errors
     + Syntax sugar from other languages, that are so excess
     + Ability to customize your code the way you want it, and much more!
+    + Easy to switch and learn
+    + Code with ease
+    + Reabable and efficient
 
 This page represents the simple to follow documentation of the language.
 

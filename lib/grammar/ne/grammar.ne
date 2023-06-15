@@ -1,4 +1,4 @@
-@{%
+@%
     const assign = Object.assign.bind(Object)
     let HTML_ALLOWED = false
     const moo = require('moo');
@@ -18,7 +18,7 @@ const lexer = moo.compile({
             match: /'(?:\\["'`bfnrtvxu$\\/]|[^'\\])*'/, quoteType: '\''
         },
         {
-            match: /`(?:\\["'`bfnrtvxu$\\/]|[^`\\])*`/, lineBreaks: true, quoteType: '\`'
+            match: /`(?:[^`\\$]|\\[\s\S]|\$(?!\{)|\$\{(?:[^}]|\\[\s\S])*\})*`/, lineBreaks: true, quoteType: '\`'
         },
     ],
     space: {
@@ -103,7 +103,7 @@ const lexer = moo.compile({
     }
 });
 
-%}
+%
 @lexer lexer
 
 process -> decorated_statements _ (";" _):? {% (v, l, reject) => {
@@ -1418,7 +1418,7 @@ __nbsp -> (" " | [\t]):+ {% (v, l, reject) => {
 
 ### END whitespace ###
 
-@{%
+@%
     const parsed = new Map();
 const functions = {
     annonymous: (v, l, reject) => {
@@ -1936,4 +1936,4 @@ Object.join = function (obj) {
     return {...this, ...obj};
 }
 
-%}
+%

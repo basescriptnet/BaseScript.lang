@@ -1,5 +1,17 @@
 ### Release Notes:
 
+## Multiline strings fixed
+
+> `\n` and `\r` now are replaced with `\x0A` and `\x0D` respectively
+
+## Template Strings fix
+
+> You can use JavaScript like template literals, and use `${}` to insert a BaseScript syntax
+
+```js
+`Hello, ${clients[].name}` //get the last client's name
+```
+
 ## Arrow functions
 
 > Now, arrow functions supported
