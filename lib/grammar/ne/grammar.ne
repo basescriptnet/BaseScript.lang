@@ -188,7 +188,7 @@ statement -> blocks {% id %}
     #| "delete" _nbsp value {% statement.delete %}
 	| return {% id %}
 	| "throw" __ superValue {% statement.throw %}
-	| ("break" | "continue") (__nbsp ("when" | "when" __ "not") statement_condition):? {% statement.break_continue %}
+	| ("break" | "continue") (__ ("when" | "when" __ "not") statement_condition):? {% statement.break_continue %}
     | "swap" __ superValue _ "," _ superValue {% statement.swap %}
 	| "import" (__ identifier (__ "as" __ identifier {% v => v[3] %}):?
         (_ "," _ identifier
@@ -519,6 +519,18 @@ Var -> base _nbsp "[" _ "]" {% (v, l, reject) => {
 	}) %}
     | function_call {% id %}
     | identifier {% id %}
+
+arrow_arguments -> "(" _ arrow_argument (_ "," _ arrow_argument):* (_ ","):? _ ")" {% args.extract %}
+
+arrow_argument -> "&" _ arguments {% v => ({
+    type: 'arrow_argument',
+    value: v[2],
+}) %}
+    | superValue {% id %}
+# "&" _ "(" _ ")" {% args.empty %}
+#	| "&" _ "(" _ (argument | arguments) (_ "," _ (argument | arguments)):* (_ ","):? _ ")" {% v => {
+#        return args.extract(v.slice(2))
+    #} %}
 
 switch -> "switch" "*" _ superValue _ "{" (_ case_single_valued):* _ "}" {% v => assign(v[0], {
 	type: 'switch*',
@@ -920,7 +932,7 @@ _value_type -> (identifier) (_nbsp "[" _ "]"):? {% v => {
 return -> "return" __nbsp superValue {% returns.value %}
     | "return" {% returns.empty %}
     | "=>" _nbsp superValue {% returns.value %}
-    | "return" ((__nbsp superValue):? __nbsp ("when" | "when" __ "not") statement_condition) {% v => {
+    | "return" ((__nbsp superValue):? __ ("when" | "when" __ "not") statement_condition) {% v => {
         let unless = !!v[1][2][2]
         return {
             type: 'return',
@@ -1188,7 +1200,7 @@ exponentiation -> unary2 _ "**" _ exponentiation {% (v, l, reject) => ({
     } %}
     | unary2 {% id %}
 
-multiplicative -> multiplicative _ ("*" | "/" | "%") _ exponentiation {% (v, l, reject) => ({
+multiplicative -> multiplicative _ ("*" | "/" | "%" | "~" "/") _ exponentiation {% v => ({
         type: 'multiplicative',
         left: v[0],
         right: v[4],
@@ -1415,8 +1427,20 @@ EOL -> __ {% (v, l, r) => {
     }
     return 'EOL'
 } %}
-	| _nbsp ";" (_nbsp "/" "/" [^\n]:* [\n]:*):? {% v => v[1] %}
-    | _nbsp "/" "/" [^\n]:* [\n]:*  {% v => 'EOL' %}
+	| _nbsp ";" (_nbsp "/" "/" [^\n]:* _):? {% (v, l, r) => {
+        if (v[2]) {
+            if (v[2][5].value.length && !/(\n|\r)/.test(v[2][5].value)) {
+                return r
+            }
+        }
+        return v[1]
+    } %}
+    | _nbsp "/" "/" [^\n]:* _ {% v => {
+        if (v[4].value.length && !/(\n|\r)/.test(v[4].value)) {
+            return 'EOL'
+        }
+        return 'EOL'
+    } %}
 
 # Not breaking space
 _nbsp -> (" " | [\t]):* {% (v, l, reject) => {

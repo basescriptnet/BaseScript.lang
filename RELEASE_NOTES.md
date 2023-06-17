@@ -1,5 +1,50 @@
 ### Release Notes:
 
+### [0.2.6]
+
+## Chained `->` function executions
+
+> `->` operator can be used to execute a function multiple times, and return an array with results
+
+```js
+let elementsToWatch = document.querySelector->(
+    '#item1',
+    '#item2',
+    '#item6'
+)
+// ... do something with the array
+```
+
+> To call the function with multiple arguments, use `&` prefix with `()`
+
+```js
+// read files, and join them with a new line
+let code = fs.readFileSync->(
+    &(path1, 'utf8'),
+    &(path2, 'utf8'),
+    &(path3, 'utf8')
+).join('\n')
+```
+
+## `~/` operator is added
+
+> `~/` is used to do division values with floating part drop
+
+```js
+5 / 2 // 2.5
+5 ~/ 2 // 2
+```
+
+## `when` keyword now is accessible on multiline
+
+```js
+while true {
+    x += 1
+    break
+        when x > 1_000
+}
+```
+
 ### [0.2.5]
 
 ## End Of Line token fixed
@@ -32,6 +77,8 @@ export mainValue // automatically converted to export { mainValue }
 export const someConst = 10
 export let a = 10
 ```
+
+### [0.2.4]
 
 ## Multiline strings fixed
 
