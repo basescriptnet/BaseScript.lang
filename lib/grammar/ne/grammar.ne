@@ -227,14 +227,14 @@ blocks ->
 statements_block -> _ "{" statements _ (";" _):? "}" {% v => ({
     type: 'scope',
     value: v[2],
-    line: v[2].line,
-    col: v[2].col
+    line: v[1].line,
+    col: v[1].col
 }) %}
 	| _ "BEGIN" __ statements _ (";" _):? "END" {% v => ({
     type: 'scope',
     value: v[3],
-    line: v[3].line,
-    col: v[3].col
+    line: v[1].line,
+    col: v[1].col
 }) %}
 	| _ ":" _ statement {% (v, l, r) => {
         //if (done.includes[l]) {
@@ -244,8 +244,8 @@ statements_block -> _ "{" statements _ (";" _):? "}" {% v => ({
         return {
             type: 'scope',
             value: [v[3]],
-            line: v[3].line,
-            col: v[3].col,
+            line: v[1].line,
+            col: v[1].col,
             inline: true,
             mustEndWithEOL: true
         }
@@ -253,8 +253,8 @@ statements_block -> _ "{" statements _ (";" _):? "}" {% v => ({
 	| _nbsp "do" __ statement {% v => ({
         type: 'scope',
         value: [v[3]],
-        line: v[3].line,
-        col: v[3].col,
+        line: v[1].line,
+        col: v[1].col,
         inline: true,
         mustEndWithEOL: true
     }) %}
@@ -279,7 +279,8 @@ type_declaration -> "type" __ identifier _ arguments_with_types statements_block
 operator -> "#" [A-Za-z0-9_\/*+-.&|$@!^#~]:+ {% v => ({
     type: 'operator',
     value: v[1].join(''),
-    line: v[0].line, col: v[0].col, offset: v[0].offset,
+    line: v[0].line,
+    col: v[0].col
 }) %}
 operator_declaration -> "operator" __ operator _ arguments_with_types statements_block {% v => {
     if (v[4].value.length < 2 && v[4].value.length > 2) {
@@ -293,7 +294,8 @@ operator_declaration -> "operator" __ operator _ arguments_with_types statements
         identifier: v[2],
         arguments: v[4],
         value: v[5],
-        line: v[0].line, col: v[0].col, offset: v[0].offset,
+        line: v[0].line,
+        col: v[0].col
     })
 } %}
 
@@ -825,6 +827,7 @@ while_block -> "while" statement_condition statements_block {%  v => {
 		type: 'while',
 		condition: v[1],
 		value: v[2],
+        isEmpty: !!v[2].value.length
 	});
 } %}
 for_block -> "for" __ identifier __ ("in" | "of") __ superValue statements_block {%  v => {
@@ -834,6 +837,7 @@ for_block -> "for" __ identifier __ ("in" | "of") __ superValue statements_block
 		identifier: v[2],
 		iterable: v[6],
 		value: v[7],
+        isEmpty: !!v[7].value.length
 	});
 } %}
 | "for" _ "(" _ identifier __ ("in" | "of") __ superValue _ ")" statements_block {%  v => {
@@ -843,6 +847,7 @@ for_block -> "for" __ identifier __ ("in" | "of") __ superValue statements_block
 		identifier: v[4],
 		iterable: v[8],
 		value: v[11],
+        isEmpty: !!v[11].value.length
 	});
 } %}
 	| "for" __ identifier __ "from" __ superValue _ ("through" | "till") _ superValue statements_block {%  v => {
@@ -853,6 +858,7 @@ for_block -> "for" __ identifier __ ("in" | "of") __ superValue statements_block
 		through: v[10],
 		include: v[8][0].text == 'till' ? false : true,
 		value: v[11],
+        isEmpty: !!v[11].value.length
 	});
 } %}
 	| "for" _ "(" _ identifier __ "from" __ superValue _ ("through" | "till") _ superValue _ ")" statements_block {%  v => {
@@ -863,6 +869,7 @@ for_block -> "for" __ identifier __ ("in" | "of") __ superValue statements_block
 		through: v[12],
 		include: v[10][0].text == 'till' ? false : true,
 		value: v[15],
+        isEmpty: !!v[15].value.length
 	});
 } %}
 	| "for" __ (var_assign | var_assign_list) _ ";" statement_condition _ ";" _ superValue statements_block {%  v => {
@@ -872,6 +879,7 @@ for_block -> "for" __ identifier __ ("in" | "of") __ superValue statements_block
 		identifier: v[2][0],
 		change: v[9],
 		value: v[10],
+        isEmpty: !!v[10].value.length
 	});
 } %}
 | "for" _ "(" _ (var_assign | var_assign_list) _ ";" statement_condition _ ";" _ superValue _ ")" statements_block {%  v => {
@@ -881,7 +889,16 @@ for_block -> "for" __ identifier __ ("in" | "of") __ superValue statements_block
 		identifier: v[4][0],
 		change: v[11],
 		value: v[14],
+        isEmpty: !!v[14].value.length
 	});
+} %}
+| number __nbsp "times" statements_block {% v => {
+    return assign(v[0], {
+        type: 'times_loop',
+        times: v[0].value,
+        value: v[3],
+        isEmpty: !!v[3].value.length
+    });
 } %}
 
 anonymous_function ->

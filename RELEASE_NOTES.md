@@ -1,5 +1,23 @@
 ### Release Notes:
 
+### [0.2.7]
+
+## Builtin files load error fixed
+
+> On the previous version, the default file was not being loaded correctly. Now, it is fixed
+
+## `times` keyword is added
+
+> Followed by a number, this keyword allowes you to repeat an action several times
+
+```js
+3 times {
+    print 'hello world!'
+}
+```
+
+> Note: floating point numbers are instantly floored; `times` is not a reserved keyword
+
 ### [0.2.6]
 
 ## Chained `->` function executions

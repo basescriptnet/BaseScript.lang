@@ -11,7 +11,7 @@ let number = -5.5
 
 // . is a placeholder for the value of the previous pipe, otherwise null
 
-// is no pipe forward, you would have to write
+// if no pipe forward, you would have to write
 let number = Math.max(0, 2, Math.round(Math.abs(-5.5)), 8)
 
 // with the same logic, you can use the pipe backwards operator

@@ -1,5 +1,6 @@
 const fs = require('fs');
 const BS = require(internalPaths.compiler);
+const p = require('path');
 let beautify = function (code) { return code };
 if (globalThis.development) {
     beautify = require('js-beautify').js;
@@ -12,7 +13,16 @@ let ast_to_js = require(internalPaths.ast_to_js);
 let read = (path) => {
     return fs.readFileSync(path, 'utf8');
 }
-let builtin = read('src/lib/compiler/builtin/index.js')
+//console.log(p.join(__dirname, '../', '/lib/compiler/builtin/index.js'))
+//console.log(p.resolve('./src/lib/compiler/builtin/index.js'))
+
+let builtin = (() => {
+    if (!development) {
+        return read(p.join(__dirname, '../', '/lib/compiler/builtin/index.js'))
+    }
+    return read(p.resolve('./src/lib/compiler/builtin/index.js'))
+})();
+
 let getBuiltin = (name) => {
     let regex = new RegExp(`// @@@ ${name}.js[ \t]*\n([\\s\\S]*?)// @@@ END ${name}.js[ \t]*`, 'g');
     let match = regex.exec(builtin);
@@ -87,7 +97,7 @@ let writeFile = (path, fileName, content, silent = false, env) => {
         if (tmp.result === void 0) {
             return;
         }
-        silent || console.log('[File System]: Writing to: '+fileName+'.js');
+        silent || console.log('\x1b[36m%s\x1b[0m', '[File System]:', 'Writing to: '+fileName+'.js');
 
         let includes = tmp.includes;
         let contentJS = tmp.result;
@@ -173,7 +183,7 @@ module.exports = {
             let wrote = writeFile(path, fileName, content.result, run ? true : false, env);
             if (wrote !== void 0 && wrote !== false && wrote !== null) {
                 if (!run) {
-                    console.log('Compiled in ' + (Date.now() - date) + 'ms');
+                    console.log('\x1b[36m%s\x1b[0m', '[Compilation]:', (Date.now() - date) + 'ms');
                 }
             }
         } catch (err) {
