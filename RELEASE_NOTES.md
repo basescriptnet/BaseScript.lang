@@ -1,5 +1,9 @@
 ### Release Notes:
 
+### [0.2.71]
+
+## Fixed builtin files associated with typed arguments
+
 ### [0.2.7]
 
 ## Builtin files load error fixed
