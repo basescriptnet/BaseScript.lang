@@ -8,7 +8,7 @@ if (globalThis.development) {
 const path_applied = process.cwd();
 const run_code = require('./run_code.js');
 
-let ast_to_js = require(internalPaths.ast_to_js);
+const ast_to_js = require(internalPaths.ast_to_js);
 
 let read = (path) => {
     return fs.readFileSync(path, 'utf8');
@@ -24,7 +24,7 @@ let builtin = (() => {
 })();
 
 let getBuiltin = (name) => {
-    let regex = new RegExp(`// @@@ ${name}.js[ \t]*\n([\\s\\S]*?)// @@@ END ${name}.js[ \t]*`, 'g');
+    let regex = new RegExp(`// @@@ ${name}.js[ \\t]*\\n([\\s\\S]*?)// @@@ END ${name}.js[ \\t]*`, 'g');
     let match = regex.exec(builtin);
     if (!match) {
         console.error('Builtin not found: ' + name);
@@ -33,7 +33,7 @@ let getBuiltin = (name) => {
     // remove first and last line
     match[1] = match[1].replace(/.*\n/, '').replace(/\n.*$/, '');
     // remove content from builtin
-    builtin = builtin.replace(regex, '');
+    //builtin = builtin.replace(regex, '');
     return match[1];
     //return read('src/lib/compiler/builtin/' + name + '.js');
 }
@@ -167,7 +167,7 @@ module.exports = {
                 let contentJS = beautify(tmp.result);
                 let builtins = getRequiredBuiltins();
                 //if (!tmp.builtins) {
-                //    builtins = `(function () {${fs.readFileSync(pathJS(__dirname).add(internalPaths.built_in_from_utils), 'utf8')}})();`;
+                    //    builtins = `(function () {${fs.readFileSync(pathJS(__dirname).add(internalPaths.built_in_from_utils), 'utf8')}})();`;
                 //}
                 let final = builtins + includes + '\n' + contentJS;
                 try {

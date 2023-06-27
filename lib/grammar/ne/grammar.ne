@@ -218,6 +218,7 @@ blocks ->
         line: v[0].line,
         col: v[0].col
     }) %}
+    | switch_multiple {% id %}
     #| "test" statements_block _ "expect" _ value {% v => ({
     #    type: 'test',
     #    value: v[1],
@@ -489,6 +490,7 @@ Var -> base _nbsp "[" _ "]" {% (v, l, reject) => {
     #} %}
     | base _ "." _ (%keyword | identifier) {% (v, l, reject) => {
         if (v[0].type == 'annonymous_function') return reject
+        if (v[0].type == 'number') v[0].value = `(${v[0].value})`
         return {
             type: 'dot_retraction_v2',
             from: v[0],
@@ -567,13 +569,29 @@ case_multiline -> "case" __ superValue _ ":" statements (_ ";"):? {% v => assign
     value: v[2],
     statements: v[5]
 }) %}
-    | "case" "*" __ superValue _ ":" statements (_ ";"):? {% v => assign(v[0], {
+| "case" __ superValue _ ":" _ "{" statements _ (";" _):? "}" (";" _):? {% v => assign(v[0], {
+    type: 'case',
+    value: v[2],
+    statements: v[7],
+    scoped: true
+}) %}
+| "case" "*" __ superValue _ ":" _ "{" statements _ (";" _):? "}" (";" _):? {% v => assign(v[0], {
+    type: 'broken_case',
+    value: v[3],
+    statements: v[8],
+    scoped: true
+}) %}
+| "case" "*" __ superValue _ ":" statements (_ ";"):? {% v => assign(v[0], {
     type: 'broken_case',
     value: v[3],
     statements: v[6]
 }) %}
-
-case_default -> "default" _ ":" statements (_ ";"):? {% v => assign(v[0], {
+case_default -> "default" _ ":"  _ "{" statements _ (";" _):? "}" (_ ";"):? {% v => assign(v[0], {
+    type: 'case_default',
+    value: v[5],
+    scoped: true
+}) %}
+| "default" _ ":" statements (_ ";"):? {% v => assign(v[0], {
     type: 'case_default',
     value: v[3]
 }) %}
@@ -961,6 +979,12 @@ return -> "return" __nbsp superValue {% returns.value %}
 
 function_call -> base _nbsp arguments {% (v, l, reject) => {
     if (v[0].type == 'anonymous_function') return reject
+    if (['string', 'number', 'boolean', 'null', 'undefined', 'object', 'array'].includes(v[0].type)) {
+        //throw createError([v[0].type[0].toUpperCase() + v[0].type.slice(1), v[0], 'is not a function\n\tat ${v[0].line}:${v[0].col}'])
+
+        //console.log(last.replace(process.cwd().replace(/\\/g, '/'), ''))
+        throw new TypeError(`${v[0].type[0].toUpperCase() + v[0].type.slice(1)} is not a function\n\tat ${v[0].line}:${v[0].col} <${getLastStack()}>`)
+    }
 	return ({
 		type: 'function_call',
 		value: v[0],
