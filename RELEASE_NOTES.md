@@ -1,5 +1,9 @@
 ### Release Notes:
 
+### [0.2.73]
+
+## Builtin minification and minor fixes
+
 ### [0.2.71]
 
 ## Fixed builtin files associated with typed arguments
@@ -250,7 +254,7 @@ let project = builder->[
     isOK(),
     isDone()
 ]
-// we can retract data as folows
+// we can retract data as follows
 project[1] // true
 ```
 
