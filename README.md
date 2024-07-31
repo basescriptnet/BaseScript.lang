@@ -9,7 +9,7 @@
 
 [About](#%E2%84%B9%EF%B8%8F-about) | [docs](#-docs) | [bugs](https://github.com/basescriptnet/BaseScript.lang/issues) | [license](#-license)
 
-<b><img src="https://img.shields.io/badge/version-0.2.72-yellow" alt="version"></b>
+<b><img src="https://img.shields.io/badge/version-#git{version}-yellow" alt="version"></b>
 </div>
 
 ## ℹ️ About
@@ -18,18 +18,21 @@
 
 > Why to choose BaseScript?
 
-* It is in the phase of active development, so more and more features are being added constantly. Also, check out [RELEASE_NOTES.md](https://github.com/basescriptnet/BaseScript.lang/RELEASE_NOTES.md), as well as [Syntax Highlighter](https://github.com/basescriptnet/VSCode_highlighter/) for the language
+* It is in the phase of active development, so more and more features are being added constantly. Also, check out [RELEASE_NOTES.md](https://github.com/basescriptnet/BaseScript.lang/blob/master/RELEASE_NOTES.md), as well as [Syntax Highlighter](https://github.com/basescriptnet/VSCode_highlighter/) (updated) for the language
 * Your ideas are also being reviewed and added, as the language is welcoming collaborations
 * It provides you things, that JavaScript lacks:
-    + Typed functions and arguments
-    + Interfaces
+    + Custom operator declaration
     + Pipe forward and pipe backward operators
+    + Emoji variables and operators
+    + Interfaces
+    + Typed functions and arguments
     + Ability to get compile time errors to prevent runtime errors
     + Syntax sugar from other languages, that are so excess
     + Ability to customize your code the way you want it, and much more!
     + Easy to switch and learn
     + Code with ease
-    + Reabable and efficient
+    + Readable and efficient
+    + Boilerplate minimization
 
 This page represents the simple to follow documentation of the language.
 
@@ -45,7 +48,7 @@ This page represents the simple to follow documentation of the language.
  - [How to contact the creators](#-how-to-contact-the-creators)
  - [Variables](#%EF%B8%8F-variables)
  - [Arrays](#%EF%B8%8F-arrays)
- - [Objects](#-objects)
+ - [Objects](#-objects) (New Features)
  - [Strings](#-strings)
  - [Ternar operator](#-ternar-operator)
  - [Numbers](#%EF%B8%8F%E2%83%A3-numbers)
@@ -54,15 +57,15 @@ This page represents the simple to follow documentation of the language.
  - [LOG, print, WRITE and ERROR keywords](#-log-print-write-and-error-keywords)
  - [Conditions](#-conditions)
  - [if else statements](#-if-else-statements)
- - [Functions](#-functions)
+ - [Functions](#-functions) (New Features)
  - [Custom types](#-custom-types)
  - [Debugger](#-debugger)
  - [try|catch|finally statement](#-trycatchfinally-statement)
  - [Switch cases](#-switch-cases)
- - [Loops](#🔛-loops)
+ - [Loops](#🔛-loops) (New Features)
  - [Strict mode](#%EF%B8%8F-strict-mode)
  - [Interfaces](#interfaces)
- - [Operators](#operators)
+ - [Operators](#operators) (New Features)
  - [Custom Operators](#custom-operators)
 
 ## ▶️ Getting started
@@ -147,7 +150,7 @@ Object.doSomething = value
 > Array creation
 
 ```javascript
-new Array(length?)
+new Array(length) // length is optional
 [0, 1, 2]
 ```
 
@@ -191,6 +194,17 @@ new Object() // not recomended
 ```javascript
 object.x
 object['x']
+```
+
+> Assigning multiple items at once using `.{}` operator
+
+```javascript
+let object = {a: 'a'}
+object.{
+    b: 'b',
+    c: 'c'
+}
+// object is {a: 'a', b: 'b', c: 'c'}
 ```
 
 ## 💬 Strings
@@ -457,6 +471,37 @@ function add(a, b):=> a + b
 add(10, 20)
 ```
 
+> If a function needs to be called multiple times, use the `->()` operator
+
+```javascript
+let elementsToWatch = document.querySelector->(
+    '#login',
+    '#password',
+    '#submitBtn',
+) // returns an array of elements
+
+let content = readFile->(
+    &('header', 'utf8'),
+    &('content', 'utf8'),
+    &('footer', 'utf8'),
+).join('\n')
+// returns an array, then uses the join method
+```
+
+> For object properties, use `->[]` operator to return an array with multiple property calls
+
+```javascript
+let game = new Game()
+game->[
+    player,
+    getEnemies(),
+    getEntities()
+] // returns an array of the property call results
+// Note: all of those are methods and properties of game
+// but you won't need to specify `game.player`. Simple:)
+// This, in fact, uses the javascript `with` statement under the hood for now, which might be updated for safety purposes in the future
+```
+
 > Typed arguments and args constant
 
 ### 📝 NOTE: every function contains **args** constant, which is an array representation of **arguments** object
@@ -555,7 +600,37 @@ switch typeof value {
 }
 ```
 
+> To instantly break the case, use `case*` feature
+
+```javascript
+let error = ''
+switch errorNumber {
+    case* 403: error = 'Forbidden'
+    case* 404: error = 'Not Found'
+    case* 500: error = 'Internal Server Error'
+}
+```
+
+> Use `switch*` clause as a value
+
+```javascript
+let error = switch errorNumber {
+    case 403: 'Forbidden'
+    case 404: 'Not Found'
+    case 500: 'Internal Server Error'
+}
+```
+
 ## 🔛 Loops
+
+> Declaration using `times` keyword (not a reserved one)
+
+```javascript
+8 times {
+    print 'Yes!'
+}
+// Note: For now, only a numeric value is allowed before `times` keyword
+```
 
 > Declaration of while loop
 
@@ -629,6 +704,15 @@ addToArray({
 
 ##  Operators
 
+> Arrow and dot operators, `->[]`, `->()`, `.{}` (see [Functions](#-functions), [Objects](#-objects))
+
+```javascript
+->() // Calls a function if used on functions multiple times, depending on argument length
+->[] // Calls an object property/properties multiple times, without the need to refer to the object each time
+
+.{} // assigns or reassigns multiple properties and methods to an object at once, and returns the result
+```
+
 > Arithmetic Operators
 
 ```javascript
@@ -636,6 +720,7 @@ addToArray({
 - Minus
 * Multiply
 / Divide
+~/ Divide and drop the floating part
 % Modulus
 ** Exponentiation
 ++ Increment
